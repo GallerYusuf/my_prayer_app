@@ -317,6 +317,12 @@
                                     TextColor="{StaticResource AccentGold}"
                                     FontFamily="OpenSansSemibold"
                                     Command="{Binding OpenExactAlarmSettingsCommand}" />
+
+                            <Button Text="Pil Optimizasyonunu Kapat"
+                                    BackgroundColor="Transparent"
+                                    TextColor="{StaticResource AccentEmerald}"
+                                    FontFamily="OpenSansSemibold"
+                                    Command="{Binding OpenBatterySettingsCommand}" />
                         </VerticalStackLayout>
                     </Border>
                 </VerticalStackLayout>

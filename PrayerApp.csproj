@@ -73,4 +73,9 @@
 		<PackageReference Include="Plugin.LocalNotification" Version="14.1.1" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<TrimmerRootAssembly Include="Plugin.LocalNotification" />
+		<TrimmerRootAssembly Include="Plugin.LocalNotification.Core" />
+	</ItemGroup>
+
 </Project>

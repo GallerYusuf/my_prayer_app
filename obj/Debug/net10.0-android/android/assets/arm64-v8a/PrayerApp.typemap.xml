@@ -1,4 +1,4 @@
-<api type="debug" assembly-name="PrayerApp" mvid="86733bee6b564d7cb0a97342327fcbc4">
+<api type="debug" assembly-name="PrayerApp" mvid="f74a97ed9d9040b29a1a3d158d7f7695">
   <java-to-managed>
     <entry java-name="crc6425c6d21f3599989c/MainActivity" managed-name="PrayerApp.MainActivity, PrayerApp" managed-type-token-id="33554442" />
     <entry java-name="crc6425c6d21f3599989c/MainApplication" managed-name="PrayerApp.MainApplication, PrayerApp" managed-type-token-id="33554443" />

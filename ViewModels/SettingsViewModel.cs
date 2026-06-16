@@ -181,6 +181,15 @@ public partial class SettingsViewModel : ObservableObject
         await _notificationService.OpenExactAlarmSettingsAsync();
         StatusMessage = "Alarm izni ayarları açıldı. 'İzin ver' veya 'Açık' yapın.";
     }
+
+    [RelayCommand]
+    private async Task OpenBatterySettingsAsync()
+    {
+        await _notificationService.OpenBatterySettingsAsync();
+        StatusMessage = "Pil optimizasyonu ayarı açıldı. Uygulamayı 'Kısıtlama yok' yapın.";
+        await Task.Delay(1500);
+        await RefreshDiagnosticsAsync();
+    }
 }
 
 public partial class VerseTimeItem : ObservableObject

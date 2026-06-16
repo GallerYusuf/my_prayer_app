@@ -12,6 +12,12 @@ public partial class App : Application
 
 	protected override Window CreateWindow(IActivationState? activationState)
 	{
-		return new Window(new AppShell());
+		var window = new Window(new AppShell());
+		window.Created += (_, _) =>
+		{
+			var services = IPlatformApplication.Current?.Services;
+			services?.GetService<Services.Interfaces.INotificationSchedulerService>()?.StartForegroundMonitor();
+		};
+		return window;
 	}
 }

@@ -83,6 +83,7 @@
             <inheritdoc/>
             <inheritdoc/>
             <inheritdoc/>
+            <inheritdoc/>
         </member>
         <member name="P:PrayerApp.ViewModels.SettingsViewModel.City">
             <inheritdoc cref="F:PrayerApp.ViewModels.SettingsViewModel._city"/>
@@ -163,6 +164,12 @@
         </member>
         <member name="P:PrayerApp.ViewModels.SettingsViewModel.OpenExactAlarmSettingsCommand">
             <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:PrayerApp.ViewModels.SettingsViewModel.OpenExactAlarmSettingsAsync"/>.</summary>
+        </member>
+        <member name="F:PrayerApp.ViewModels.SettingsViewModel.openBatterySettingsCommand">
+            <summary>The backing field for <see cref="P:PrayerApp.ViewModels.SettingsViewModel.OpenBatterySettingsCommand"/>.</summary>
+        </member>
+        <member name="P:PrayerApp.ViewModels.SettingsViewModel.OpenBatterySettingsCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:PrayerApp.ViewModels.SettingsViewModel.OpenBatterySettingsAsync"/>.</summary>
         </member>
         <member name="T:PrayerApp.ViewModels.VerseTimeItem">
             <inheritdoc/>

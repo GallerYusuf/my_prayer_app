@@ -12,5 +12,7 @@ public interface INotificationSchedulerService
     Task<string> GetScheduleSummaryAsync();
     Task OpenNotificationSettingsAsync();
     Task OpenExactAlarmSettingsAsync();
+    Task OpenBatterySettingsAsync();
+    void StartForegroundMonitor();
     Task<int> GetPendingCountAsync();
 }
