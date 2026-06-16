@@ -1,0 +1,339 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PrayerApp</name>
+    </assembly>
+    <members>
+        <member name="T:PrayerApp.Models.PrayerTime">
+            <inheritdoc/>
+        </member>
+        <member name="P:PrayerApp.Models.PrayerTime.IsNext">
+            <inheritdoc cref="F:PrayerApp.Models.PrayerTime._isNext"/>
+        </member>
+        <member name="P:PrayerApp.Models.PrayerTime.IsPassed">
+            <inheritdoc cref="F:PrayerApp.Models.PrayerTime._isPassed"/>
+        </member>
+        <member name="T:PrayerApp.Models.QuranSurahDto">
+            <summary>
+            quran-json (Diyanet meal) kaynak formatı — yükleme sırasında düzleştirilir.
+            </summary>
+        </member>
+        <member name="M:PrayerApp.Models.QuranSurahDto.#ctor(System.String,System.Collections.Generic.List{PrayerApp.Models.QuranVerseDto})">
+            <summary>
+            quran-json (Diyanet meal) kaynak formatı — yükleme sırasında düzleştirilir.
+            </summary>
+        </member>
+        <member name="T:PrayerApp.ViewModels.MainViewModel">
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.MainViewModel.CityDisplay">
+            <inheritdoc cref="F:PrayerApp.ViewModels.MainViewModel._cityDisplay"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.MainViewModel.Greeting">
+            <inheritdoc cref="F:PrayerApp.ViewModels.MainViewModel._greeting"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.MainViewModel.TodayDate">
+            <inheritdoc cref="F:PrayerApp.ViewModels.MainViewModel._todayDate"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.MainViewModel.NextPrayerName">
+            <inheritdoc cref="F:PrayerApp.ViewModels.MainViewModel._nextPrayerName"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.MainViewModel.NextPrayerTime">
+            <inheritdoc cref="F:PrayerApp.ViewModels.MainViewModel._nextPrayerTime"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.MainViewModel.RemainingTime">
+            <inheritdoc cref="F:PrayerApp.ViewModels.MainViewModel._remainingTime"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.MainViewModel.DayProgress">
+            <inheritdoc cref="F:PrayerApp.ViewModels.MainViewModel._dayProgress"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.MainViewModel.VerseOfDay">
+            <inheritdoc cref="F:PrayerApp.ViewModels.MainViewModel._verseOfDay"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.MainViewModel.VerseReference">
+            <inheritdoc cref="F:PrayerApp.ViewModels.MainViewModel._verseReference"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.MainViewModel.IsBusy">
+            <inheritdoc cref="F:PrayerApp.ViewModels.MainViewModel._isBusy"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.MainViewModel.ErrorMessage">
+            <inheritdoc cref="F:PrayerApp.ViewModels.MainViewModel._errorMessage"/>
+        </member>
+        <member name="F:PrayerApp.ViewModels.MainViewModel.initializeCommand">
+            <summary>The backing field for <see cref="P:PrayerApp.ViewModels.MainViewModel.InitializeCommand"/>.</summary>
+        </member>
+        <member name="P:PrayerApp.ViewModels.MainViewModel.InitializeCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:PrayerApp.ViewModels.MainViewModel.InitializeAsync"/>.</summary>
+        </member>
+        <member name="F:PrayerApp.ViewModels.MainViewModel.refreshVerseCommand">
+            <summary>The backing field for <see cref="P:PrayerApp.ViewModels.MainViewModel.RefreshVerseCommand"/>.</summary>
+        </member>
+        <member name="P:PrayerApp.ViewModels.MainViewModel.RefreshVerseCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand"/> instance wrapping <see cref="M:PrayerApp.ViewModels.MainViewModel.RefreshVerse"/>.</summary>
+        </member>
+        <member name="T:PrayerApp.ViewModels.SettingsViewModel">
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.SettingsViewModel.City">
+            <inheritdoc cref="F:PrayerApp.ViewModels.SettingsViewModel._city"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.SettingsViewModel.Country">
+            <inheritdoc cref="F:PrayerApp.ViewModels.SettingsViewModel._country"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.SettingsViewModel.PrayerNotificationsEnabled">
+            <inheritdoc cref="F:PrayerApp.ViewModels.SettingsViewModel._prayerNotificationsEnabled"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.SettingsViewModel.NotifyAtPrayerTime">
+            <inheritdoc cref="F:PrayerApp.ViewModels.SettingsViewModel._notifyAtPrayerTime"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.SettingsViewModel.MinutesBeforePrayer">
+            <inheritdoc cref="F:PrayerApp.ViewModels.SettingsViewModel._minutesBeforePrayer"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.SettingsViewModel.VerseNotificationsEnabled">
+            <inheritdoc cref="F:PrayerApp.ViewModels.SettingsViewModel._verseNotificationsEnabled"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.SettingsViewModel.VerseNotificationCount">
+            <inheritdoc cref="F:PrayerApp.ViewModels.SettingsViewModel._verseNotificationCount"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.SettingsViewModel.StatusMessage">
+            <inheritdoc cref="F:PrayerApp.ViewModels.SettingsViewModel._statusMessage"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.SettingsViewModel.NotificationDiagnostics">
+            <inheritdoc cref="F:PrayerApp.ViewModels.SettingsViewModel._notificationDiagnostics"/>
+        </member>
+        <member name="M:PrayerApp.ViewModels.SettingsViewModel.OnVerseNotificationCountChanged(System.Int32)">
+            <summary>Executes the logic for when <see cref="P:PrayerApp.ViewModels.SettingsViewModel.VerseNotificationCount"/> just changed.</summary>
+            <param name="value">The new property value that was set.</param>
+            <remarks>This method is invoked right after the value of <see cref="P:PrayerApp.ViewModels.SettingsViewModel.VerseNotificationCount"/> is changed.</remarks>
+        </member>
+        <member name="F:PrayerApp.ViewModels.SettingsViewModel.loadSettingsCommand">
+            <summary>The backing field for <see cref="P:PrayerApp.ViewModels.SettingsViewModel.LoadSettingsCommand"/>.</summary>
+        </member>
+        <member name="P:PrayerApp.ViewModels.SettingsViewModel.LoadSettingsCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand"/> instance wrapping <see cref="M:PrayerApp.ViewModels.SettingsViewModel.LoadSettings"/>.</summary>
+        </member>
+        <member name="F:PrayerApp.ViewModels.SettingsViewModel.refreshDiagnosticsCommand">
+            <summary>The backing field for <see cref="P:PrayerApp.ViewModels.SettingsViewModel.RefreshDiagnosticsCommand"/>.</summary>
+        </member>
+        <member name="P:PrayerApp.ViewModels.SettingsViewModel.RefreshDiagnosticsCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:PrayerApp.ViewModels.SettingsViewModel.RefreshDiagnosticsAsync"/>.</summary>
+        </member>
+        <member name="F:PrayerApp.ViewModels.SettingsViewModel.decrementVerseCountCommand">
+            <summary>The backing field for <see cref="P:PrayerApp.ViewModels.SettingsViewModel.DecrementVerseCountCommand"/>.</summary>
+        </member>
+        <member name="P:PrayerApp.ViewModels.SettingsViewModel.DecrementVerseCountCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand"/> instance wrapping <see cref="M:PrayerApp.ViewModels.SettingsViewModel.DecrementVerseCount"/>.</summary>
+        </member>
+        <member name="F:PrayerApp.ViewModels.SettingsViewModel.incrementVerseCountCommand">
+            <summary>The backing field for <see cref="P:PrayerApp.ViewModels.SettingsViewModel.IncrementVerseCountCommand"/>.</summary>
+        </member>
+        <member name="P:PrayerApp.ViewModels.SettingsViewModel.IncrementVerseCountCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand"/> instance wrapping <see cref="M:PrayerApp.ViewModels.SettingsViewModel.IncrementVerseCount"/>.</summary>
+        </member>
+        <member name="F:PrayerApp.ViewModels.SettingsViewModel.saveCommand">
+            <summary>The backing field for <see cref="P:PrayerApp.ViewModels.SettingsViewModel.SaveCommand"/>.</summary>
+        </member>
+        <member name="P:PrayerApp.ViewModels.SettingsViewModel.SaveCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:PrayerApp.ViewModels.SettingsViewModel.SaveAsync"/>.</summary>
+        </member>
+        <member name="F:PrayerApp.ViewModels.SettingsViewModel.testNotificationCommand">
+            <summary>The backing field for <see cref="P:PrayerApp.ViewModels.SettingsViewModel.TestNotificationCommand"/>.</summary>
+        </member>
+        <member name="P:PrayerApp.ViewModels.SettingsViewModel.TestNotificationCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:PrayerApp.ViewModels.SettingsViewModel.TestNotificationAsync"/>.</summary>
+        </member>
+        <member name="F:PrayerApp.ViewModels.SettingsViewModel.openNotificationSettingsCommand">
+            <summary>The backing field for <see cref="P:PrayerApp.ViewModels.SettingsViewModel.OpenNotificationSettingsCommand"/>.</summary>
+        </member>
+        <member name="P:PrayerApp.ViewModels.SettingsViewModel.OpenNotificationSettingsCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:PrayerApp.ViewModels.SettingsViewModel.OpenNotificationSettingsAsync"/>.</summary>
+        </member>
+        <member name="F:PrayerApp.ViewModels.SettingsViewModel.openExactAlarmSettingsCommand">
+            <summary>The backing field for <see cref="P:PrayerApp.ViewModels.SettingsViewModel.OpenExactAlarmSettingsCommand"/>.</summary>
+        </member>
+        <member name="P:PrayerApp.ViewModels.SettingsViewModel.OpenExactAlarmSettingsCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:PrayerApp.ViewModels.SettingsViewModel.OpenExactAlarmSettingsAsync"/>.</summary>
+        </member>
+        <member name="T:PrayerApp.ViewModels.VerseTimeItem">
+            <inheritdoc/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.VerseTimeItem.Time">
+            <inheritdoc cref="F:PrayerApp.ViewModels.VerseTimeItem._time"/>
+        </member>
+        <member name="P:PrayerApp.ViewModels.VerseTimeItem.IsActive">
+            <inheritdoc cref="F:PrayerApp.ViewModels.VerseTimeItem._isActive"/>
+        </member>
+        <member name="T:PrayerApp.Resource">
+            <summary>
+            Android Resource Designer class.
+            Exposes the Android Resource designer assembly into the project Namespace.
+            </summary>
+        </member>
+        <member name="T:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs">
+            <summary>
+            A helper type providing cached, reusable <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instances
+            for all properties generated with <see cref="T:CommunityToolkit.Mvvm.ComponentModel.ObservablePropertyAttribute"/>.
+            </summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsNext">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsNext" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsPassed">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsPassed" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.CityDisplay">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "CityDisplay" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.Greeting">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "Greeting" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.TodayDate">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "TodayDate" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.NextPrayerName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "NextPrayerName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.NextPrayerTime">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "NextPrayerTime" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.RemainingTime">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "RemainingTime" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.DayProgress">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "DayProgress" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.VerseOfDay">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "VerseOfDay" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.VerseReference">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "VerseReference" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsBusy">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsBusy" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.ErrorMessage">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "ErrorMessage" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.City">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "City" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.Country">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "Country" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.PrayerNotificationsEnabled">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "PrayerNotificationsEnabled" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.NotifyAtPrayerTime">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "NotifyAtPrayerTime" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.MinutesBeforePrayer">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "MinutesBeforePrayer" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.VerseNotificationsEnabled">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "VerseNotificationsEnabled" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.VerseNotificationCount">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "VerseNotificationCount" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.StatusMessage">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "StatusMessage" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.NotificationDiagnostics">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "NotificationDiagnostics" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.Time">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "Time" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsActive">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsActive" generated properties.</summary>
+        </member>
+        <member name="T:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs">
+            <summary>
+            A helper type providing cached, reusable <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instances
+            for all properties generated with <see cref="T:CommunityToolkit.Mvvm.ComponentModel.ObservablePropertyAttribute"/>.
+            </summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsNext">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsNext" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsPassed">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsPassed" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.CityDisplay">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "CityDisplay" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.Greeting">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "Greeting" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.TodayDate">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "TodayDate" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.NextPrayerName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "NextPrayerName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.NextPrayerTime">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "NextPrayerTime" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.RemainingTime">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "RemainingTime" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.DayProgress">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "DayProgress" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.VerseOfDay">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "VerseOfDay" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.VerseReference">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "VerseReference" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsBusy">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsBusy" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.ErrorMessage">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "ErrorMessage" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.City">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "City" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.Country">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "Country" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.PrayerNotificationsEnabled">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "PrayerNotificationsEnabled" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.NotifyAtPrayerTime">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "NotifyAtPrayerTime" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.MinutesBeforePrayer">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "MinutesBeforePrayer" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.VerseNotificationsEnabled">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "VerseNotificationsEnabled" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.VerseNotificationCount">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "VerseNotificationCount" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.StatusMessage">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "StatusMessage" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.NotificationDiagnostics">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "NotificationDiagnostics" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.Time">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "Time" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsActive">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsActive" generated properties.</summary>
+        </member>
+    </members>
+</doc>

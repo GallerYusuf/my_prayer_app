@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Premium accent palette -->
+    <Color x:Key="AccentGold">#D4AF37</Color>
+    <Color x:Key="AccentGoldSoft">#E8C97A</Color>
+    <Color x:Key="AccentGoldMuted">#B8942E</Color>
+    <Color x:Key="AccentEmerald">#10B981</Color>
+    <Color x:Key="AccentEmeraldSoft">#34D399</Color>
+    <Color x:Key="AccentEmeraldDeep">#059669</Color>
+
+    <!-- Legacy brand keys (mapped to premium palette) -->
+    <Color x:Key="Primary">#10B981</Color>
+    <Color x:Key="PrimaryDark">#059669</Color>
+    <Color x:Key="PrimaryDarkText">#0F172A</Color>
+    <Color x:Key="Secondary">#1E293B</Color>
+    <Color x:Key="SecondaryDarkText">#D4AF37</Color>
+    <Color x:Key="Tertiary">#334155</Color>
+    <Color x:Key="Emerald">#10B981</Color>
+    <Color x:Key="EmeraldDeep">#059669</Color>
+    <Color x:Key="EmeraldNight">#064E3B</Color>
+    <Color x:Key="Teal">#14B8A6</Color>
+    <Color x:Key="Gold">#D4AF37</Color>
+    <Color x:Key="GoldSoft">#E8C97A</Color>
+
+    <!-- Deep backgrounds -->
+    <Color x:Key="BackgroundDeep">#0F172A</Color>
+    <Color x:Key="BackgroundElevated">#121212</Color>
+    <Color x:Key="BackgroundMid">#1E293B</Color>
+    <Color x:Key="BackgroundGlow">#10B981</Color>
+
+    <!-- Glass surfaces (ARGB) -->
+    <Color x:Key="GlassFill">#CC1E293B</Color>
+    <Color x:Key="GlassFillLight">#40FFFFFF</Color>
+    <Color x:Key="GlassStroke">#33FFFFFF</Color>
+    <Color x:Key="GlassHighlight">#14FFFFFF</Color>
+
+    <!-- Surfaces (Light fallback) -->
+    <Color x:Key="AppBackground">#F8FAFC</Color>
+    <Color x:Key="CardSurface">#FFFFFF</Color>
+    <Color x:Key="CardSurfaceAlt">#F1F5F9</Color>
+    <Color x:Key="HairLine">#E2E8F0</Color>
+
+    <!-- Surfaces (Dark — default experience) -->
+    <Color x:Key="AppBackgroundDark">#0F172A</Color>
+    <Color x:Key="CardSurfaceDark">#CC1E293B</Color>
+    <Color x:Key="CardSurfaceAltDark">#991E293B</Color>
+    <Color x:Key="HairLineDark">#1E293B</Color>
+
+    <!-- Typography -->
+    <Color x:Key="TextPrimary">#0F172A</Color>
+    <Color x:Key="TextSecondary">#64748B</Color>
+    <Color x:Key="TextPrimaryDark">#FFFFFF</Color>
+    <Color x:Key="TextSecondaryDark">#9CA3AF</Color>
+    <Color x:Key="TextMutedDark">#6B7280</Color>
+
+    <!-- Semantic -->
+    <Color x:Key="Error">#F87171</Color>
+    <Color x:Key="Success">#10B981</Color>
+
+    <Color x:Key="White">#FFFFFF</Color>
+    <Color x:Key="Black">#000000</Color>
+    <Color x:Key="Magenta">#D4AF37</Color>
+    <Color x:Key="MidnightBlue">#0F172A</Color>
+    <Color x:Key="OffBlack">#0F172A</Color>
+
+    <Color x:Key="Gray100">#F1F5F9</Color>
+    <Color x:Key="Gray200">#E2E8F0</Color>
+    <Color x:Key="Gray300">#CBD5E1</Color>
+    <Color x:Key="Gray400">#94A3B8</Color>
+    <Color x:Key="Gray500">#64748B</Color>
+    <Color x:Key="Gray600">#475569</Color>
+    <Color x:Key="Gray900">#1E293B</Color>
+    <Color x:Key="Gray950">#0F172A</Color>
+
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}" />
+    <SolidColorBrush x:Key="AccentGoldBrush" Color="{StaticResource AccentGold}" />
+    <SolidColorBrush x:Key="AccentEmeraldBrush" Color="{StaticResource AccentEmerald}" />
+    <SolidColorBrush x:Key="GlassStrokeBrush" Color="{StaticResource GlassStroke}" />
+    <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextSecondaryDark}" />
+
+</ResourceDictionary>

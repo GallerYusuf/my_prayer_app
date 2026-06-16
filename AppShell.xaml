@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="PrayerApp.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:PrayerApp.Views"
+    Title="Ezan Vakti"
+    Shell.NavBarHasShadow="False">
+
+    <Shell.Resources>
+        <Style TargetType="TabBar">
+            <Setter Property="Shell.TabBarBackgroundColor" Value="{StaticResource BackgroundMid}" />
+            <Setter Property="Shell.TabBarTitleColor" Value="{StaticResource AccentGold}" />
+            <Setter Property="Shell.TabBarUnselectedColor" Value="{StaticResource TextSecondaryDark}" />
+            <Setter Property="Shell.TabBarForegroundColor" Value="{StaticResource AccentGold}" />
+        </Style>
+    </Shell.Resources>
+
+    <TabBar>
+        <ShellContent
+            Title="Ana Sayfa"
+            Icon="dotnet_bot.png"
+            ContentTemplate="{DataTemplate views:MainPage}"
+            Route="MainPage" />
+
+        <ShellContent
+            Title="Ayarlar"
+            Icon="dotnet_bot.png"
+            ContentTemplate="{DataTemplate views:SettingsPage}"
+            Route="SettingsPage" />
+    </TabBar>
+
+</Shell>
