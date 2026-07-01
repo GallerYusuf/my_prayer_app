@@ -135,6 +135,11 @@ public class PrayerTimeService(HttpClient httpClient) : IPrayerTimeService
             Preferences.Default.Remove(BuildCacheKey(city, country));
             return null;
         }
+        catch (FormatException)
+        {
+            Preferences.Default.Remove(BuildCacheKey(city, country));
+            return null;
+        }
     }
 
     private static TimeSpan ParsePrayerTime(string value)
