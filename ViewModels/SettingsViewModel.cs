@@ -28,6 +28,12 @@ public partial class SettingsViewModel : ObservableObject
     private int _minutesBeforePrayer = 10;
 
     [ObservableProperty]
+    private bool _fridayNotificationsEnabled = true;
+
+    [ObservableProperty]
+    private TimeSpan _fridayNotificationTime = new(11, 30, 0);
+
+    [ObservableProperty]
     private bool _verseNotificationsEnabled = true;
 
     [ObservableProperty]
@@ -64,6 +70,8 @@ public partial class SettingsViewModel : ObservableObject
         PrayerNotificationsEnabled = settings.PrayerNotificationsEnabled;
         NotifyAtPrayerTime = settings.NotifyAtPrayerTime;
         MinutesBeforePrayer = settings.MinutesBeforePrayer;
+        FridayNotificationsEnabled = settings.FridayNotificationsEnabled;
+        FridayNotificationTime = settings.FridayNotificationTime;
         VerseNotificationsEnabled = settings.VerseNotificationsEnabled;
         VerseNotificationCount = settings.VerseNotificationCount;
 
@@ -147,6 +155,8 @@ public partial class SettingsViewModel : ObservableObject
             PrayerNotificationsEnabled = PrayerNotificationsEnabled,
             NotifyAtPrayerTime = NotifyAtPrayerTime,
             MinutesBeforePrayer = Math.Max(0, MinutesBeforePrayer),
+            FridayNotificationsEnabled = FridayNotificationsEnabled,
+            FridayNotificationTime = FridayNotificationTime,
             VerseNotificationsEnabled = VerseNotificationsEnabled,
             VerseNotificationCount = Math.Clamp(VerseNotificationCount, 1, 5),
             VerseNotificationTimes = VerseTimes.Select(v => v.Time).ToList()

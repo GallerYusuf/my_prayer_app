@@ -10,6 +10,9 @@ public class AppSettings
     public bool NotifyAtPrayerTime { get; set; } = true;
     public int MinutesBeforePrayer { get; set; } = 10;
 
+    public bool FridayNotificationsEnabled { get; set; } = true;
+    public TimeSpan FridayNotificationTime { get; set; } = new(11, 30, 0);
+
     public bool VerseNotificationsEnabled { get; set; } = true;
     public int VerseNotificationCount { get; set; } = 3;
     public List<TimeSpan> VerseNotificationTimes { get; set; } =

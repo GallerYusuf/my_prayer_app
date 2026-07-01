@@ -12,6 +12,7 @@ public class NotificationSchedulerService(IVerseService verseService) : INotific
     private const int ScheduledTestId = 999;
     private const int PrayerNotificationBaseId = 100;
     private const int VerseNotificationBaseId = 200;
+    private const int FridayNotificationId = 300;
     private const string ChannelId = "prayer_app_channel";
 
     private DateTime _lastRescheduleDate = DateTime.MinValue;
@@ -169,8 +170,13 @@ public class NotificationSchedulerService(IVerseService verseService) : INotific
         for (var i = 0; i < 5; i++)
             LocalNotificationCenter.Current.Cancel(VerseNotificationBaseId + i);
 
+        LocalNotificationCenter.Current.Cancel(FridayNotificationId);
+
         if (settings.PrayerNotificationsEnabled)
             await SchedulePrayerNotificationsAsync(settings, prayerTimes);
+
+        if (settings.FridayNotificationsEnabled)
+            await ScheduleFridayNotificationAsync(settings);
 
         if (settings.VerseNotificationsEnabled)
             await ScheduleVerseNotificationsAsync(settings);
@@ -278,6 +284,23 @@ public class NotificationSchedulerService(IVerseService verseService) : INotific
         }
     }
 
+    private async Task ScheduleFridayNotificationAsync(AppSettings settings)
+    {
+        var scheduleDate = ResolveNextWeekdayOccurrence(
+            DayOfWeek.Friday,
+            settings.FridayNotificationTime,
+            DateTimeOffset.Now);
+
+        await ScheduleNotificationAsync(new NotificationRequest
+        {
+            NotificationId = FridayNotificationId,
+            Title = "Cuma Hatırlatıcısı",
+            Description = "Cuma namazı için hazırlık vakti yaklaşıyor.",
+            Android = CreateAndroidOptions(),
+            Schedule = CreateSchedule(scheduleDate)
+        });
+    }
+
     private async Task ScheduleVerseNotificationsAsync(AppSettings settings)
     {
         await verseService.InitializeAsync();
@@ -323,6 +346,17 @@ public class NotificationSchedulerService(IVerseService verseService) : INotific
 
         if (candidate <= now)
             candidate = candidate.AddDays(1);
+
+        return candidate;
+    }
+
+    private static DateTimeOffset ResolveNextWeekdayOccurrence(DayOfWeek dayOfWeek, TimeSpan timeOfDay, DateTimeOffset now)
+    {
+        var daysUntilTarget = ((int)dayOfWeek - (int)now.DayOfWeek + 7) % 7;
+        var candidate = new DateTimeOffset(now.Date + timeOfDay, now.Offset).AddDays(daysUntilTarget);
+
+        if (candidate <= now)
+            candidate = candidate.AddDays(7);
 
         return candidate;
     }

@@ -163,6 +163,67 @@
                     </Border>
                 </VerticalStackLayout>
 
+                <!-- Friday notifications -->
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Cuma Hatırlatıcısı" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource GlassCard}">
+                        <VerticalStackLayout Spacing="20">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                                <Border WidthRequest="44" HeightRequest="44"
+                                        StrokeThickness="0"
+                                        BackgroundColor="#1AD4AF37"
+                                        StrokeShape="RoundRectangle 14"
+                                        VerticalOptions="Center">
+                                    <Label Text="🕌"
+                                           FontSize="18"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                    <Label Text="Cuma bildirimi"
+                                           FontFamily="OpenSansSemibold"
+                                           FontSize="16"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                    <Label Text="Cuma namazı öncesi hazırlık hatırlatması"
+                                           Style="{StaticResource BodyMuted}"
+                                           FontSize="12" />
+                                </VerticalStackLayout>
+                                <Switch Grid.Column="2"
+                                        Style="{StaticResource PremiumSwitch}"
+                                        VerticalOptions="Center"
+                                        IsToggled="{Binding FridayNotificationsEnabled}" />
+                            </Grid>
+
+                            <BoxView HeightRequest="1"
+                                     Color="{StaticResource GlassStroke}"
+                                     IsVisible="{Binding FridayNotificationsEnabled}" />
+
+                            <Border Style="{StaticResource GlassCardCompact}"
+                                    Padding="16"
+                                    IsEnabled="{Binding FridayNotificationsEnabled}"
+                                    IsVisible="{Binding FridayNotificationsEnabled}">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="14">
+                                    <VerticalStackLayout Spacing="3" VerticalOptions="Center">
+                                        <Label Text="Hatırlatma saati"
+                                               FontFamily="OpenSansSemibold"
+                                               FontSize="15"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                        <Label Text="Varsayılan: 11:30"
+                                               Style="{StaticResource BodyMuted}"
+                                               FontSize="12" />
+                                    </VerticalStackLayout>
+                                    <TimePicker Grid.Column="1"
+                                                Time="{Binding FridayNotificationTime, Mode=TwoWay}"
+                                                Format="HH:mm"
+                                                FontFamily="OpenSansSemibold"
+                                                TextColor="{StaticResource AccentGold}"
+                                                VerticalOptions="Center" />
+                                </Grid>
+                            </Border>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
                 <!-- Verse notifications -->
                 <VerticalStackLayout Spacing="12">
                     <Label Text="Ayet Bildirimleri" Style="{StaticResource SectionLabel}" />
@@ -335,6 +396,44 @@
                                     TextColor="{StaticResource AccentEmerald}"
                                     FontFamily="OpenSansSemibold"
                                     Command="{Binding OpenBatterySettingsCommand}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- About and privacy -->
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Hakkında ve Gizlilik" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource GlassCard}">
+                        <VerticalStackLayout Spacing="16">
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="Ezan Vakti"
+                                       FontFamily="OpenSansSemibold"
+                                       FontSize="18"
+                                       TextColor="{StaticResource AccentGold}" />
+                                <Label Text="Sade, güvenilir ve Türk kullanıcıya odaklı namaz vakti deneyimi."
+                                       Style="{StaticResource BodyMuted}" />
+                            </VerticalStackLayout>
+
+                            <BoxView HeightRequest="1"
+                                     Color="{StaticResource GlassStroke}" />
+
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="Veri kaynakları"
+                                       FontFamily="OpenSansSemibold"
+                                       FontSize="15"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                <Label Text="Namaz vakitleri Aladhan API üzerinden Diyanet hesaplama yöntemiyle alınır. Ayet içerikleri uygulama paketindeki yerel Kur'an Türkçe veri dosyasından gösterilir."
+                                       Style="{StaticResource BodyMuted}" />
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="Gizlilik"
+                                       FontFamily="OpenSansSemibold"
+                                       FontSize="15"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                <Label Text="Şehir, ülke ve bildirim tercihleriniz yalnızca cihazınızda saklanır. Bu sürüm GPS konumu kullanmaz ve hesap oluşturma istemez."
+                                       Style="{StaticResource BodyMuted}" />
+                            </VerticalStackLayout>
                         </VerticalStackLayout>
                     </Border>
                 </VerticalStackLayout>

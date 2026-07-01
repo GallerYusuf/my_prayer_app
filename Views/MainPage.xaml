@@ -46,8 +46,11 @@
             </Ellipse.Fill>
         </Ellipse>
 
-        <ScrollView>
-            <VerticalStackLayout Padding="24,20,24,36" Spacing="28">
+        <RefreshView IsRefreshing="{Binding IsRefreshing}"
+                     Command="{Binding RefreshPrayerTimesCommand}"
+                     RefreshColor="{StaticResource AccentGold}">
+            <ScrollView>
+                <VerticalStackLayout Padding="24,20,24,36" Spacing="28">
 
                 <!-- Header -->
                 <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
@@ -286,7 +289,8 @@
                            FontSize="14" />
                 </Border>
 
-            </VerticalStackLayout>
-        </ScrollView>
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
     </Grid>
 </ContentPage>

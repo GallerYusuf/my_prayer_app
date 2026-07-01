@@ -47,6 +47,9 @@ public partial class MainViewModel : ObservableObject
     private bool _isBusy;
 
     [ObservableProperty]
+    private bool _isRefreshing;
+
+    [ObservableProperty]
     private string _errorMessage = string.Empty;
 
     public ObservableCollection<PrayerTime> PrayerTimes { get; } = [];
@@ -75,25 +78,8 @@ public partial class MainViewModel : ObservableObject
             ErrorMessage = string.Empty;
 
             await _verseService.InitializeAsync();
-            LoadVerseOfDay();
-
-            UpdateGreeting();
-            TodayDate = DateTime.Now.ToString("d MMMM yyyy, dddd", new CultureInfo("tr-TR"));
-
-            var settings = _settingsService.GetSettings();
-            CityDisplay = $"{settings.City}, {settings.Country}";
-            if (!settings.HasCompletedOnboarding)
-            {
-                ErrorMessage = "Namaz vakitlerini göstermek için önce şehir ve ülke seçin.";
-                await Shell.Current.GoToAsync("//SettingsPage");
-                return;
-            }
-
-            await LoadPrayerTimesAsync(settings);
-            await _notificationService.RequestPermissionAsync();
-            await _notificationService.RescheduleIfStaleAsync(settings, _prayerTimes);
-
-            StartCountdown();
+            if (await LoadHomeDataAsync(refreshVerse: true, requestPermission: true))
+                StartCountdown();
         }
         catch (Exception ex)
         {
@@ -102,6 +88,31 @@ public partial class MainViewModel : ObservableObject
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task RefreshPrayerTimesAsync()
+    {
+        if (IsBusy)
+            return;
+
+        try
+        {
+            IsRefreshing = true;
+            ErrorMessage = string.Empty;
+
+            await _verseService.InitializeAsync();
+            if (await LoadHomeDataAsync(refreshVerse: false, requestPermission: false))
+                StartCountdown();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        finally
+        {
+            IsRefreshing = false;
         }
     }
 
@@ -115,6 +126,32 @@ public partial class MainViewModel : ObservableObject
     private static async Task OpenSettingsAsync()
     {
         await Shell.Current.GoToAsync("//SettingsPage");
+    }
+
+    private async Task<bool> LoadHomeDataAsync(bool refreshVerse, bool requestPermission)
+    {
+        if (refreshVerse)
+            LoadVerseOfDay();
+
+        UpdateGreeting();
+        TodayDate = DateTime.Now.ToString("d MMMM yyyy, dddd", new CultureInfo("tr-TR"));
+
+        var settings = _settingsService.GetSettings();
+        CityDisplay = $"{settings.City}, {settings.Country}";
+        if (!settings.HasCompletedOnboarding)
+        {
+            ErrorMessage = "Namaz vakitlerini göstermek için önce şehir ve ülke seçin.";
+            await Shell.Current.GoToAsync("//SettingsPage");
+            return false;
+        }
+
+        await LoadPrayerTimesAsync(settings);
+
+        if (requestPermission)
+            await _notificationService.RequestPermissionAsync();
+
+        await _notificationService.RescheduleIfStaleAsync(settings, _prayerTimes);
+        return true;
     }
 
     private void UpdateGreeting()
