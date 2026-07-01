@@ -82,6 +82,12 @@ public partial class MainViewModel : ObservableObject
 
             var settings = _settingsService.GetSettings();
             CityDisplay = $"{settings.City}, {settings.Country}";
+            if (!settings.HasCompletedOnboarding)
+            {
+                ErrorMessage = "Namaz vakitlerini göstermek için önce şehir ve ülke seçin.";
+                await Shell.Current.GoToAsync("//SettingsPage");
+                return;
+            }
 
             await LoadPrayerTimesAsync(settings);
             await _notificationService.RequestPermissionAsync();
@@ -103,6 +109,12 @@ public partial class MainViewModel : ObservableObject
     private void RefreshVerse()
     {
         LoadVerseOfDay();
+    }
+
+    [RelayCommand]
+    private static async Task OpenSettingsAsync()
+    {
+        await Shell.Current.GoToAsync("//SettingsPage");
     }
 
     private void UpdateGreeting()

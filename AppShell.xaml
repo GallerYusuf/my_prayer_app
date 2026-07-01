@@ -19,13 +19,13 @@
     <TabBar>
         <ShellContent
             Title="Ana Sayfa"
-            Icon="dotnet_bot.png"
+            Icon="home.svg"
             ContentTemplate="{DataTemplate views:MainPage}"
             Route="MainPage" />
 
         <ShellContent
             Title="Ayarlar"
-            Icon="dotnet_bot.png"
+            Icon="settings.svg"
             ContentTemplate="{DataTemplate views:SettingsPage}"
             Route="SettingsPage" />
     </TabBar>

@@ -64,6 +64,9 @@
                             Style="{StaticResource GlassCardCompact}"
                             Padding="14,8"
                             VerticalOptions="Center">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenSettingsCommand}" />
+                        </Border.GestureRecognizers>
                         <HorizontalStackLayout Spacing="6">
                             <Label Text="◉"
                                    FontSize="10"

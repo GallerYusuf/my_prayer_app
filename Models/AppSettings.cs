@@ -4,6 +4,7 @@ public class AppSettings
 {
     public string City { get; set; } = "Van";
     public string Country { get; set; } = "Turkey";
+    public bool HasCompletedOnboarding { get; set; }
 
     public bool PrayerNotificationsEnabled { get; set; } = true;
     public bool NotifyAtPrayerTime { get; set; } = true;

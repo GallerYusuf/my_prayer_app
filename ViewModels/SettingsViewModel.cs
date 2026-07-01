@@ -39,6 +39,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private string _notificationDiagnostics = "Kontrol ediliyor...";
 
+    [ObservableProperty]
+    private bool _isFirstLaunch;
+
     public ObservableCollection<VerseTimeItem> VerseTimes { get; } = [];
 
     public SettingsViewModel(
@@ -57,6 +60,7 @@ public partial class SettingsViewModel : ObservableObject
         var settings = _settingsService.GetSettings();
         City = settings.City;
         Country = settings.Country;
+        IsFirstLaunch = !settings.HasCompletedOnboarding;
         PrayerNotificationsEnabled = settings.PrayerNotificationsEnabled;
         NotifyAtPrayerTime = settings.NotifyAtPrayerTime;
         MinutesBeforePrayer = settings.MinutesBeforePrayer;
@@ -125,10 +129,21 @@ public partial class SettingsViewModel : ObservableObject
             await Task.Delay(100);
         }
 
+        var trimmedCity = City.Trim();
+        var trimmedCountry = Country.Trim();
+
+        if (string.IsNullOrWhiteSpace(trimmedCity) || string.IsNullOrWhiteSpace(trimmedCountry))
+        {
+            StatusMessage = "Devam etmek için şehir ve ülke bilgilerini girin.";
+            return;
+        }
+
+        var wasFirstLaunch = IsFirstLaunch;
         var settings = new AppSettings
         {
-            City = City.Trim(),
-            Country = Country.Trim(),
+            City = trimmedCity,
+            Country = trimmedCountry,
+            HasCompletedOnboarding = true,
             PrayerNotificationsEnabled = PrayerNotificationsEnabled,
             NotifyAtPrayerTime = NotifyAtPrayerTime,
             MinutesBeforePrayer = Math.Max(0, MinutesBeforePrayer),
@@ -137,12 +152,23 @@ public partial class SettingsViewModel : ObservableObject
             VerseNotificationTimes = VerseTimes.Select(v => v.Time).ToList()
         };
 
+        IReadOnlyList<PrayerTime> prayers;
+        try
+        {
+            prayers = await _prayerTimeService.GetTodayPrayerTimesAsync(settings.City, settings.Country);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Şehir doğrulanamadı: {ex.Message}";
+            return;
+        }
+
         _settingsService.SaveSettings(settings);
+        IsFirstLaunch = false;
 
         try
         {
             await _notificationService.RequestPermissionAsync();
-            var prayers = await _prayerTimeService.GetTodayPrayerTimesAsync(settings.City, settings.Country);
             await _notificationService.RescheduleAllAsync(settings, prayers);
             var summary = await _notificationService.GetScheduleSummaryAsync();
             StatusMessage = $"Kaydedildi.\n{summary}";
@@ -152,6 +178,9 @@ public partial class SettingsViewModel : ObservableObject
         {
             StatusMessage = $"Ayarlar kaydedildi ancak bildirimler güncellenemedi: {ex.Message}";
         }
+
+        if (wasFirstLaunch)
+            await Shell.Current.GoToAsync("//MainPage");
     }
 
     [RelayCommand]

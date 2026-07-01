@@ -32,6 +32,18 @@
                            Style="{StaticResource BodyMuted}" />
                 </VerticalStackLayout>
 
+                <Border Style="{StaticResource GlassCard}"
+                        IsVisible="{Binding IsFirstLaunch}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="İlk kurulum"
+                               FontFamily="OpenSansSemibold"
+                               FontSize="18"
+                               TextColor="{StaticResource AccentGold}" />
+                        <Label Text="Doğru namaz vakitlerini gösterebilmemiz için şehir ve ülke bilginizi seçin. Kaydettikten sonra ana ekrana yönlendirileceksiniz."
+                               Style="{StaticResource BodyMuted}" />
+                    </VerticalStackLayout>
+                </Border>
+
                 <!-- Location -->
                 <VerticalStackLayout Spacing="12">
                     <Label Text="Konum" Style="{StaticResource SectionLabel}" />
