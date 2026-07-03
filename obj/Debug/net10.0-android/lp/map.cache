@@ -121,7 +121,6 @@ androidx.lifecycle.lifecycle-viewmodel-android.aar
 androidx.lifecycle.lifecycle-viewmodel.aar
 androidx.lifecycle.lifecycle-livedata-core.aar
 androidx.loader.loader.aar
-androidx.lifecycle.lifecycle-viewmodel-savedstate-android.aar
 androidx.lifecycle.lifecycle-viewmodel-savedstate.aar
 androidx.activity.activity.aar
 androidx.fragment.fragment.aar

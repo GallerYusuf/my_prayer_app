@@ -3706,6 +3706,9 @@ prayerapp.MainActivity;crc6425c6d21f3599989c.MainActivity
 PrayerApp.MainApplication, PrayerApp;crc6425c6d21f3599989c.MainApplication
 PrayerApp.MainApplication;crc6425c6d21f3599989c.MainApplication
 prayerapp.MainApplication;crc6425c6d21f3599989c.MainApplication
+PrayerApp.PrayerAppWidget, PrayerApp;crc6425c6d21f3599989c.PrayerAppWidget
+PrayerApp.PrayerAppWidget;crc6425c6d21f3599989c.PrayerAppWidget
+prayerapp.PrayerAppWidget;crc6425c6d21f3599989c.PrayerAppWidget
 Xamarin.Google.Crypto.Tink.Aead.Internal.AesGcmSiv+IThrowingSupplier, Xamarin.Google.Crypto.Tink.Android;com.google.crypto.tink.aead.internal.AesGcmSiv$ThrowingSupplier
 Xamarin.Google.Crypto.Tink.Aead.Internal.AesGcmSiv.IThrowingSupplier;com.google.crypto.tink.aead.internal.AesGcmSiv$ThrowingSupplier
 com.google.crypto.tink.aead.internal.AesGcmSiv$ThrowingSupplier;com.google.crypto.tink.aead.internal.AesGcmSiv$ThrowingSupplier

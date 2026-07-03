@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PrayerApp.ViewModels"
+             xmlns:conv="clr-namespace:PrayerApp.Converters"
+             x:Class="PrayerApp.Views.QiblaPage"
+             x:DataType="vm:QiblaViewModel"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <conv:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
+    </ContentPage.Resources>
+
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0" />
+                <GradientStop Color="{AppThemeBinding Light=#EEF2FF, Dark={StaticResource BackgroundMid}}" Offset="1" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <ScrollView>
+            <VerticalStackLayout Padding="20,16,20,32" Spacing="24">
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Kıble"
+                           Style="{StaticResource DisplayTitle}"
+                           FontSize="28" />
+                    <Label Text="{Binding CityDisplay, StringFormat='{0} için yön'}"
+                           Style="{StaticResource BodyMuted}" />
+                </VerticalStackLayout>
+
+                <!-- Compass -->
+                <Border StrokeThickness="1"
+                        Stroke="{StaticResource GlassStroke}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceDark}}"
+                        StrokeShape="RoundRectangle 28"
+                        Padding="24"
+                        HeightRequest="320"
+                        HorizontalOptions="Center"
+                        WidthRequest="320">
+                    <Grid>
+                        <!-- Outer ring -->
+                        <Border StrokeThickness="2"
+                                Stroke="{StaticResource AccentGold}"
+                                BackgroundColor="Transparent"
+                                StrokeShape="RoundRectangle 140"
+                                WidthRequest="280"
+                                HeightRequest="280"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center"
+                                Opacity="0.35" />
+
+                        <Label Text="K"
+                               FontFamily="OpenSansSemibold"
+                               FontSize="16"
+                               TextColor="{StaticResource AccentGold}"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Start"
+                               Margin="0,8,0,0" />
+
+                        <!-- Qibla arrow -->
+                        <Border WidthRequest="4"
+                                HeightRequest="100"
+                                BackgroundColor="{StaticResource AccentEmerald}"
+                                StrokeThickness="0"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center"
+                                Margin="0,0,0,20"
+                                Rotation="{Binding ArrowRotation}"
+                                AnchorX="0.5"
+                                AnchorY="1">
+                            <Border.Shadow>
+                                <Shadow Brush="{StaticResource AccentEmerald}" Opacity="0.5" Radius="12" Offset="0,0" />
+                            </Border.Shadow>
+                        </Border>
+
+                        <!-- Center dot -->
+                        <Ellipse WidthRequest="16"
+                                 HeightRequest="16"
+                                 Fill="{StaticResource AccentGold}"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center" />
+
+                        <Label Text="☪"
+                               FontSize="28"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"
+                               Opacity="0.25" />
+                    </Grid>
+                </Border>
+
+                <Label Text="Telefonu yatay tutun ve yeşil ok kıbleyi göstersin"
+                       Style="{StaticResource BodyMuted}"
+                       FontSize="13"
+                       HorizontalTextAlignment="Center" />
+
+                <!-- Stats -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Border Style="{StaticResource SettingsGroup}" Padding="16">
+                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                            <Label Text="Kıble açısı"
+                                   Style="{StaticResource BodyMuted}"
+                                   FontSize="12"
+                                   HorizontalOptions="Center" />
+                            <Label Text="{Binding BearingText}"
+                                   FontFamily="OpenSansSemibold"
+                                   FontSize="22"
+                                   TextColor="{StaticResource AccentGold}"
+                                   HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="1" Style="{StaticResource SettingsGroup}" Padding="16">
+                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                            <Label Text="Kabe mesafesi"
+                                   Style="{StaticResource BodyMuted}"
+                                   FontSize="12"
+                                   HorizontalOptions="Center" />
+                            <Label Text="{Binding DistanceText}"
+                                   FontFamily="OpenSansSemibold"
+                                   FontSize="22"
+                                   TextColor="{StaticResource AccentEmerald}"
+                                   HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <Border IsVisible="{Binding StatusMessage, Converter={StaticResource StringNotEmptyConverter}}"
+                        StrokeThickness="1"
+                        Stroke="#40F87171"
+                        BackgroundColor="#1AF87171"
+                        StrokeShape="RoundRectangle 14"
+                        Padding="14,12">
+                    <Label Text="{Binding StatusMessage}"
+                           TextColor="{StaticResource Error}"
+                           HorizontalTextAlignment="Center"
+                           FontSize="13" />
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

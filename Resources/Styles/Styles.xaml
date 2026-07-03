@@ -561,4 +561,74 @@
         </Setter>
     </Style>
 
+    <!-- Info chip (header pills) -->
+    <Style TargetType="Border" x:Key="InfoChip">
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Stroke" Value="{StaticResource GlassStroke}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceAltDark}}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 20" />
+        <Setter Property="Padding" Value="12,7" />
+    </Style>
+
+    <!-- Hero card shell -->
+    <Style TargetType="Border" x:Key="HeroCard">
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Stroke" Value="#33FFFFFF" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 28" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Shadow">
+            <Setter.Value>
+                <Shadow Brush="{StaticResource AccentEmerald}" Opacity="0.25" Radius="36" Offset="0,14" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Countdown digit box -->
+    <Style TargetType="Border" x:Key="CountdownBox">
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="BackgroundColor" Value="#20FFFFFF" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 16" />
+        <Setter Property="Padding" Value="0,12" />
+        <Setter Property="MinimumWidthRequest" Value="72" />
+    </Style>
+
+    <!-- Ghost text button -->
+    <Style TargetType="Button" x:Key="GhostButton">
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="TextColor" Value="{StaticResource AccentGold}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="BorderWidth" Value="0" />
+        <Setter Property="Padding" Value="12,8" />
+        <Setter Property="MinimumHeightRequest" Value="36" />
+    </Style>
+
+    <!-- Secondary outline button -->
+    <Style TargetType="Button" x:Key="OutlineButton">
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="TextColor" Value="{StaticResource AccentEmerald}" />
+        <Setter Property="BackgroundColor" Value="#1410B981" />
+        <Setter Property="BorderColor" Value="#4010B981" />
+        <Setter Property="BorderWidth" Value="1" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="Padding" Value="16,10" />
+        <Setter Property="MinimumHeightRequest" Value="44" />
+    </Style>
+
+    <!-- Settings grouped card -->
+    <Style TargetType="Border" x:Key="SettingsGroup">
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Stroke" Value="{StaticResource GlassStroke}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceDark}}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 20" />
+        <Setter Property="Padding" Value="4,6" />
+    </Style>
+
+    <Style TargetType="BoxView" x:Key="SettingsDivider">
+        <Setter Property="HeightRequest" Value="1" />
+        <Setter Property="Color" Value="{StaticResource GlassStroke}" />
+        <Setter Property="Margin" Value="16,0" />
+    </Style>
+
 </ResourceDictionary>

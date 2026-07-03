@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PrayerApp.ViewModels"
+             xmlns:conv="clr-namespace:PrayerApp.Converters"
+             x:Class="PrayerApp.Views.CityPickerPage"
+             x:DataType="vm:CityPickerViewModel"
+             Shell.NavBarIsVisible="False"
+             Padding="0">
+
+    <ContentPage.Resources>
+        <conv:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0.0" />
+                <GradientStop Color="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource BackgroundElevated}}" Offset="1.0" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <!-- Header + search -->
+        <VerticalStackLayout Grid.Row="0" Padding="20,16,20,12" Spacing="16">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                <Border Style="{StaticResource IconButton}"
+                        WidthRequest="40"
+                        HeightRequest="40"
+                        VerticalOptions="Center">
+                    <Label Text="{Binding BackGlyph}"
+                           FontSize="18"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center" />
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding BackCommand}" />
+                    </Border.GestureRecognizers>
+                </Border>
+
+                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                    <Label Text="{Binding Title}"
+                           Style="{StaticResource DisplayTitle}"
+                           FontSize="22"
+                           HorizontalTextAlignment="Center" />
+                    <Label Text="{Binding Subtitle}"
+                           Style="{StaticResource BodyMuted}"
+                           FontSize="12"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+
+                <Border Grid.Column="2"
+                        Style="{StaticResource IconButton}"
+                        WidthRequest="40"
+                        HeightRequest="40"
+                        IsVisible="{Binding IsDistrictMode}"
+                        VerticalOptions="Center">
+                    <Label Text="✕"
+                           FontSize="16"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center" />
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CancelCommand}" />
+                    </Border.GestureRecognizers>
+                </Border>
+            </Grid>
+
+            <Border Style="{StaticResource PremiumInput}" Padding="12,6">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                    <Label Text="🔍"
+                           FontSize="16"
+                           VerticalOptions="Center"
+                           Opacity="0.7" />
+                    <Entry Grid.Column="1"
+                           Text="{Binding SearchQuery}"
+                           Placeholder="{Binding SearchPlaceholder}"
+                           PlaceholderColor="{StaticResource TextMutedDark}"
+                           BackgroundColor="Transparent"
+                           FontFamily="OpenSansRegular"
+                           FontSize="15"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                    <Border Grid.Column="2"
+                            Style="{StaticResource IconButton}"
+                            WidthRequest="32"
+                            HeightRequest="32"
+                            IsVisible="{Binding SearchQuery, Converter={StaticResource StringNotEmptyConverter}}"
+                            VerticalOptions="Center">
+                        <Label Text="✕"
+                               FontSize="12"
+                               TextColor="{StaticResource TextMutedDark}"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center" />
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ClearSearchCommand}" />
+                        </Border.GestureRecognizers>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <Label Text="{Binding ResultSummary}"
+                   Style="{StaticResource SectionLabel}"
+                   FontSize="11"
+                   Margin="4,0,0,0" />
+        </VerticalStackLayout>
+
+        <!-- List -->
+        <Grid Grid.Row="1" Padding="20,0,20,20">
+            <CollectionView x:Name="ItemList"
+                            ItemsSource="{Binding Items}"
+                            SelectionMode="Single"
+                            SelectionChanged="OnItemSelectionChanged">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:PickerItem">
+                        <Border StrokeThickness="1"
+                                Stroke="{StaticResource GlassStroke}"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceDark}}"
+                                StrokeShape="RoundRectangle 16"
+                                Padding="14,12">
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
+                                <Border WidthRequest="42"
+                                        HeightRequest="42"
+                                        StrokeThickness="0"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}"
+                                        StrokeShape="RoundRectangle 12"
+                                        VerticalOptions="Center">
+                                    <Label Text="{Binding Badge}"
+                                           FontFamily="OpenSansSemibold"
+                                           FontSize="14"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                </Border>
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                    <Label Text="{Binding Title}"
+                                           FontFamily="OpenSansSemibold"
+                                           FontSize="16"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                    <Label Text="{Binding Subtitle}"
+                                           Style="{StaticResource BodyMuted}"
+                                           FontSize="12" />
+                                </VerticalStackLayout>
+
+                                <Label Grid.Column="2"
+                                       Text="✓"
+                                       FontFamily="OpenSansSemibold"
+                                       FontSize="18"
+                                       TextColor="{StaticResource AccentEmerald}"
+                                       VerticalOptions="Center"
+                                       IsVisible="{Binding IsSelected}" />
+
+                                <Label Grid.Column="3"
+                                       Text="›"
+                                       FontSize="22"
+                                       TextColor="{StaticResource AccentGold}"
+                                       VerticalOptions="Center"
+                                       IsVisible="{Binding ShowChevron}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Empty state -->
+            <Border IsVisible="{Binding HasNoResults}"
+                    Style="{StaticResource GlassCard}"
+                    Padding="28"
+                    VerticalOptions="Center">
+                <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                    <Label Text="🏙️"
+                           FontSize="36"
+                           HorizontalOptions="Center" />
+                    <Label Text="Sonuç bulunamadı"
+                           FontFamily="OpenSansSemibold"
+                           FontSize="17"
+                           HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                    <Label Text="Farklı bir arama deneyin veya filtreyi temizleyin"
+                           Style="{StaticResource BodyMuted}"
+                           FontSize="13"
+                           HorizontalTextAlignment="Center" />
+                    <Button Text="Filtreyi Temizle"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource AccentEmerald}"
+                            FontFamily="OpenSansSemibold"
+                            Command="{Binding ClearSearchCommand}"
+                            Margin="0,8,0,0" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+    </Grid>
+</ContentPage>

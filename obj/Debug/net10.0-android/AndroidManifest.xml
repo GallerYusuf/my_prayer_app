@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Bu kod, bir araç tarafından oluşturuldu.
-    C:\Users\yusufemredeniz\Desktop\my_prayer_app\Platforms\Android\AndroidManifest.xml dosyasından oluşturuldu
+    c:\Users\yusufemredeniz\Desktop\my_prayer_app\Platforms\Android\AndroidManifest.xml dosyasından oluşturuldu
     Bu dosyada yapılan değişiklikler, içerik yeniden oluşturulursa
     yanlış davranışlara yol açabilir ve kaybolabilir.
     -->
@@ -23,6 +23,12 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
+    <receiver android:exported="true" android:label="Ezan Vakti Widget" android:name="crc6425c6d21f3599989c.PrayerAppWidget">
+      <meta-data android:name="android.appwidget.provider" android:resource="@xml/prayer_appwidget_info" />
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+    </receiver>
     <activity android:configChanges="orientation|screenSize" android:exported="false" android:name="crc6468b6408a11370c2f.WebAuthenticatorIntermediateActivity" />
     <provider android:authorities="com.companyname.prayerapp.fileProvider" android:exported="false" android:grantUriPermissions="true" android:name="microsoft.maui.essentials.fileProvider">
       <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/microsoft_maui_essentials_fileprovider_file_paths" />

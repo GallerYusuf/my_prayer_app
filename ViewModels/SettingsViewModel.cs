@@ -1,8 +1,10 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PrayerApp.Data;
 using PrayerApp.Models;
 using PrayerApp.Services.Interfaces;
+using PrayerApp.Views;
 
 namespace PrayerApp.ViewModels;
 
@@ -17,6 +19,27 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private string _country = "Turkey";
+
+    [ObservableProperty]
+    private string _cityDisplay = "Van";
+
+    [ObservableProperty]
+    private string _cityRegion = "Doğu Anadolu";
+
+    [ObservableProperty]
+    private int _selectedPlateCode = 65;
+
+    [ObservableProperty]
+    private string _districtDisplay = string.Empty;
+
+    [ObservableProperty]
+    private string _districtApiName = string.Empty;
+
+    [ObservableProperty]
+    private string _locationSummary = "Van";
+
+    [ObservableProperty]
+    private bool _hasDistrict;
 
     [ObservableProperty]
     private bool _prayerNotificationsEnabled = true;
@@ -48,6 +71,17 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private bool _isFirstLaunch;
 
+    [ObservableProperty]
+    private bool _isAdvancedExpanded;
+
+    [ObservableProperty]
+    private bool _isAboutExpanded;
+
+    [ObservableProperty]
+    private bool _ramadanModeEnabled = true;
+
+    public int[] MinutesBeforeOptions { get; } = [5, 10, 15, 30];
+
     public ObservableCollection<VerseTimeItem> VerseTimes { get; } = [];
 
     public SettingsViewModel(
@@ -64,16 +98,21 @@ public partial class SettingsViewModel : ObservableObject
     public void LoadSettings()
     {
         var settings = _settingsService.GetSettings();
-        City = settings.City;
         Country = settings.Country;
         IsFirstLaunch = !settings.HasCompletedOnboarding;
+
+        var city = TurkishCities.FindByApiName(settings.City) ?? TurkishCities.GetDefault();
+        var district = TurkishCities.FindDistrict(city, settings.DistrictApiName);
+        ApplySelection(new CitySelection(city, district));
+
         PrayerNotificationsEnabled = settings.PrayerNotificationsEnabled;
         NotifyAtPrayerTime = settings.NotifyAtPrayerTime;
-        MinutesBeforePrayer = settings.MinutesBeforePrayer;
+        MinutesBeforePrayer = SnapMinutesBefore(settings.MinutesBeforePrayer);
         FridayNotificationsEnabled = settings.FridayNotificationsEnabled;
         FridayNotificationTime = settings.FridayNotificationTime;
         VerseNotificationsEnabled = settings.VerseNotificationsEnabled;
         VerseNotificationCount = settings.VerseNotificationCount;
+        RamadanModeEnabled = settings.RamadanModeEnabled;
 
         VerseTimes.Clear();
         for (var i = 0; i < 5; i++)
@@ -129,6 +168,69 @@ public partial class SettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void ToggleAdvanced() => IsAdvancedExpanded = !IsAdvancedExpanded;
+
+    [RelayCommand]
+    private void ToggleAbout() => IsAboutExpanded = !IsAboutExpanded;
+
+    [RelayCommand]
+    private void SelectMinutesBefore(int minutes) => MinutesBeforePrayer = minutes;
+
+    [RelayCommand]
+    private async Task OpenCityPickerAsync()
+    {
+        try
+        {
+            var navigation = Shell.Current?.Navigation;
+            if (navigation is null)
+                return;
+
+            var pickerVm = new CityPickerViewModel(SelectedPlateCode, DistrictApiName);
+            pickerVm.SetNavigation(navigation);
+            var page = new CityPickerPage(pickerVm);
+            var modal = new NavigationPage(page)
+            {
+                BarBackgroundColor = Colors.Transparent,
+                BackgroundColor = Colors.Transparent
+            };
+            NavigationPage.SetHasNavigationBar(page, false);
+
+            await navigation.PushModalAsync(modal);
+
+            var selected = await pickerVm.WaitForSelectionAsync();
+            if (selected is not null)
+                ApplySelection(selected);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Şehir seçici açılamadı: {ex.Message}";
+        }
+    }
+
+    private void ApplySelection(CitySelection selection)
+    {
+        City = selection.City.ApiName;
+        Country = "Turkey";
+        CityDisplay = selection.City.DisplayName;
+        CityRegion = selection.City.Region;
+        SelectedPlateCode = selection.City.PlateCode;
+
+        DistrictDisplay = selection.District?.DisplayName ?? string.Empty;
+        DistrictApiName = selection.District?.ApiName ?? string.Empty;
+        HasDistrict = selection.District is not null;
+        LocationSummary = selection.Display;
+    }
+
+    private static int SnapMinutesBefore(int minutes) =>
+        minutes switch
+        {
+            <= 7 => 5,
+            <= 12 => 10,
+            <= 22 => 15,
+            _ => 30
+        };
+
+    [RelayCommand]
     private async Task SaveAsync()
     {
         if (Application.Current?.MainPage is not null)
@@ -147,9 +249,15 @@ public partial class SettingsViewModel : ObservableObject
         }
 
         var wasFirstLaunch = IsFirstLaunch;
-        var settings = new AppSettings
+        var settings = _settingsService.GetSettings();
+        var settingsToSave = new AppSettings
         {
             City = trimmedCity,
+            CityDisplay = CityDisplay.Trim(),
+            Region = CityRegion.Trim(),
+            PlateCode = SelectedPlateCode,
+            District = DistrictDisplay.Trim(),
+            DistrictApiName = DistrictApiName.Trim(),
             Country = trimmedCountry,
             HasCompletedOnboarding = true,
             PrayerNotificationsEnabled = PrayerNotificationsEnabled,
@@ -159,13 +267,22 @@ public partial class SettingsViewModel : ObservableObject
             FridayNotificationTime = FridayNotificationTime,
             VerseNotificationsEnabled = VerseNotificationsEnabled,
             VerseNotificationCount = Math.Clamp(VerseNotificationCount, 1, 5),
-            VerseNotificationTimes = VerseTimes.Select(v => v.Time).ToList()
+            VerseNotificationTimes = VerseTimes.Select(v => v.Time).ToList(),
+            RamadanModeEnabled = RamadanModeEnabled,
+            Latitude = settings.Latitude,
+            Longitude = settings.Longitude
         };
 
         IReadOnlyList<PrayerTime> prayers;
         try
         {
-            prayers = await _prayerTimeService.GetTodayPrayerTimesAsync(settings.City, settings.Country);
+            var result = await _prayerTimeService.GetTodayPrayerTimesAsync(settingsToSave.LocationQuery, settingsToSave.Country);
+            prayers = result.Times;
+            if (result.Latitude != 0 && result.Longitude != 0)
+            {
+                settingsToSave.Latitude = result.Latitude;
+                settingsToSave.Longitude = result.Longitude;
+            }
         }
         catch (Exception ex)
         {
@@ -173,13 +290,13 @@ public partial class SettingsViewModel : ObservableObject
             return;
         }
 
-        _settingsService.SaveSettings(settings);
+        _settingsService.SaveSettings(settingsToSave);
         IsFirstLaunch = false;
 
         try
         {
             await _notificationService.RequestPermissionAsync();
-            await _notificationService.RescheduleAllAsync(settings, prayers);
+            await _notificationService.RescheduleAllAsync(settingsToSave, prayers);
             var summary = await _notificationService.GetScheduleSummaryAsync();
             StatusMessage = $"Kaydedildi.\n{summary}";
             await RefreshDiagnosticsAsync();

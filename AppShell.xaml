@@ -5,27 +5,29 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:PrayerApp.Views"
     Title="Ezan Vakti"
-    Shell.NavBarHasShadow="False">
+    Shell.NavBarHasShadow="False"
+    Shell.TabBarIsVisible="True">
 
-    <Shell.Resources>
-        <Style TargetType="TabBar">
-            <Setter Property="Shell.TabBarBackgroundColor" Value="{StaticResource BackgroundMid}" />
-            <Setter Property="Shell.TabBarTitleColor" Value="{StaticResource AccentGold}" />
-            <Setter Property="Shell.TabBarUnselectedColor" Value="{StaticResource TextSecondaryDark}" />
-            <Setter Property="Shell.TabBarForegroundColor" Value="{StaticResource AccentGold}" />
-        </Style>
-    </Shell.Resources>
+    <TabBar Shell.TabBarBackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource BackgroundMid}}"
+            Shell.TabBarTitleColor="{StaticResource AccentGold}"
+            Shell.TabBarUnselectedColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource TextSecondaryDark}}"
+            Shell.TabBarForegroundColor="{StaticResource AccentGold}">
 
-    <TabBar>
         <ShellContent
-            Title="Ana Sayfa"
-            Icon="home.svg"
+            Title="Vakitler"
+            Icon="tab_home.png"
             ContentTemplate="{DataTemplate views:MainPage}"
             Route="MainPage" />
 
         <ShellContent
+            Title="Kıble"
+            Icon="tab_qibla.png"
+            ContentTemplate="{DataTemplate views:QiblaPage}"
+            Route="QiblaPage" />
+
+        <ShellContent
             Title="Ayarlar"
-            Icon="settings.svg"
+            Icon="tab_settings.png"
             ContentTemplate="{DataTemplate views:SettingsPage}"
             Route="SettingsPage" />
     </TabBar>

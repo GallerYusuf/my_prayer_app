@@ -12,13 +12,16 @@ drawable\maui_splash;drawable\maui_splash
 drawable\maui_splash_image;drawable\maui_splash_image
 drawable\notification_icon;drawable\notification_icon
 drawable\notification_icon_large;drawable\notification_icon_large
+drawable\widget_background;drawable\widget_background
 layout\drawer_layout;layout\drawer_layout
 layout\flyoutcontent;compatibility\Android\Resources\layout\flyoutcontent
 layout\fragment_backstack;layout\fragment_backstack
 layout\navigationlayout;layout\navigationlayout
 layout\shellcontent;compatibility\Android\Resources\layout\shellcontent
+layout\widget_prayer;layout\widget_prayer
 values\attr;values\attr
 values\colors;values\colors
 values\strings;values\strings
 values\styles;values\styles
 xml\microsoft_maui_essentials_fileprovider_file_paths;resources\xml\microsoft_maui_essentials_fileprovider_file_paths
+xml\prayer_appwidget_info;xml\prayer_appwidget_info

@@ -8,7 +8,6 @@ namespace PrayerApp.Services;
 
 public class PrayerTimeService(HttpClient httpClient) : IPrayerTimeService
 {
-    private const int DiyanetMethod = 13;
     private const string CacheKeyPrefix = "prayer_times_cache_";
 
     private static readonly (string Key, string TurkishName, string Glyph)[] PrayerMap =
@@ -21,23 +20,42 @@ public class PrayerTimeService(HttpClient httpClient) : IPrayerTimeService
         ("Isha", "Yatsı", "🌃")
     ];
 
-    public async Task<IReadOnlyList<PrayerTime>> GetTodayPrayerTimesAsync(
+    private static readonly string[] HijriMonthsTr =
+    [
+        "", "Muharrem", "Safer", "Rebiülevvel", "Rebiülahir",
+        "Cemaziyelevvel", "Cemaziyelahir", "Recep", "Şaban",
+        "Ramazan", "Şevval", "Zilkade", "Zilhicce"
+    ];
+
+    public async Task<PrayerDayResult> GetTodayPrayerTimesAsync(
         string city,
         string country,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            var url = $"timingsByCity?city={Uri.EscapeDataString(city)}&country={Uri.EscapeDataString(country)}&method={DiyanetMethod}";
-            var response = await httpClient.GetFromJsonAsync<AladhanResponse>(url, cancellationToken)
+            var address = string.IsNullOrWhiteSpace(country) ? city : $"{city}, {country}";
+            var url = $"timingsByAddress?address={Uri.EscapeDataString(address)}";
+
+            using var response = await httpClient.GetAsync(url, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+                throw new InvalidOperationException($"Namaz vakitleri alınamadı (HTTP {(int)response.StatusCode}).");
+
+            var payload = await response.Content.ReadFromJsonAsync<AladhanResponse>(cancellationToken: cancellationToken)
                 ?? throw new InvalidOperationException("Namaz vakitleri alınamadı.");
 
-            if (response.Code != 200)
-                throw new InvalidOperationException($"API hatası: {response.Status}");
+            if (payload.Code != 200)
+                throw new InvalidOperationException($"API hatası: {payload.Status}");
 
-            var prayerTimes = BuildPrayerTimes(response.Data.Timings);
-            SaveCachedTimes(city, country, prayerTimes);
-            return prayerTimes;
+            var prayerTimes = BuildPrayerTimes(payload.Data.Timings);
+            var hijri = payload.Data.Date.Hijri;
+            var hijriDate = FormatHijriDate(hijri);
+            var hijriMonth = hijri?.Month.Number ?? 0;
+            var hijriDay = ParseHijriDay(hijri?.Day);
+            var latitude = payload.Data.Meta?.Latitude ?? 0;
+            var longitude = payload.Data.Meta?.Longitude ?? 0;
+            SaveCachedTimes(city, country, prayerTimes, hijriDate, hijriMonth, hijriDay, latitude, longitude);
+            return new PrayerDayResult(prayerTimes, hijriDate, hijriMonth, hijriDay, latitude, longitude);
         }
         catch (Exception ex) when (IsRecoverableFailure(ex))
         {
@@ -87,13 +105,39 @@ public class PrayerTimeService(HttpClient httpClient) : IPrayerTimeService
             .ToList();
     }
 
-    private static void SaveCachedTimes(string city, string country, IReadOnlyList<PrayerTime> prayerTimes)
+    private static string FormatHijriDate(AladhanHijri? hijri)
+    {
+        if (hijri is null)
+            return string.Empty;
+
+        var monthIndex = Math.Clamp(hijri.Month.Number, 1, 12);
+        var monthName = HijriMonthsTr[monthIndex];
+        return $"{hijri.Day} {monthName} {hijri.Year}";
+    }
+
+    private static int ParseHijriDay(string? day) =>
+        int.TryParse(day, out var value) ? value : 0;
+
+    private static void SaveCachedTimes(
+        string city,
+        string country,
+        IReadOnlyList<PrayerTime> prayerTimes,
+        string hijriDate,
+        int hijriMonth,
+        int hijriDay,
+        double latitude,
+        double longitude)
     {
         var cache = new CachedPrayerTimes
         {
             Date = DateTime.Today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             City = city.Trim(),
             Country = country.Trim(),
+            HijriDate = hijriDate,
+            HijriMonth = hijriMonth,
+            HijriDay = hijriDay,
+            Latitude = latitude,
+            Longitude = longitude,
             Times = prayerTimes
                 .Select(p => new CachedPrayerTime
                 {
@@ -108,7 +152,7 @@ public class PrayerTimeService(HttpClient httpClient) : IPrayerTimeService
         Preferences.Default.Set(BuildCacheKey(city, country), JsonSerializer.Serialize(cache));
     }
 
-    private static IReadOnlyList<PrayerTime>? LoadCachedTimes(string city, string country)
+    private static PrayerDayResult? LoadCachedTimes(string city, string country)
     {
         var json = Preferences.Default.Get(BuildCacheKey(city, country), string.Empty);
         if (string.IsNullOrWhiteSpace(json))
@@ -120,15 +164,21 @@ public class PrayerTimeService(HttpClient httpClient) : IPrayerTimeService
             if (cache is null || cache.Date != DateTime.Today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))
                 return null;
 
-            return cache.Times
-                .Select(p => new PrayerTime
-                {
-                    Name = p.Name,
-                    TurkishName = p.TurkishName,
-                    Glyph = p.Glyph,
-                    Time = ParsePrayerTime(p.Time)
-                })
-                .ToList();
+            return new PrayerDayResult(
+                cache.Times
+                    .Select(p => new PrayerTime
+                    {
+                        Name = p.Name,
+                        TurkishName = p.TurkishName,
+                        Glyph = p.Glyph,
+                        Time = ParsePrayerTime(p.Time)
+                    })
+                    .ToList(),
+                cache.HijriDate,
+                cache.HijriMonth,
+                cache.HijriDay,
+                cache.Latitude,
+                cache.Longitude);
         }
         catch (JsonException)
         {
@@ -157,13 +207,23 @@ public class PrayerTimeService(HttpClient httpClient) : IPrayerTimeService
     private static bool IsRecoverableFailure(Exception exception) =>
         exception is HttpRequestException
             or TaskCanceledException
+            or OperationCanceledException
             or JsonException
             or FormatException
             or InvalidOperationException;
 
     private static string GetUserFriendlyMessage(Exception exception)
     {
-        if (exception is TaskCanceledException)
+        var message = exception.InnerException?.Message ?? exception.Message;
+
+        if (message.Contains("SSL", StringComparison.OrdinalIgnoreCase) ||
+            message.Contains("certificate", StringComparison.OrdinalIgnoreCase) ||
+            message.Contains("TLS", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Sunucuya güvenli bağlantı kurulamadı. İnternet bağlantınızı kontrol edip tekrar deneyin.";
+        }
+
+        if (exception is TaskCanceledException or OperationCanceledException)
             return "Namaz vakitleri alınırken bağlantı zaman aşımına uğradı. Lütfen internet bağlantınızı kontrol edin.";
 
         if (exception is HttpRequestException)
@@ -180,6 +240,11 @@ public class PrayerTimeService(HttpClient httpClient) : IPrayerTimeService
         public string Date { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
         public string Country { get; set; } = string.Empty;
+        public string HijriDate { get; set; } = string.Empty;
+        public int HijriMonth { get; set; }
+        public int HijriDay { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
         public List<CachedPrayerTime> Times { get; set; } = [];
     }
 

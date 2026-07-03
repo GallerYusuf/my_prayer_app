@@ -38,17 +38,26 @@ public static class MauiProgram
 		{
 			client.BaseAddress = new Uri("https://api.aladhan.com/v1/");
 			client.Timeout = TimeSpan.FromSeconds(30);
-		});
+			client.DefaultRequestHeaders.UserAgent.ParseAdd("EzanVakti/1.0");
+		})
+		.ConfigurePrimaryHttpMessageHandler(HttpClientPlatformHelper.CreateHandler);
 
 		builder.Services.AddSingleton<IVerseService, VerseService>();
 		builder.Services.AddSingleton<ISettingsService, SettingsService>();
 		builder.Services.AddSingleton<INotificationSchedulerService, NotificationSchedulerService>();
 
+		builder.Services.AddSingleton<IWidgetDataService, WidgetDataService>();
+		builder.Services.AddSingleton<IQiblaService, QiblaService>();
+		builder.Services.AddSingleton<IPrayerTrackingService, PrayerTrackingService>();
+		builder.Services.AddSingleton<IRamadanService, RamadanService>();
+
 		builder.Services.AddTransient<MainViewModel>();
 		builder.Services.AddTransient<SettingsViewModel>();
+		builder.Services.AddTransient<QiblaViewModel>();
 
 		builder.Services.AddTransient<MainPage>();
 		builder.Services.AddTransient<SettingsPage>();
+		builder.Services.AddTransient<QiblaPage>();
 
 #if DEBUG
 		builder.Logging.AddDebug();

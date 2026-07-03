@@ -410,11 +410,11 @@ public final class R {
 		public static final int view_transition = 0x7f08020a;
 		public static final int visible = 0x7f080210;
 		public static final int west = 0x7f080212;
-		public static final int wrap = 0x7f080216;
-		public static final int wrap_content = 0x7f080217;
-		public static final int wrap_content_constrained = 0x7f080218;
-		public static final int x_left = 0x7f080219;
-		public static final int x_right = 0x7f08021a;
+		public static final int wrap = 0x7f08021d;
+		public static final int wrap_content = 0x7f08021e;
+		public static final int wrap_content_constrained = 0x7f08021f;
+		public static final int x_left = 0x7f080220;
+		public static final int x_right = 0x7f080221;
 	}
 	public static final class styleable {
 		public static final int[] Carousel = new int[] { 0x7f0300a9, 0x7f0300aa, 0x7f0300ab, 0x7f0300ac, 0x7f0300ad, 0x7f0300ae, 0x7f0300af, 0x7f0300b0, 0x7f0300b1, 0x7f0300b2, 0x7f0300b3 };

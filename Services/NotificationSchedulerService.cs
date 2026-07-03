@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Plugin.LocalNotification;
 using Plugin.LocalNotification.Core.Models;
 using Plugin.LocalNotification.Core.Models.AndroidOption;
@@ -14,6 +15,7 @@ public class NotificationSchedulerService(IVerseService verseService) : INotific
     private const int VerseNotificationBaseId = 200;
     private const int FridayNotificationId = 300;
     private const string ChannelId = "prayer_app_channel";
+    private const string VersePreferenceKeyPrefix = "verse_notif_";
 
     private DateTime _lastRescheduleDate = DateTime.MinValue;
     private IDispatcherTimer? _foregroundMonitor;
@@ -313,15 +315,43 @@ public class NotificationSchedulerService(IVerseService verseService) : INotific
         {
             var scheduleDate = ResolveNextOccurrence(times[i], DateTimeOffset.Now);
             var verse = verseService.GetRandomVerse();
+            var notificationId = VerseNotificationBaseId + i;
+            var verseJson = JsonSerializer.Serialize(verse);
+
+            // Tam ayet metnini bildirim kimliğine göre sakla; bildirime
+            // dokununca uygulama kapalı olsa bile ayetin tamamı açılabilsin.
+            Preferences.Set(VersePreferenceKeyPrefix + notificationId, verseJson);
 
             await ScheduleNotificationAsync(new NotificationRequest
             {
-                NotificationId = VerseNotificationBaseId + i,
+                NotificationId = notificationId,
                 Title = "Günün Ayeti",
                 Description = Truncate($"{verse.SurahName}, {verse.AyahNumber}. ayet — {verse.Text}", 180),
+                ReturningData = verseJson,
                 Android = CreateAndroidOptions(),
                 Schedule = CreateSchedule(scheduleDate)
             });
+        }
+    }
+
+    /// <summary>
+    /// Dokunulan bildirimin kimliği ve/veya taşınan verisinden ilgili ayeti çözer.
+    /// </summary>
+    public static QuranVerse? ResolveTappedVerse(int notificationId, string? returningData)
+    {
+        var stored = Preferences.Get(VersePreferenceKeyPrefix + notificationId, null);
+        var json = !string.IsNullOrWhiteSpace(stored) ? stored : returningData;
+
+        if (string.IsNullOrWhiteSpace(json))
+            return null;
+
+        try
+        {
+            return JsonSerializer.Deserialize<QuranVerse>(json);
+        }
+        catch (JsonException)
+        {
+            return null;
         }
     }
 

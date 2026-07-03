@@ -9,7 +9,12 @@ public record AladhanResponse(
 
 public record AladhanData(
     [property: JsonPropertyName("timings")] PrayerTimings Timings,
-    [property: JsonPropertyName("date")] AladhanDate Date);
+    [property: JsonPropertyName("date")] AladhanDate Date,
+    [property: JsonPropertyName("meta")] AladhanMeta? Meta);
+
+public record AladhanMeta(
+    [property: JsonPropertyName("latitude")] double Latitude,
+    [property: JsonPropertyName("longitude")] double Longitude);
 
 public record PrayerTimings(
     [property: JsonPropertyName("Fajr")] string Fajr,
@@ -20,4 +25,14 @@ public record PrayerTimings(
     [property: JsonPropertyName("Isha")] string Isha);
 
 public record AladhanDate(
-    [property: JsonPropertyName("readable")] string Readable);
+    [property: JsonPropertyName("readable")] string Readable,
+    [property: JsonPropertyName("hijri")] AladhanHijri? Hijri);
+
+public record AladhanHijri(
+    [property: JsonPropertyName("day")] string Day,
+    [property: JsonPropertyName("month")] AladhanHijriMonth Month,
+    [property: JsonPropertyName("year")] string Year);
+
+public record AladhanHijriMonth(
+    [property: JsonPropertyName("number")] int Number,
+    [property: JsonPropertyName("en")] string En);

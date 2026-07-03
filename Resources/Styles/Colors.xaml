@@ -60,6 +60,22 @@
     <Color x:Key="Error">#F87171</Color>
     <Color x:Key="Success">#10B981</Color>
 
+    <!-- Time-of-day hero accents -->
+    <Color x:Key="HeroDawnStart">#1E3A5F</Color>
+    <Color x:Key="HeroDawnEnd">#7C3AED</Color>
+    <Color x:Key="HeroMorningStart">#065F46</Color>
+    <Color x:Key="HeroMorningEnd">#10B981</Color>
+    <Color x:Key="HeroDayStart">#0E7490</Color>
+    <Color x:Key="HeroDayEnd">#059669</Color>
+    <Color x:Key="HeroSunsetStart">#9A3412</Color>
+    <Color x:Key="HeroSunsetEnd">#D97706</Color>
+    <Color x:Key="HeroNightStart">#0F172A</Color>
+    <Color x:Key="HeroNightEnd">#1E1B4B</Color>
+
+    <!-- Tab bar -->
+    <Color x:Key="TabBarBackground">#E60F172A</Color>
+    <Color x:Key="TabBarBorder">#33FFFFFF</Color>
+
     <Color x:Key="White">#FFFFFF</Color>
     <Color x:Key="Black">#000000</Color>
     <Color x:Key="Magenta">#D4AF37</Color>

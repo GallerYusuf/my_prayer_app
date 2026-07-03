@@ -26,13 +26,13 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property.EntryPointFilePath = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = PrayerApp
-build_property.ProjectDir = C:\Users\yusufemredeniz\Desktop\my_prayer_app\
+build_property.ProjectDir = c:\Users\yusufemredeniz\Desktop\my_prayer_app\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Users/yusufemredeniz/Desktop/my_prayer_app/App.xaml]
+[c:/Users/yusufemredeniz/Desktop/my_prayer_app/App.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = PrayerApp.App.xaml
 build_metadata.AdditionalFiles.TargetPath = App.xaml
@@ -42,7 +42,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Users/yusufemredeniz/Desktop/my_prayer_app/AppShell.xaml]
+[c:/Users/yusufemredeniz/Desktop/my_prayer_app/AppShell.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = PrayerApp.AppShell.xaml
 build_metadata.AdditionalFiles.TargetPath = AppShell.xaml
@@ -52,7 +52,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Users/yusufemredeniz/Desktop/my_prayer_app/Resources/Styles/Colors.xaml]
+[c:/Users/yusufemredeniz/Desktop/my_prayer_app/Resources/Styles/Colors.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = PrayerApp.Resources.Styles.Colors.xaml
 build_metadata.AdditionalFiles.TargetPath = Resources\Styles\Colors.xaml
@@ -62,7 +62,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Users/yusufemredeniz/Desktop/my_prayer_app/Resources/Styles/Styles.xaml]
+[c:/Users/yusufemredeniz/Desktop/my_prayer_app/Resources/Styles/Styles.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = PrayerApp.Resources.Styles.Styles.xaml
 build_metadata.AdditionalFiles.TargetPath = Resources\Styles\Styles.xaml
@@ -72,7 +72,17 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Users/yusufemredeniz/Desktop/my_prayer_app/Views/MainPage.xaml]
+[c:/Users/yusufemredeniz/Desktop/my_prayer_app/Views/CityPickerPage.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = PrayerApp.Views.CityPickerPage.xaml
+build_metadata.AdditionalFiles.TargetPath = Views\CityPickerPage.xaml
+build_metadata.AdditionalFiles.RelativePath = Views\CityPickerPage.xaml
+build_metadata.AdditionalFiles.Inflator = SourceGen
+build_metadata.AdditionalFiles.NoWarn = 
+build_metadata.AdditionalFiles.EnableDiagnostics = 
+build_metadata.AdditionalFiles.LineInfo = 
+
+[c:/Users/yusufemredeniz/Desktop/my_prayer_app/Views/MainPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = PrayerApp.Views.MainPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\MainPage.xaml
@@ -82,7 +92,17 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Users/yusufemredeniz/Desktop/my_prayer_app/Views/SettingsPage.xaml]
+[c:/Users/yusufemredeniz/Desktop/my_prayer_app/Views/QiblaPage.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = PrayerApp.Views.QiblaPage.xaml
+build_metadata.AdditionalFiles.TargetPath = Views\QiblaPage.xaml
+build_metadata.AdditionalFiles.RelativePath = Views\QiblaPage.xaml
+build_metadata.AdditionalFiles.Inflator = SourceGen
+build_metadata.AdditionalFiles.NoWarn = 
+build_metadata.AdditionalFiles.EnableDiagnostics = 
+build_metadata.AdditionalFiles.LineInfo = 
+
+[c:/Users/yusufemredeniz/Desktop/my_prayer_app/Views/SettingsPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = PrayerApp.Views.SettingsPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\SettingsPage.xaml

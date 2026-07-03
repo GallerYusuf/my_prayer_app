@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PrayerApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+a1055bb4c808b26cf26e9f77037718f3badecd2e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+4ae64b0e052edd20d95594811573178abfacc65f")]
 [assembly: System.Reflection.AssemblyProductAttribute("PrayerApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PrayerApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

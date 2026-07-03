@@ -1,27 +1,33 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg width="456" height="456" viewBox="0 0 456 456" version="1.1" xmlns="http://www.w3.org/2000/svg">
-    <!-- Crescent moon -->
-    <path d="M 228 96 A 46 46 0 1 0 228 188 A 34 34 0 1 1 228 96 Z" fill="#E8C77E" />
-    <!-- Star -->
-    <path d="M 286 132 l 6.5 13.2 14.6 2.1 -10.5 10.3 2.5 14.5 -13.1 -6.9 -13.1 6.9 2.5 -14.5 -10.5 -10.3 14.6 -2.1 Z" fill="#E8C77E" />
+    <!-- Crescent finial -->
+    <path d="M 228 150 A 16 16 0 1 0 228 182 A 11.5 11.5 0 1 1 228 150 Z" fill="#EBCB82" />
 
     <!-- Left minaret -->
-    <path d="M 150 214 a 12 12 0 0 1 24 0 v 4 h -24 Z" fill="#ffffff" />
-    <rect x="153" y="218" width="18" height="120" fill="#ffffff" />
-    <!-- Right minaret -->
-    <path d="M 282 214 a 12 12 0 0 1 24 0 v 4 h -24 Z" fill="#ffffff" />
-    <rect x="285" y="218" width="18" height="120" fill="#ffffff" />
+    <circle cx="158" cy="210" r="5" fill="#EBCB82" />
+    <path d="M 149 248 C 149 232 153 226 158 216 C 163 226 167 232 167 248 Z" fill="#FFFFFF" />
+    <rect x="146" y="250" width="24" height="6" rx="2" fill="#EBCB82" />
+    <rect x="151" y="256" width="14" height="112" rx="4" fill="#FFFFFF" />
 
-    <!-- Main dome with finial -->
-    <rect x="224" y="180" width="8" height="20" fill="#E8C77E" />
-    <circle cx="228" cy="176" r="7" fill="#E8C77E" />
-    <path d="M 184 300 Q 184 222 228 200 Q 272 222 272 300 Z" fill="#ffffff" />
+    <!-- Right minaret -->
+    <circle cx="298" cy="210" r="5" fill="#EBCB82" />
+    <path d="M 289 248 C 289 232 293 226 298 216 C 303 226 307 232 307 248 Z" fill="#FFFFFF" />
+    <rect x="286" y="250" width="24" height="6" rx="2" fill="#EBCB82" />
+    <rect x="291" y="256" width="14" height="112" rx="4" fill="#FFFFFF" />
+
+    <!-- Main onion dome -->
+    <path d="M 184 300
+             C 184 256 198 248 212 234
+             C 222 224 224 208 228 184
+             C 232 208 234 224 244 234
+             C 258 248 272 256 272 300 Z" fill="#FFFFFF" />
 
     <!-- Mosque body -->
-    <rect x="168" y="296" width="120" height="84" rx="6" fill="#ffffff" />
-    <!-- Arched door -->
-    <path d="M 210 380 v -34 a 18 18 0 0 1 36 0 v 34 Z" fill="#0E6B5C" />
+    <path d="M 176 304 h 104 v 64 a 8 8 0 0 1 -8 8 h -88 a 8 8 0 0 1 -8 -8 Z" fill="#FFFFFF" />
+    <path d="M 210 376 v -28 a 18 18 0 0 1 36 0 v 28 Z" fill="#EBCB82" />
+    <path d="M 189 374 v -18 a 7 7 0 0 1 14 0 v 18 Z" fill="#EBCB82" />
+    <path d="M 253 374 v -18 a 7 7 0 0 1 14 0 v 18 Z" fill="#EBCB82" />
 
     <!-- Base platform -->
-    <rect x="138" y="380" width="180" height="20" rx="6" fill="#ffffff" />
+    <rect x="156" y="376" width="144" height="16" rx="5" fill="#FFFFFF" />
 </svg>
