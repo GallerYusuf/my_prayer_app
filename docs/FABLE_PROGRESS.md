@@ -19,19 +19,22 @@ Son güncelleme: 2026-07-03 (oturum 1)
   Quran, Surah, Dhikr; Main/Settings/Qibla yeniden bağlandı. dotnet_bot.png silindi.
   Eski servisler (PrayerTimeService, VerseService, NotificationSchedulerService, ...) kaldırıldı.
 
-## Devam eden
+## Faz 7-8 tamamlandı
 
-- **Android Debug build doğrulaması** — CS hataları giderildi (CS0104, CS0246); son build
-  `obj` temizliği sonrası çalışıyor. XAML hataları çıkarsa düzeltilecek.
+- Android Debug build: ✅ 0 hata (temiz obj sonrası).
+- Testler: 34 unit + 25 integration ✅ (`docs/TEST_REPORT.md`).
+- Release AAB: ✅ `com.galleryusuf.ezanvakti-Signed.aab` üretildi (`PublishTrimmed=false` ile;
+  ILLink bu ortamda sandbox engeli nedeniyle çalışmadı — CI'da trimmed publish var).
+- CI: `.github/workflows/ci.yml` (test + Android debug/release + artifact).
+- Dokümantasyon seti tamamlandı (docs/ altındaki tüm dosyalar + README + CHANGELOG).
+- Commit'ler: baseline snapshot, gitignore, core katmanları, app rebuild, docs/release.
 
-## Sıradaki kesin adımlar
+## Yeni oturumda devam edilecekse
 
-1. Android Debug build'i yeşile çevir (XAML binding hataları muhtemel).
-2. Testleri tekrar çalıştır, `docs/TEST_REPORT.md` doldur.
-3. Commit: UI + bildirim fazları.
-4. Release build + AAB (`dotnet publish -f net10.0-android -c Release -p:AndroidPackageFormats=aab`),
-   trimming sorunlarını çöz (Plugin.LocalNotification TrimmerRootAssembly zaten var).
-5. Final rapor.
+1. `git log --oneline` ve bu dosyayı oku.
+2. Kalan işler için `docs/ROADMAP.md` "Teknik borç" bölümüne bak.
+3. Cihaz üzerinde `docs/TEST_REPORT.md` manuel senaryolarını ve
+   `docs/NOTIFICATION_TESTING.md` ADB testlerini uygula.
 
 ## Bilinen açık konular
 
