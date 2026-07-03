@@ -8,521 +8,267 @@
              Shell.NavBarIsVisible="False">
 
     <ContentPage.Resources>
+        <conv:StringNotEmptyConverter x:Key="StringNotEmpty" />
         <conv:InverseBoolConverter x:Key="InverseBool" />
-        <conv:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
-        <conv:IntEqualsConverter x:Key="IntEquals" />
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="*,Auto">
+    <Grid>
         <Grid.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0" />
-                <GradientStop Color="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource BackgroundElevated}}" Offset="1" />
+                <GradientStop Color="{AppThemeBinding Light=#EEF2FF, Dark={StaticResource BackgroundMid}}" Offset="1" />
             </LinearGradientBrush>
         </Grid.Background>
 
-        <ScrollView Grid.Row="0">
-            <VerticalStackLayout Padding="20,16,20,24" Spacing="20">
+        <ScrollView>
+            <VerticalStackLayout Padding="20,16,20,32" Spacing="18">
 
-                <!-- Header -->
-                <VerticalStackLayout Spacing="4" Margin="0,4,0,0">
-                    <Label Text="Ayarlar"
-                           Style="{StaticResource DisplayTitle}"
-                           FontSize="28" />
-                    <Label Text="Konum ve bildirim tercihleriniz"
-                           Style="{StaticResource BodyMuted}"
-                           FontSize="14" />
-                </VerticalStackLayout>
+                <Label Text="Ayarlar" Style="{StaticResource DisplayTitle}" FontSize="28" />
 
-                <!-- First launch -->
-                <Border StrokeThickness="1"
-                        Stroke="#40D4AF37"
-                        BackgroundColor="#18D4AF37"
-                        StrokeShape="RoundRectangle 16"
-                        Padding="16,14"
-                        IsVisible="{Binding IsFirstLaunch}">
-                    <VerticalStackLayout Spacing="6">
-                        <Label Text="Hoş geldiniz"
-                               FontFamily="OpenSansSemibold"
-                               FontSize="16"
-                               TextColor="{StaticResource AccentGold}" />
-                        <Label Text="Önce şehrinizi seçin, ardından Kaydet'e dokunun."
-                               Style="{StaticResource BodyMuted}"
-                               FontSize="13" />
-                    </VerticalStackLayout>
-                </Border>
-
-                <!-- ── Konum ── -->
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="Konum" Style="{StaticResource SectionLabel}" Margin="4,0,0,0" />
-
+                <!-- KONUM -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="KONUM" Style="{StaticResource SectionLabel}" />
                     <Border Style="{StaticResource SettingsGroup}">
-                        <Border Padding="14,12"
-                                StrokeThickness="0"
-                                BackgroundColor="Transparent">
-                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                                <Border WidthRequest="40"
-                                        HeightRequest="40"
-                                        StrokeThickness="0"
-                                        BackgroundColor="#1A10B981"
-                                        StrokeShape="RoundRectangle 12"
-                                        VerticalOptions="Center">
-                                    <Label Text="{Binding SelectedPlateCode, StringFormat='{0:D2}'}"
-                                           FontFamily="OpenSansSemibold"
-                                           FontSize="13"
-                                           TextColor="{StaticResource AccentEmerald}"
-                                           HorizontalOptions="Center"
-                                           VerticalOptions="Center" />
-                                </Border>
-
-                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                        <VerticalStackLayout Spacing="12" Padding="4">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                                    <Label Text="Seçili konum" Style="{StaticResource BodyMuted}" FontSize="12" />
                                     <Label Text="{Binding LocationSummary}"
-                                           FontFamily="OpenSansSemibold"
-                                           FontSize="16"
-                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                                    <Label Text="{Binding CityRegion, StringFormat='{0} · Türkiye'}"
-                                           Style="{StaticResource BodyMuted}"
-                                           FontSize="12" />
+                                           FontFamily="OpenSansSemibold" FontSize="15"
+                                           TextColor="{StaticResource AccentGold}" />
                                 </VerticalStackLayout>
-
-                                <Label Grid.Column="2"
-                                       Text="Değiştir"
-                                       FontFamily="OpenSansSemibold"
-                                       FontSize="13"
-                                       TextColor="{StaticResource AccentGold}"
-                                       VerticalOptions="Center" />
                             </Grid>
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding OpenCityPickerCommand}" />
-                            </Border.GestureRecognizers>
-                        </Border>
-                    </Border>
-                </VerticalStackLayout>
-
-                <!-- Ramazan -->
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="Ramazan" Style="{StaticResource SectionLabel}" Margin="4,0,0,0" />
-                    <Border Style="{StaticResource SettingsGroup}">
-                        <Grid Padding="14,12" ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                            <VerticalStackLayout Spacing="2" VerticalOptions="Center">
-                                <Label Text="Ramazan modu"
-                                       FontFamily="OpenSansSemibold"
-                                       FontSize="15"
-                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                                <Label Text="Ramazan ayında iftar ve sahur kartı"
-                                       Style="{StaticResource BodyMuted}"
-                                       FontSize="12" />
-                            </VerticalStackLayout>
-                            <Switch Grid.Column="1"
-                                    Style="{StaticResource PremiumSwitch}"
-                                    VerticalOptions="Center"
-                                    IsToggled="{Binding RamadanModeEnabled}" />
-                        </Grid>
-                    </Border>
-                </VerticalStackLayout>
-
-                <!-- ── Bildirimler ── -->
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="Bildirimler" Style="{StaticResource SectionLabel}" Margin="4,0,0,0" />
-
-                    <Border Style="{StaticResource SettingsGroup}">
-                        <VerticalStackLayout Spacing="0">
-
-                            <!-- Vakit bildirimleri -->
-                            <Grid Padding="14,12" ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                                <VerticalStackLayout Spacing="2" VerticalOptions="Center">
-                                    <Label Text="Namaz vakitleri"
-                                           FontFamily="OpenSansSemibold"
-                                           FontSize="15"
-                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                                    <Label Text="Her vakit için hatırlatma"
-                                           Style="{StaticResource BodyMuted}"
-                                           FontSize="12" />
-                                </VerticalStackLayout>
-                                <Switch Grid.Column="1"
-                                        Style="{StaticResource PremiumSwitch}"
-                                        VerticalOptions="Center"
-                                        IsToggled="{Binding PrayerNotificationsEnabled}" />
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                <Button Text="Şehir Seç"
+                                        Style="{StaticResource OutlineButton}"
+                                        Command="{Binding OpenCityPickerCommand}" />
+                                <Button Grid.Column="1"
+                                        Text="Konumumu Kullan"
+                                        Style="{StaticResource GhostButton}"
+                                        Command="{Binding UseDeviceLocationCommand}"
+                                        IsEnabled="{Binding IsLocating, Converter={StaticResource InverseBool}}" />
                             </Grid>
-
-                            <VerticalStackLayout IsVisible="{Binding PrayerNotificationsEnabled}"
-                                                 Padding="14,0,14,14"
-                                                 Spacing="12">
-                                <BoxView Style="{StaticResource SettingsDivider}" Margin="0" />
-
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                                    <Label Text="Tam vakitte bildir"
-                                           FontSize="14"
-                                           VerticalOptions="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                                    <Switch Grid.Column="1"
-                                            Style="{StaticResource PremiumSwitch}"
-                                            VerticalOptions="Center"
-                                            IsToggled="{Binding NotifyAtPrayerTime}" />
-                                </Grid>
-
-                                <VerticalStackLayout Spacing="8"
-                                                     IsVisible="{Binding NotifyAtPrayerTime, Converter={StaticResource InverseBool}}">
-                                    <Label Text="Ezandan kaç dakika önce?"
-                                           Style="{StaticResource BodyMuted}"
-                                           FontSize="12" />
-                                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
-                                        <Border Grid.Column="0"
-                                                StrokeThickness="1"
-                                                Stroke="{StaticResource GlassStroke}"
-                                                BackgroundColor="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}"
-                                                StrokeShape="RoundRectangle 12"
-                                                Padding="0,10"
-                                                HorizontalOptions="Fill">
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding SelectMinutesBeforeCommand}" CommandParameter="5" />
-                                            </Border.GestureRecognizers>
-                                            <Label Text="5 dk"
-                                                   FontSize="13"
-                                                   FontFamily="OpenSansSemibold"
-                                                   HorizontalOptions="Center"
-                                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                                            <Border.Triggers>
-                                                <DataTrigger TargetType="Border" Binding="{Binding MinutesBeforePrayer, Converter={StaticResource IntEquals}, ConverterParameter=5}" Value="True">
-                                                    <Setter Property="BackgroundColor" Value="#2510B981" />
-                                                    <Setter Property="Stroke" Value="#5010B981" />
-                                                </DataTrigger>
-                                            </Border.Triggers>
-                                        </Border>
-                                        <Border Grid.Column="1"
-                                                StrokeThickness="1"
-                                                Stroke="{StaticResource GlassStroke}"
-                                                BackgroundColor="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}"
-                                                StrokeShape="RoundRectangle 12"
-                                                Padding="0,10">
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding SelectMinutesBeforeCommand}" CommandParameter="10" />
-                                            </Border.GestureRecognizers>
-                                            <Label Text="10 dk"
-                                                   FontSize="13"
-                                                   FontFamily="OpenSansSemibold"
-                                                   HorizontalOptions="Center"
-                                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                                            <Border.Triggers>
-                                                <DataTrigger TargetType="Border" Binding="{Binding MinutesBeforePrayer, Converter={StaticResource IntEquals}, ConverterParameter=10}" Value="True">
-                                                    <Setter Property="BackgroundColor" Value="#2510B981" />
-                                                    <Setter Property="Stroke" Value="#5010B981" />
-                                                </DataTrigger>
-                                            </Border.Triggers>
-                                        </Border>
-                                        <Border Grid.Column="2"
-                                                StrokeThickness="1"
-                                                Stroke="{StaticResource GlassStroke}"
-                                                BackgroundColor="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}"
-                                                StrokeShape="RoundRectangle 12"
-                                                Padding="0,10">
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding SelectMinutesBeforeCommand}" CommandParameter="15" />
-                                            </Border.GestureRecognizers>
-                                            <Label Text="15 dk"
-                                                   FontSize="13"
-                                                   FontFamily="OpenSansSemibold"
-                                                   HorizontalOptions="Center"
-                                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                                            <Border.Triggers>
-                                                <DataTrigger TargetType="Border" Binding="{Binding MinutesBeforePrayer, Converter={StaticResource IntEquals}, ConverterParameter=15}" Value="True">
-                                                    <Setter Property="BackgroundColor" Value="#2510B981" />
-                                                    <Setter Property="Stroke" Value="#5010B981" />
-                                                </DataTrigger>
-                                            </Border.Triggers>
-                                        </Border>
-                                        <Border Grid.Column="3"
-                                                StrokeThickness="1"
-                                                Stroke="{StaticResource GlassStroke}"
-                                                BackgroundColor="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}"
-                                                StrokeShape="RoundRectangle 12"
-                                                Padding="0,10">
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding SelectMinutesBeforeCommand}" CommandParameter="30" />
-                                            </Border.GestureRecognizers>
-                                            <Label Text="30 dk"
-                                                   FontSize="13"
-                                                   FontFamily="OpenSansSemibold"
-                                                   HorizontalOptions="Center"
-                                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                                            <Border.Triggers>
-                                                <DataTrigger TargetType="Border" Binding="{Binding MinutesBeforePrayer, Converter={StaticResource IntEquals}, ConverterParameter=30}" Value="True">
-                                                    <Setter Property="BackgroundColor" Value="#2510B981" />
-                                                    <Setter Property="Stroke" Value="#5010B981" />
-                                                </DataTrigger>
-                                            </Border.Triggers>
-                                        </Border>
-                                    </Grid>
-                                </VerticalStackLayout>
-                            </VerticalStackLayout>
-
-                            <BoxView Style="{StaticResource SettingsDivider}" />
-
-                            <!-- Cuma -->
-                            <Grid Padding="14,12" ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                                <VerticalStackLayout Spacing="2" VerticalOptions="Center">
-                                    <Label Text="Cuma hatırlatıcısı"
-                                           FontFamily="OpenSansSemibold"
-                                           FontSize="15"
-                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                                    <Label Text="Cuma namazı öncesi"
-                                           Style="{StaticResource BodyMuted}"
-                                           FontSize="12" />
-                                </VerticalStackLayout>
-                                <Switch Grid.Column="1"
-                                        Style="{StaticResource PremiumSwitch}"
-                                        VerticalOptions="Center"
-                                        IsToggled="{Binding FridayNotificationsEnabled}" />
-                            </Grid>
-
-                            <Grid Padding="14,0,14,14"
-                                  ColumnDefinitions="*,Auto"
-                                  IsVisible="{Binding FridayNotificationsEnabled}">
-                                <Label Text="Hatırlatma saati"
-                                       FontSize="14"
-                                       VerticalOptions="Center"
-                                       TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
-                                <TimePicker Grid.Column="1"
-                                            Time="{Binding FridayNotificationTime, Mode=TwoWay}"
-                                            Format="HH:mm"
-                                            FontFamily="OpenSansSemibold"
-                                            TextColor="{StaticResource AccentGold}"
-                                            VerticalOptions="Center" />
-                            </Grid>
-
-                            <BoxView Style="{StaticResource SettingsDivider}" />
-
-                            <!-- Ayet -->
-                            <Grid Padding="14,12" ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                                <VerticalStackLayout Spacing="2" VerticalOptions="Center">
-                                    <Label Text="Günün ayeti"
-                                           FontFamily="OpenSansSemibold"
-                                           FontSize="15"
-                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                                    <Label Text="Gün içinde ilham verici ayetler"
-                                           Style="{StaticResource BodyMuted}"
-                                           FontSize="12" />
-                                </VerticalStackLayout>
-                                <Switch Grid.Column="1"
-                                        Style="{StaticResource PremiumSwitch}"
-                                        VerticalOptions="Center"
-                                        IsToggled="{Binding VerseNotificationsEnabled}" />
-                            </Grid>
-
-                            <VerticalStackLayout Padding="14,0,14,14"
-                                                 Spacing="12"
-                                                 IsVisible="{Binding VerseNotificationsEnabled}">
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                                    <Label Text="Günlük bildirim sayısı"
-                                           FontSize="14"
-                                           VerticalOptions="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
-                                    <HorizontalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center">
-                                        <Border Style="{StaticResource IconButton}"
-                                                WidthRequest="34"
-                                                HeightRequest="34">
-                                            <Label Text="−" FontSize="18" TextColor="{StaticResource AccentGold}"
-                                                   HorizontalOptions="Center" VerticalOptions="Center" />
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding DecrementVerseCountCommand}" />
-                                            </Border.GestureRecognizers>
-                                        </Border>
-                                        <Label Text="{Binding VerseNotificationCount}"
-                                               FontFamily="OpenSansSemibold"
-                                               FontSize="20"
-                                               TextColor="{StaticResource AccentGold}"
-                                               WidthRequest="24"
-                                               HorizontalTextAlignment="Center"
-                                               VerticalOptions="Center" />
-                                        <Border Style="{StaticResource IconButton}"
-                                                WidthRequest="34"
-                                                HeightRequest="34">
-                                            <Label Text="+" FontSize="18" TextColor="{StaticResource AccentGold}"
-                                                   HorizontalOptions="Center" VerticalOptions="Center" />
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding IncrementVerseCountCommand}" />
-                                            </Border.GestureRecognizers>
-                                        </Border>
-                                    </HorizontalStackLayout>
-                                </Grid>
-
-                                <CollectionView ItemsSource="{Binding VerseTimes}"
-                                                SelectionMode="None">
-                                    <CollectionView.ItemTemplate>
-                                        <DataTemplate x:DataType="vm:VerseTimeItem">
-                                            <Grid IsVisible="{Binding IsActive}"
-                                                  Padding="0,3"
-                                                  ColumnDefinitions="Auto,*"
-                                                  ColumnSpacing="10">
-                                                <Label Text="{Binding Index, StringFormat='{0}.'}"
-                                                       FontSize="13"
-                                                       TextColor="{StaticResource TextMutedDark}"
-                                                       VerticalOptions="Center"
-                                                       WidthRequest="20" />
-                                                <TimePicker Grid.Column="1"
-                                                            Time="{Binding Time, Mode=TwoWay}"
-                                                            Format="HH:mm"
-                                                            FontFamily="OpenSansSemibold"
-                                                            FontSize="14"
-                                                            TextColor="{StaticResource AccentGold}"
-                                                            HorizontalOptions="End"
-                                                            VerticalOptions="Center" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </CollectionView.ItemTemplate>
-                                </CollectionView>
-                            </VerticalStackLayout>
-
                         </VerticalStackLayout>
                     </Border>
                 </VerticalStackLayout>
 
-                <!-- ── Sorun giderme (daraltılabilir) ── -->
-                <Border Style="{StaticResource SettingsGroup}" Padding="0">
-                    <VerticalStackLayout Spacing="0">
-                        <Grid Padding="14,14" ColumnDefinitions="*,Auto">
-                            <Grid.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding ToggleAdvancedCommand}" />
-                            </Grid.GestureRecognizers>
-                            <VerticalStackLayout Spacing="2" VerticalOptions="Center">
-                                <Label Text="Bildirim sorunları"
-                                       FontFamily="OpenSansSemibold"
-                                       FontSize="15"
-                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                                <Label Text="Test ve izin ayarları"
-                                       Style="{StaticResource BodyMuted}"
-                                       FontSize="12" />
+                <!-- HESAPLAMA -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="NAMAZ VAKİTLERİ" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource SettingsGroup}">
+                        <VerticalStackLayout Spacing="12" Padding="4">
+                            <Label Text="Hesaplama yöntemi" Style="{StaticResource BodyMuted}" FontSize="12" />
+                            <Picker ItemsSource="{Binding MethodOptions}"
+                                    ItemDisplayBinding="{Binding DisplayName, x:DataType=vm:CalculationMethodOption}"
+                                    SelectedIndex="{Binding SelectedMethodIndex}"
+                                    Title="Yöntem seçin" />
+                            <BoxView Style="{StaticResource SettingsDivider}" />
+                            <Label Text="Manuel dakika düzeltmeleri" Style="{StaticResource BodyMuted}" FontSize="12" />
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Adjustments}" Spacing="8">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:AdjustmentItem">
+                                        <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10">
+                                            <Label Text="{Binding Name}" FontSize="14" VerticalOptions="Center"
+                                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                            <Border Grid.Column="1" Style="{StaticResource IconButton}"
+                                                    WidthRequest="36" HeightRequest="36"
+                                                    SemanticProperties.Description="Bir dakika azalt">
+                                                <Label Text="−" FontSize="18" TextColor="{StaticResource AccentGold}"
+                                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding DecrementCommand}" />
+                                                </Border.GestureRecognizers>
+                                            </Border>
+                                            <Label Grid.Column="2"
+                                                   Text="{Binding Minutes, StringFormat='{0} dk'}"
+                                                   FontFamily="OpenSansSemibold" FontSize="14"
+                                                   WidthRequest="52"
+                                                   HorizontalTextAlignment="Center"
+                                                   VerticalOptions="Center"
+                                                   TextColor="{StaticResource AccentEmerald}" />
+                                            <Border Grid.Column="3" Style="{StaticResource IconButton}"
+                                                    WidthRequest="36" HeightRequest="36"
+                                                    SemanticProperties.Description="Bir dakika artır">
+                                                <Label Text="+" FontSize="18" TextColor="{StaticResource AccentGold}"
+                                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding IncrementCommand}" />
+                                                </Border.GestureRecognizers>
+                                            </Border>
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
                             </VerticalStackLayout>
-                            <Label Grid.Column="1"
-                                   Text="▼"
-                                   FontSize="10"
-                                   TextColor="{StaticResource TextMutedDark}"
-                                   VerticalOptions="Center">
-                                <Label.Triggers>
-                                    <DataTrigger TargetType="Label" Binding="{Binding IsAdvancedExpanded}" Value="True">
-                                        <Setter Property="Rotation" Value="180" />
-                                    </DataTrigger>
-                                </Label.Triggers>
-                            </Label>
-                        </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
 
-                        <VerticalStackLayout Padding="14,0,14,14"
-                                             Spacing="10"
-                                             IsVisible="{Binding IsAdvancedExpanded}">
-                            <BoxView Style="{StaticResource SettingsDivider}" Margin="0,0,0,4" />
+                <!-- BİLDİRİMLER -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="BİLDİRİMLER" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource SettingsGroup}">
+                        <VerticalStackLayout Spacing="14" Padding="4">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Namaz vakti bildirimleri" FontSize="14" VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                <Switch Grid.Column="1" IsToggled="{Binding PrayerNotificationsEnabled}" Style="{StaticResource PremiumSwitch}" />
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Güneş (doğuş) bildirimi" FontSize="14" VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                <Switch Grid.Column="1" IsToggled="{Binding SunriseNotificationEnabled}" Style="{StaticResource PremiumSwitch}" />
+                            </Grid>
+                            <BoxView Style="{StaticResource SettingsDivider}" />
+                            <Label Text="Vakitten kaç dakika önce hatırlatılsın?" Style="{StaticResource BodyMuted}" FontSize="12" />
+                            <HorizontalStackLayout Spacing="8">
+                                <Border Style="{StaticResource InfoChip}" Padding="12,8">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding SelectMinutesBeforeCommand}" CommandParameter="0" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="Kapalı" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                </Border>
+                                <Border Style="{StaticResource InfoChip}" Padding="12,8">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding SelectMinutesBeforeCommand}" CommandParameter="5" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="5 dk" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                </Border>
+                                <Border Style="{StaticResource InfoChip}" Padding="12,8">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding SelectMinutesBeforeCommand}" CommandParameter="10" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="10 dk" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                </Border>
+                                <Border Style="{StaticResource InfoChip}" Padding="12,8">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding SelectMinutesBeforeCommand}" CommandParameter="15" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="15 dk" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                </Border>
+                                <Border Style="{StaticResource InfoChip}" Padding="12,8">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding SelectMinutesBeforeCommand}" CommandParameter="30" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="30 dk" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                </Border>
+                            </HorizontalStackLayout>
+                            <Label Text="{Binding MinutesBeforePrayer, StringFormat='Seçili: {0} dk önce (0 = kapalı)'}"
+                                   Style="{StaticResource BodyMuted}" FontSize="12" />
+                            <BoxView Style="{StaticResource SettingsDivider}" />
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Ses" FontSize="14" VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                <Switch Grid.Column="1" IsToggled="{Binding SoundEnabled}" Style="{StaticResource PremiumSwitch}" />
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Titreşim" FontSize="14" VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                <Switch Grid.Column="1" IsToggled="{Binding VibrationEnabled}" Style="{StaticResource PremiumSwitch}" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
 
-                            <Label Text="{Binding NotificationDiagnostics}"
-                                   FontSize="12"
-                                   LineBreakMode="WordWrap"
-                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
+                <!-- AYET & CUMA -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="AYET VE CUMA BİLDİRİMLERİ" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource SettingsGroup}">
+                        <VerticalStackLayout Spacing="14" Padding="4">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Günün ayeti bildirimi" FontSize="14" VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                <Switch Grid.Column="1" IsToggled="{Binding VerseNotificationsEnabled}" Style="{StaticResource PremiumSwitch}" />
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding VerseNotificationsEnabled}">
+                                <Label Text="Ayet bildirim saati" FontSize="14" VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                <TimePicker Grid.Column="1" Time="{Binding VerseTime}" />
+                            </Grid>
+                            <BoxView Style="{StaticResource SettingsDivider}" />
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Cuma hatırlatıcısı" FontSize="14" VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                <Switch Grid.Column="1" IsToggled="{Binding FridayNotificationsEnabled}" Style="{StaticResource PremiumSwitch}" />
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding FridayNotificationsEnabled}">
+                                <Label Text="Cuma bildirimi saati" FontSize="14" VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                <TimePicker Grid.Column="1" Time="{Binding FridayTime}" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
 
-                            <Button Text="Test bildirimi gönder"
-                                    Style="{StaticResource OutlineButton}"
-                                    FontSize="13"
-                                    Command="{Binding TestNotificationCommand}" />
+                <!-- GÖRÜNÜM -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="GÖRÜNÜM" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource SettingsGroup}">
+                        <VerticalStackLayout Spacing="12" Padding="4">
+                            <Label Text="Tema" Style="{StaticResource BodyMuted}" FontSize="12" />
+                            <Picker ItemsSource="{Binding ThemeOptions}"
+                                    SelectedIndex="{Binding ThemeIndex}"
+                                    Title="Tema seçin" />
+                            <BoxView Style="{StaticResource SettingsDivider}" />
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Ramazan modu" FontSize="14" VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                <Switch Grid.Column="1" IsToggled="{Binding RamadanModeEnabled}" Style="{StaticResource PremiumSwitch}" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
 
-                            <Button Text="Bildirim izinlerini aç"
+                <!-- SAVE -->
+                <Button Text="Kaydet"
+                        Style="{StaticResource PremiumButton}"
+                        Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding IsSaving, Converter={StaticResource InverseBool}}" />
+
+                <Border IsVisible="{Binding StatusMessage, Converter={StaticResource StringNotEmpty}}"
+                        StrokeThickness="1" Stroke="#5010B981" BackgroundColor="#2010B981"
+                        StrokeShape="RoundRectangle 12" Padding="12,10">
+                    <Label Text="{Binding StatusMessage}" TextColor="{StaticResource AccentEmerald}" FontSize="13" />
+                </Border>
+
+                <!-- TANILAMA -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="BİLDİRİM TANILAMA" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource SettingsGroup}">
+                        <VerticalStackLayout Spacing="12" Padding="4">
+                            <Label Text="{Binding DiagnosticsText}"
+                                   FontSize="13"
+                                   LineHeight="1.4"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                <Button Text="Test Bildirimi"
+                                        Style="{StaticResource OutlineButton}"
+                                        Command="{Binding TestNotificationCommand}" />
+                                <Button Grid.Column="1"
+                                        Text="Bildirim Ayarları"
+                                        Style="{StaticResource GhostButton}"
+                                        Command="{Binding OpenNotificationSettingsCommand}" />
+                            </Grid>
+                            <Button Text="Tam Zamanlı Alarm İzni"
                                     Style="{StaticResource GhostButton}"
-                                    FontSize="13"
-                                    Command="{Binding OpenNotificationSettingsCommand}" />
-
-                            <Button Text="Tam alarm iznini aç"
-                                    Style="{StaticResource GhostButton}"
-                                    FontSize="13"
                                     Command="{Binding OpenExactAlarmSettingsCommand}" />
-
-                            <Button Text="Pil optimizasyonunu kapat"
-                                    Style="{StaticResource GhostButton}"
-                                    FontSize="13"
-                                    Command="{Binding OpenBatterySettingsCommand}" />
                         </VerticalStackLayout>
-                    </VerticalStackLayout>
-                </Border>
+                    </Border>
+                </VerticalStackLayout>
 
-                <!-- ── Hakkında (daraltılabilir) ── -->
-                <Border Style="{StaticResource SettingsGroup}" Padding="0">
-                    <VerticalStackLayout Spacing="0">
-                        <Grid Padding="14,14" ColumnDefinitions="*,Auto">
-                            <Grid.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding ToggleAboutCommand}" />
-                            </Grid.GestureRecognizers>
-                            <VerticalStackLayout Spacing="2" VerticalOptions="Center">
-                                <Label Text="Hakkında"
-                                       FontFamily="OpenSansSemibold"
-                                       FontSize="15"
-                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                                <Label Text="Ezan Vakti · v1.0"
-                                       Style="{StaticResource BodyMuted}"
-                                       FontSize="12" />
-                            </VerticalStackLayout>
-                            <Label Grid.Column="1"
-                                   Text="▼"
-                                   FontSize="10"
-                                   TextColor="{StaticResource TextMutedDark}"
-                                   VerticalOptions="Center">
-                                <Label.Triggers>
-                                    <DataTrigger TargetType="Label" Binding="{Binding IsAboutExpanded}" Value="True">
-                                        <Setter Property="Rotation" Value="180" />
-                                    </DataTrigger>
-                                </Label.Triggers>
-                            </Label>
-                        </Grid>
-
-                        <VerticalStackLayout Padding="14,0,14,14"
-                                             Spacing="10"
-                                             IsVisible="{Binding IsAboutExpanded}">
-                            <BoxView Style="{StaticResource SettingsDivider}" Margin="0,0,0,4" />
-
-                            <Label Text="Namaz vakitleri Aladhan API (Diyanet yöntemi) üzerinden alınır. Ayetler cihazınızdaki yerel veriden gösterilir."
-                                   Style="{StaticResource BodyMuted}"
-                                   FontSize="12"
-                                   LineBreakMode="WordWrap" />
-
-                            <Label Text="Tüm tercihleriniz yalnızca cihazınızda saklanır. GPS veya hesap gerektirmez."
-                                   Style="{StaticResource BodyMuted}"
-                                   FontSize="12"
-                                   LineBreakMode="WordWrap" />
-
-                            <Label Text="Android: Ana ekrana 'Ezan Vakti' widget'ı ekleyerek vakitleri görün."
-                                   Style="{StaticResource BodyMuted}"
-                                   FontSize="12"
-                                   LineBreakMode="WordWrap" />
+                <!-- HAKKINDA -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="HAKKINDA" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource SettingsGroup}">
+                        <VerticalStackLayout Spacing="8" Padding="4">
+                            <Label Text="{Binding AppVersion}" FontSize="14"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                            <Label Text="Vakitler Aladhan API üzerinden Diyanet İşleri Başkanlığı yöntemiyle hesaplanır. Meal: Diyanet İşleri (quran-json). Veriler cihazınızda saklanır; hesap, analiz ve reklam yoktur."
+                                   Style="{StaticResource BodyMuted}" FontSize="12" LineHeight="1.4" />
                         </VerticalStackLayout>
-                    </VerticalStackLayout>
-                </Border>
+                    </Border>
+                </VerticalStackLayout>
 
             </VerticalStackLayout>
         </ScrollView>
-
-        <!-- Sticky footer -->
-        <Border Grid.Row="1"
-                StrokeThickness="1"
-                Stroke="{StaticResource GlassStroke}"
-                BackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource BackgroundMid}}"
-                Padding="20,14,20,20">
-            <VerticalStackLayout Spacing="10">
-                <Border IsVisible="{Binding StatusMessage, Converter={StaticResource StringNotEmptyConverter}}"
-                        StrokeThickness="0"
-                        BackgroundColor="#1410B981"
-                        StrokeShape="RoundRectangle 12"
-                        Padding="12,10">
-                    <Label Text="{Binding StatusMessage}"
-                           FontSize="13"
-                           LineBreakMode="WordWrap"
-                           TextColor="{StaticResource AccentEmeraldSoft}" />
-                </Border>
-
-                <Button Text="Kaydet"
-                        Style="{StaticResource PremiumButton}"
-                        HeightRequest="52"
-                        Command="{Binding SaveCommand}">
-                    <Button.Triggers>
-                        <DataTrigger TargetType="Button" Binding="{Binding IsFirstLaunch}" Value="True">
-                            <Setter Property="Text" Value="Başla" />
-                        </DataTrigger>
-                    </Button.Triggers>
-                </Button>
-            </VerticalStackLayout>
-        </Border>
     </Grid>
 </ContentPage>

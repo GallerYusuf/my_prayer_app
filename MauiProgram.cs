@@ -1,6 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
 using Plugin.LocalNotification.Core.Models.AndroidOption;
+using PrayerApp.Core.Common;
+using PrayerApp.Core.Contracts;
+using PrayerApp.Core.Services;
+using PrayerApp.Infrastructure.Database;
+using PrayerApp.Infrastructure.Providers;
+using PrayerApp.Infrastructure.Repositories;
 using PrayerApp.Services;
 using PrayerApp.Services.Interfaces;
 using PrayerApp.ViewModels;
@@ -21,10 +27,31 @@ public static class MauiProgram
 				{
 					android.AddChannel(new AndroidNotificationChannelRequest
 					{
-						Id = "prayer_app_channel",
-						Name = "Ezan Vakti Bildirimleri",
-						Description = "Namaz vakti ve ayet bildirimleri",
+						Id = LocalNotificationScheduler.ChannelPrayer,
+						Name = "Namaz Vakti",
+						Description = "Namaz vakti girdiğinde bildirim",
 						Importance = AndroidImportance.High
+					});
+					android.AddChannel(new AndroidNotificationChannelRequest
+					{
+						Id = LocalNotificationScheduler.ChannelPreReminder,
+						Name = "Vakit Öncesi Hatırlatma",
+						Description = "Namaz vaktinden önce hatırlatma",
+						Importance = AndroidImportance.High
+					});
+					android.AddChannel(new AndroidNotificationChannelRequest
+					{
+						Id = LocalNotificationScheduler.ChannelVerse,
+						Name = "Günün Ayeti",
+						Description = "Günlük ayet bildirimleri",
+						Importance = AndroidImportance.Default
+					});
+					android.AddChannel(new AndroidNotificationChannelRequest
+					{
+						Id = LocalNotificationScheduler.ChannelOther,
+						Name = "Diğer Hatırlatmalar",
+						Description = "Cuma ve diğer manevi hatırlatmalar",
+						Importance = AndroidImportance.Default
 					});
 				});
 			})
@@ -34,7 +61,27 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
-		builder.Services.AddHttpClient<IPrayerTimeService, PrayerTimeService>(client =>
+		RegisterCoreServices(builder.Services);
+		RegisterViewModels(builder.Services);
+
+#if DEBUG
+		builder.Logging.AddDebug();
+#endif
+
+		return builder.Build();
+	}
+
+	private static void RegisterCoreServices(IServiceCollection services)
+	{
+		services.AddSingleton<IClock, SystemClock>();
+		services.AddSingleton<ISettingsStore, SettingsStore>();
+		services.AddSingleton<IKeyValueStore, PreferencesKeyValueStore>();
+
+		// SQLite database in app data; created lazily off the UI thread.
+		services.AddSingleton(_ => new AppDatabase(
+			Path.Combine(FileSystem.AppDataDirectory, "prayerapp.db3")));
+
+		services.AddHttpClient<IPrayerTimeProvider, AladhanPrayerTimeProvider>(client =>
 		{
 			client.BaseAddress = new Uri("https://api.aladhan.com/v1/");
 			client.Timeout = TimeSpan.FromSeconds(30);
@@ -42,27 +89,43 @@ public static class MauiProgram
 		})
 		.ConfigurePrimaryHttpMessageHandler(HttpClientPlatformHelper.CreateHandler);
 
-		builder.Services.AddSingleton<IVerseService, VerseService>();
-		builder.Services.AddSingleton<ISettingsService, SettingsService>();
-		builder.Services.AddSingleton<INotificationSchedulerService, NotificationSchedulerService>();
+		services.AddSingleton<IPrayerDayRepository, PrayerDayRepository>();
+		services.AddSingleton<IPrayerScheduleService, PrayerScheduleService>();
 
-		builder.Services.AddSingleton<IWidgetDataService, WidgetDataService>();
-		builder.Services.AddSingleton<IQiblaService, QiblaService>();
-		builder.Services.AddSingleton<IPrayerTrackingService, PrayerTrackingService>();
-		builder.Services.AddSingleton<IRamadanService, RamadanService>();
+		services.AddSingleton<IQuranRepository>(sp => new QuranRepository(
+			sp.GetRequiredService<AppDatabase>(),
+			async _ => await FileSystem.OpenAppPackageFileAsync("quran_tr.json"),
+			sp.GetRequiredService<IClock>(),
+			sp.GetRequiredService<ILogger<QuranRepository>>()));
 
-		builder.Services.AddTransient<MainViewModel>();
-		builder.Services.AddTransient<SettingsViewModel>();
-		builder.Services.AddTransient<QiblaViewModel>();
+		services.AddSingleton<IDhikrRepository, DhikrRepository>();
 
-		builder.Services.AddTransient<MainPage>();
-		builder.Services.AddTransient<SettingsPage>();
-		builder.Services.AddTransient<QiblaPage>();
+		services.AddSingleton<INotificationScheduler, LocalNotificationScheduler>();
+		services.AddSingleton<INotificationCoordinator, NotificationCoordinator>();
 
-#if DEBUG
-		builder.Logging.AddDebug();
-#endif
+		services.AddSingleton<ILocationService, LocationService>();
+		services.AddSingleton<IWidgetDataService, WidgetDataService>();
+		services.AddSingleton<IPrayerTrackingService, PrayerTrackingService>();
+	}
 
-		return builder.Build();
+	private static void RegisterViewModels(IServiceCollection services)
+	{
+		services.AddTransient<MainViewModel>();
+		services.AddTransient<CalendarViewModel>();
+		services.AddTransient<QiblaViewModel>();
+		services.AddTransient<QuranViewModel>();
+		services.AddTransient<SurahViewModel>();
+		services.AddTransient<DhikrViewModel>();
+		services.AddTransient<SettingsViewModel>();
+		services.AddTransient<OnboardingViewModel>();
+
+		services.AddTransient<MainPage>();
+		services.AddTransient<CalendarPage>();
+		services.AddTransient<QiblaPage>();
+		services.AddTransient<QuranPage>();
+		services.AddTransient<SurahPage>();
+		services.AddTransient<DhikrPage>();
+		services.AddTransient<SettingsPage>();
+		services.AddTransient<OnboardingPage>();
 	}
 }

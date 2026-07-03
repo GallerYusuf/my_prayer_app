@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PrayerApp.ViewModels"
+             xmlns:conv="clr-namespace:PrayerApp.Converters"
+             x:Class="PrayerApp.Views.CalendarPage"
+             x:DataType="vm:CalendarViewModel"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <conv:StringNotEmptyConverter x:Key="StringNotEmpty" />
+        <conv:InverseBoolConverter x:Key="InverseBool" />
+    </ContentPage.Resources>
+
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0" />
+                <GradientStop Color="{AppThemeBinding Light=#EEF2FF, Dark={StaticResource BackgroundMid}}" Offset="1" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <ScrollView>
+            <VerticalStackLayout Padding="20,16,20,32" Spacing="18">
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Vakit Takvimi" Style="{StaticResource DisplayTitle}" FontSize="28" />
+                    <Label Style="{StaticResource BodyMuted}" FontSize="13">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{Binding LocationText}" />
+                                <Span Text=" · " />
+                                <Span Text="{Binding MethodText}" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                </VerticalStackLayout>
+
+                <!-- Date navigation -->
+                <Border Style="{StaticResource GlassCard}" Padding="14">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                        <Button Text="‹"
+                                Style="{StaticResource GhostButton}"
+                                FontSize="22"
+                                WidthRequest="48"
+                                Command="{Binding GoPreviousDayCommand}"
+                                IsEnabled="{Binding CanGoBack}"
+                                SemanticProperties.Description="Önceki gün" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                            <Label Text="{Binding SelectedDateText}"
+                                   FontFamily="OpenSansSemibold"
+                                   FontSize="15"
+                                   HorizontalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                            <Label Text="{Binding HijriDateText}"
+                                   Style="{StaticResource BodyMuted}"
+                                   FontSize="12"
+                                   HorizontalTextAlignment="Center"
+                                   IsVisible="{Binding HijriDateText, Converter={StaticResource StringNotEmpty}}" />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="2" Text="›"
+                                Style="{StaticResource GhostButton}"
+                                FontSize="22"
+                                WidthRequest="48"
+                                Command="{Binding GoNextDayCommand}"
+                                IsEnabled="{Binding CanGoForward}"
+                                SemanticProperties.Description="Sonraki gün" />
+                    </Grid>
+                </Border>
+
+                <Button Text="Bugüne Dön"
+                        Style="{StaticResource OutlineButton}"
+                        Command="{Binding GoTodayCommand}"
+                        IsVisible="{Binding IsToday, Converter={StaticResource InverseBool}}" />
+
+                <!-- Day rows -->
+                <Border Style="{StaticResource GlassCard}" Padding="8">
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Rows}" Spacing="2">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:CalendarRow">
+                                <Grid Padding="14,12" ColumnDefinitions="*,Auto">
+                                    <Label Text="{Binding Name}"
+                                           FontSize="15"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Time}"
+                                           FontFamily="OpenSansSemibold"
+                                           FontSize="16"
+                                           TextColor="{StaticResource AccentGold}" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </Border>
+
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                                   Color="{StaticResource AccentEmerald}"
+                                   HorizontalOptions="Center" />
+
+                <Border IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmpty}}"
+                        StrokeThickness="1" Stroke="#40F87171" BackgroundColor="#1AF87171"
+                        StrokeShape="RoundRectangle 14" Padding="16,12">
+                    <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Error}"
+                           HorizontalTextAlignment="Center" FontSize="13" />
+                </Border>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <Button Text="Paylaş"
+                            Style="{StaticResource OutlineButton}"
+                            Command="{Binding ShareCommand}" />
+                    <Button Grid.Column="1"
+                            Text="Vakit Düzeltmeleri"
+                            Style="{StaticResource GhostButton}"
+                            Command="{Binding OpenAdjustmentsCommand}" />
+                </Grid>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

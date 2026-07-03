@@ -116,6 +116,23 @@
                                        TextColor="{StaticResource AccentEmeraldSoft}"
                                        VerticalOptions="Center" />
                             </Border>
+
+                            <Border Style="{StaticResource InfoChip}"
+                                    IsVisible="{Binding IsOffline}">
+                                <Label Text="Çevrimdışı"
+                                       FontSize="12"
+                                       FontFamily="OpenSansSemibold"
+                                       TextColor="{StaticResource AccentGoldSoft}"
+                                       VerticalOptions="Center" />
+                            </Border>
+
+                            <Border Style="{StaticResource InfoChip}"
+                                    IsVisible="{Binding DataStatusText, Converter={StaticResource StringNotEmptyConverter}}">
+                                <Label Text="{Binding DataStatusText}"
+                                       FontSize="12"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
+                                       VerticalOptions="Center" />
+                            </Border>
                         </HorizontalStackLayout>
                     </ScrollView>
 
@@ -306,6 +323,46 @@
                             </Grid>
                         </Grid>
                     </Border>
+
+                    <!-- Quick access -->
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                        <Border Style="{StaticResource InfoChip}" Padding="0,12"
+                                SemanticProperties.Description="Kıble pusulasını aç">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenQiblaCommand}" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                                <Image Source="tab_qibla.png" WidthRequest="20" HeightRequest="20" />
+                                <Label Text="Kıble" FontSize="12" FontFamily="OpenSansSemibold"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <Border Grid.Column="1" Style="{StaticResource InfoChip}" Padding="0,12"
+                                SemanticProperties.Description="Zikirmatiği aç">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenDhikrCommand}" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                                <Label Text="۝" FontSize="18" TextColor="{StaticResource AccentGold}" HorizontalOptions="Center" />
+                                <Label Text="Zikirmatik" FontSize="12" FontFamily="OpenSansSemibold"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <Border Grid.Column="2" Style="{StaticResource InfoChip}" Padding="0,12"
+                                SemanticProperties.Description="Vakit takvimini aç">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenCalendarCommand}" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                                <Image Source="tab_calendar.png" WidthRequest="20" HeightRequest="20" />
+                                <Label Text="Takvim" FontSize="12" FontFamily="OpenSansSemibold"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
 
                     <!-- Horizontal prayer timeline -->
                     <VerticalStackLayout Spacing="12">

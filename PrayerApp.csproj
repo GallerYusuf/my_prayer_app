@@ -28,15 +28,11 @@
 		       <MauiXaml Update="MyPage.xaml" Inflator="Runtime" /> (force runtime inflation) -->
 		<MauiXamlInflator>SourceGen</MauiXamlInflator>
 
-		<!-- Display name -->
-		<ApplicationTitle>Ezan Vakti</ApplicationTitle>
-
-		<!-- App Identifier -->
-		<ApplicationId>com.companyname.prayerapp</ApplicationId>
-
-		<!-- Versions -->
-		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-		<ApplicationVersion>1</ApplicationVersion>
+		<!-- Branding is centralized in Directory.Build.props -->
+		<ApplicationTitle>$(PrayerAppDisplayName)</ApplicationTitle>
+		<ApplicationId>$(PrayerAppApplicationId)</ApplicationId>
+		<ApplicationDisplayVersion>$(PrayerAppDisplayVersion)</ApplicationDisplayVersion>
+		<ApplicationVersion>$(PrayerAppVersionCode)</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
 		<WindowsPackageType>None</WindowsPackageType>
@@ -53,6 +49,15 @@
 	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' And '$(Configuration)' == 'Debug'">
 		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
 	</PropertyGroup>
+
+	<!-- The MAUI head lives at the repo root; keep library/test sources out of its implicit globs. -->
+	<ItemGroup>
+		<Compile Remove="src\**;tests\**" />
+		<None Remove="src\**;tests\**" />
+		<EmbeddedResource Remove="src\**;tests\**" />
+		<MauiXaml Remove="src\**;tests\**" />
+		<MauiCss Remove="src\**;tests\**" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<!-- App Icon -->
@@ -77,6 +82,11 @@
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
 		<PackageReference Include="Plugin.LocalNotification" Version="14.1.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="src\PrayerApp.Core\PrayerApp.Core.csproj" />
+		<ProjectReference Include="src\PrayerApp.Infrastructure\PrayerApp.Infrastructure.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

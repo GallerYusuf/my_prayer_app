@@ -8,7 +8,17 @@
     Shell.NavBarHasShadow="False"
     Shell.TabBarIsVisible="True">
 
-    <TabBar Shell.TabBarBackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource BackgroundMid}}"
+    <!-- Onboarding lives in its own TabBar so the main tab bar stays hidden during first run. -->
+    <TabBar x:Name="OnboardingBar" Route="Onboarding">
+        <ShellContent
+            Title="Hoş Geldiniz"
+            ContentTemplate="{DataTemplate views:OnboardingPage}"
+            Route="OnboardingPage" />
+    </TabBar>
+
+    <TabBar x:Name="MainTabBar"
+            Route="Main"
+            Shell.TabBarBackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource BackgroundMid}}"
             Shell.TabBarTitleColor="{StaticResource AccentGold}"
             Shell.TabBarUnselectedColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource TextSecondaryDark}}"
             Shell.TabBarForegroundColor="{StaticResource AccentGold}">
@@ -20,10 +30,22 @@
             Route="MainPage" />
 
         <ShellContent
+            Title="Takvim"
+            Icon="tab_calendar.png"
+            ContentTemplate="{DataTemplate views:CalendarPage}"
+            Route="CalendarPage" />
+
+        <ShellContent
             Title="Kıble"
             Icon="tab_qibla.png"
             ContentTemplate="{DataTemplate views:QiblaPage}"
             Route="QiblaPage" />
+
+        <ShellContent
+            Title="Kur'an"
+            Icon="tab_quran.png"
+            ContentTemplate="{DataTemplate views:QuranPage}"
+            Route="QuranPage" />
 
         <ShellContent
             Title="Ayarlar"

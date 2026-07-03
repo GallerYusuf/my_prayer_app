@@ -4,17 +4,23 @@ namespace PrayerApp.Views;
 
 public partial class MainPage : ContentPage
 {
+    private readonly MainViewModel _viewModel;
+
     public MainPage(MainViewModel viewModel)
     {
         InitializeComponent();
-        BindingContext = viewModel;
+        BindingContext = _viewModel = viewModel;
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        await _viewModel.OnAppearingAsync();
+    }
 
-        if (BindingContext is MainViewModel vm)
-            await vm.InitializeCommand.ExecuteAsync(null);
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        _viewModel.OnDisappearing();
     }
 }

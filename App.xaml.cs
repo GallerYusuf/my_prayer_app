@@ -1,21 +1,21 @@
-using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
 using Plugin.LocalNotification.EventArgs;
-using PrayerApp.Models;
+using PrayerApp.Core.Contracts;
+using PrayerApp.Core.Services;
 using PrayerApp.Services;
-using PrayerApp.Services.Interfaces;
 
 namespace PrayerApp;
 
 public partial class App : Application
 {
-	public static QuranVerse? PendingNotificationVerse { get; private set; }
-
 	public App()
 	{
 		InitializeComponent();
-		UserAppTheme = AppTheme.Dark;
+
+		var settings = IPlatformApplication.Current?.Services.GetService<ISettingsStore>()?.Get();
+		ThemeManager.Apply(settings?.Theme ?? Core.Domain.ThemePreference.System);
 
 		LocalNotificationCenter.Current.NotificationActionTapped += OnNotificationActionTapped;
 	}
@@ -23,38 +23,28 @@ public partial class App : Application
 	protected override Window CreateWindow(IActivationState? activationState)
 	{
 		var window = new Window(new AppShell());
-		window.Created += (_, _) =>
-		{
-			var services = IPlatformApplication.Current?.Services;
-			services?.GetService<INotificationSchedulerService>()?.StartForegroundMonitor();
-		};
-		window.Resumed += async (_, _) => await RefreshNotificationsIfNeededAsync();
+		window.Resumed += (_, _) => RescheduleInBackground();
 		return window;
 	}
 
-	private static async Task RefreshNotificationsIfNeededAsync()
+	private static void RescheduleInBackground()
 	{
 		var services = IPlatformApplication.Current?.Services;
-		var settingsService = services?.GetService<ISettingsService>();
-		var prayerTimeService = services?.GetService<IPrayerTimeService>();
-		var notificationService = services?.GetService<INotificationSchedulerService>();
-
-		if (settingsService is null || prayerTimeService is null || notificationService is null)
+		var coordinator = services?.GetService<INotificationCoordinator>();
+		if (coordinator is null)
 			return;
 
-		var settings = settingsService.GetSettings();
-		if (!settings.HasCompletedOnboarding)
-			return;
-
-		try
+		_ = Task.Run(async () =>
 		{
-			var result = await prayerTimeService.GetTodayPrayerTimesAsync(settings.LocationQuery, settings.Country);
-            await notificationService.RescheduleIfStaleAsync(settings, result.Times);
-		}
-		catch
-		{
-			// Foreground loading already surfaces user-facing prayer time errors.
-		}
+			try
+			{
+				await coordinator.RescheduleIfStaleAsync();
+			}
+			catch (Exception ex)
+			{
+				services?.GetService<ILogger<App>>()?.LogError(ex, "Resume reschedule failed");
+			}
+		});
 	}
 
 	private void OnNotificationActionTapped(NotificationActionEventArgs e)
@@ -62,25 +52,27 @@ public partial class App : Application
 		if (e.IsDismissed)
 			return;
 
-		var verse = NotificationSchedulerService.ResolveTappedVerse(e.Request.NotificationId, e.Request.ReturningData);
-		if (verse is null)
+		// Verse notifications carry a "surah:verse" payload; open the verse in context.
+		var payload = e.Request.ReturningData;
+		if (string.IsNullOrWhiteSpace(payload))
 			return;
 
-		PendingNotificationVerse = verse;
+		var parts = payload.Split(':');
+		if (parts.Length != 2 || !int.TryParse(parts[0], out var surah) || !int.TryParse(parts[1], out var verse))
+			return;
 
 		MainThread.BeginInvokeOnMainThread(async () =>
 		{
-			WeakReferenceMessenger.Default.Send(new VerseNotificationTappedMessage(verse));
-
-			if (Shell.Current is not null)
-				await Shell.Current.GoToAsync("//MainPage");
+			try
+			{
+				if (Shell.Current is not null)
+					await Shell.Current.GoToAsync($"//QuranPage/SurahPage?surah={surah}&verse={verse}");
+			}
+			catch (Exception ex)
+			{
+				IPlatformApplication.Current?.Services
+					.GetService<ILogger<App>>()?.LogError(ex, "Verse notification navigation failed");
+			}
 		});
-	}
-
-	public static QuranVerse? ConsumePendingNotificationVerse()
-	{
-		var verse = PendingNotificationVerse;
-		PendingNotificationVerse = null;
-		return verse;
 	}
 }

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Default (Turkish) strings. Add AppStrings.en.resx etc. for other languages. -->
+  <data name="AppName" xml:space="preserve"><value>Ezan Vakti</value></data>
+  <data name="Greeting_Morning" xml:space="preserve"><value>Hayırlı Sabahlar</value></data>
+  <data name="Greeting_Day" xml:space="preserve"><value>Hayırlı Günler</value></data>
+  <data name="Greeting_Evening" xml:space="preserve"><value>Hayırlı Akşamlar</value></data>
+  <data name="Greeting_Night" xml:space="preserve"><value>Hayırlı Geceler</value></data>
+  <data name="Prayer_Fajr" xml:space="preserve"><value>İmsak</value></data>
+  <data name="Prayer_Sunrise" xml:space="preserve"><value>Güneş</value></data>
+  <data name="Prayer_Dhuhr" xml:space="preserve"><value>Öğle</value></data>
+  <data name="Prayer_Asr" xml:space="preserve"><value>İkindi</value></data>
+  <data name="Prayer_Maghrib" xml:space="preserve"><value>Akşam</value></data>
+  <data name="Prayer_Isha" xml:space="preserve"><value>Yatsı</value></data>
+  <data name="NextPrayer" xml:space="preserve"><value>Sonraki Vakit</value></data>
+  <data name="RemainingTime" xml:space="preserve"><value>Kalan süre</value></data>
+  <data name="VerseOfDay" xml:space="preserve"><value>Günün Ayeti</value></data>
+  <data name="Share" xml:space="preserve"><value>Paylaş</value></data>
+  <data name="Copy" xml:space="preserve"><value>Kopyala</value></data>
+  <data name="Save" xml:space="preserve"><value>Kaydet</value></data>
+  <data name="Retry" xml:space="preserve"><value>Tekrar Dene</value></data>
+  <data name="Settings" xml:space="preserve"><value>Ayarlar</value></data>
+  <data name="Qibla" xml:space="preserve"><value>Kıble</value></data>
+  <data name="Calendar" xml:space="preserve"><value>Takvim</value></data>
+  <data name="Quran" xml:space="preserve"><value>Kur'an</value></data>
+  <data name="Dhikr" xml:space="preserve"><value>Zikirmatik</value></data>
+  <data name="Offline" xml:space="preserve"><value>Çevrimdışı</value></data>
+  <data name="Error_Network" xml:space="preserve"><value>İnternet bağlantısı kurulamadı. Bağlantınızı kontrol edip tekrar deneyin.</value></data>
+  <data name="Error_NoCache" xml:space="preserve"><value>Henüz kaydedilmiş veri yok. İnternet bağlantısıyla ilk verileri indirin.</value></data>
+  <data name="Error_LocationPermission" xml:space="preserve"><value>Konum izni verilmedi. Şehrinizi manuel olarak seçebilirsiniz.</value></data>
+</root>

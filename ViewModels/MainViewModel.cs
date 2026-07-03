@@ -2,138 +2,116 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using PrayerApp.Data;
+using Microsoft.Extensions.Logging;
+using PrayerApp.Core.Common;
+using PrayerApp.Core.Contracts;
+using PrayerApp.Core.Domain;
+using PrayerApp.Core.Services;
 using PrayerApp.Models;
+using PrayerApp.Services;
 using PrayerApp.Services.Interfaces;
 
 namespace PrayerApp.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-    private readonly IPrayerTimeService _prayerTimeService;
-    private readonly IVerseService _verseService;
-    private readonly ISettingsService _settingsService;
-    private readonly INotificationSchedulerService _notificationService;
+    private static readonly CultureInfo TurkishCulture = new("tr-TR");
+
+    private readonly IPrayerScheduleService _scheduleService;
+    private readonly IQuranRepository _quranRepository;
+    private readonly ISettingsStore _settingsStore;
+    private readonly INotificationCoordinator _notificationCoordinator;
     private readonly IWidgetDataService _widgetDataService;
     private readonly IPrayerTrackingService _trackingService;
-    private readonly IRamadanService _ramadanService;
+    private readonly IClock _clock;
+    private readonly ILogger<MainViewModel> _logger;
+
     private IDispatcherTimer? _countdownTimer;
-    private IReadOnlyList<PrayerTime> _prayerTimes = [];
-    private PrayerDayResult? _dayResult;
-    private RamadanInfo? _ramadanInfo;
-    private QuranVerse? _currentVerse;
+    private IReadOnlyList<PrayerDay> _days = [];
+    private DateOnly _loadedDate;
+    private Verse? _currentVerse;
     private DateTime _lastWidgetUpdate = DateTime.MinValue;
+    private bool _initialized;
 
-    [ObservableProperty]
-    private string _cityDisplay = "Van, Türkiye";
-
-    [ObservableProperty]
-    private string _greeting = "Selâmün Aleyküm";
-
-    [ObservableProperty]
-    private string _todayDate = string.Empty;
-
-    [ObservableProperty]
-    private string _hijriDate = string.Empty;
-
-    [ObservableProperty]
-    private string _dayPeriod = "day";
-
-    [ObservableProperty]
-    private string _nextPrayerName = "-";
-
-    [ObservableProperty]
-    private string _nextPrayerTime = "--:--";
-
-    [ObservableProperty]
-    private string _remainingTime = "--:--:--";
-
-    [ObservableProperty]
-    private string _remainingHours = "--";
-
-    [ObservableProperty]
-    private string _remainingMinutes = "--";
-
-    [ObservableProperty]
-    private string _remainingSeconds = "--";
-
-    [ObservableProperty]
-    private double _dayProgress;
-
-    [ObservableProperty]
-    private int _passedPrayersCount;
-
-    [ObservableProperty]
-    private string _prayerProgressText = "0/6 vakit";
-
-    [ObservableProperty]
-    private string _verseOfDay = "Yükleniyor...";
-
-    [ObservableProperty]
-    private string _verseReference = string.Empty;
-
-    [ObservableProperty]
-    private bool _isBusy;
-
-    [ObservableProperty]
-    private bool _isRefreshing;
-
-    [ObservableProperty]
-    private string _errorMessage = string.Empty;
-
-    [ObservableProperty]
-    private string _verseActionMessage = string.Empty;
-
-    [ObservableProperty]
-    private bool _isRamadanVisible;
-
-    [ObservableProperty]
-    private string _ramadanDayText = string.Empty;
-
-    [ObservableProperty]
-    private string _ramadanCountdownLabel = string.Empty;
-
-    [ObservableProperty]
-    private string _ramadanCountdown = string.Empty;
-
-    [ObservableProperty]
-    private string _ramadanIftarTime = string.Empty;
-
-    [ObservableProperty]
-    private string _ramadanSahurTime = string.Empty;
-
-    [ObservableProperty]
-    private string _trackProgressText = "0/5 kılındı";
-
-    [ObservableProperty]
-    private int _trackStreak;
+    [ObservableProperty] private string _cityDisplay = "—";
+    [ObservableProperty] private string _greeting = "Selâmün Aleyküm";
+    [ObservableProperty] private string _todayDate = string.Empty;
+    [ObservableProperty] private string _hijriDate = "—";
+    [ObservableProperty] private string _dayPeriod = "day";
+    [ObservableProperty] private string _nextPrayerName = "-";
+    [ObservableProperty] private string _nextPrayerTime = "--:--";
+    [ObservableProperty] private string _remainingTime = "--:--:--";
+    [ObservableProperty] private string _remainingHours = "--";
+    [ObservableProperty] private string _remainingMinutes = "--";
+    [ObservableProperty] private string _remainingSeconds = "--";
+    [ObservableProperty] private double _dayProgress;
+    [ObservableProperty] private string _prayerProgressText = "0/6 vakit";
+    [ObservableProperty] private string _verseOfDay = "Yükleniyor...";
+    [ObservableProperty] private string _verseReference = string.Empty;
+    [ObservableProperty] private bool _isBusy;
+    [ObservableProperty] private bool _isRefreshing;
+    [ObservableProperty] private string _errorMessage = string.Empty;
+    [ObservableProperty] private string _verseActionMessage = string.Empty;
+    [ObservableProperty] private bool _isRamadanVisible;
+    [ObservableProperty] private string _ramadanDayText = string.Empty;
+    [ObservableProperty] private string _ramadanCountdownLabel = string.Empty;
+    [ObservableProperty] private string _ramadanCountdown = string.Empty;
+    [ObservableProperty] private string _ramadanIftarTime = string.Empty;
+    [ObservableProperty] private string _ramadanSahurTime = string.Empty;
+    [ObservableProperty] private string _trackProgressText = "0/5 kılındı";
+    [ObservableProperty] private int _trackStreak;
+    [ObservableProperty] private bool _isOffline;
+    [ObservableProperty] private string _dataStatusText = string.Empty;
 
     public ObservableCollection<PrayerTime> PrayerTimes { get; } = [];
     public ObservableCollection<PrayerTrackItem> TrackItems { get; } = [];
 
     public MainViewModel(
-        IPrayerTimeService prayerTimeService,
-        IVerseService verseService,
-        ISettingsService settingsService,
-        INotificationSchedulerService notificationService,
+        IPrayerScheduleService scheduleService,
+        IQuranRepository quranRepository,
+        ISettingsStore settingsStore,
+        INotificationCoordinator notificationCoordinator,
         IWidgetDataService widgetDataService,
         IPrayerTrackingService trackingService,
-        IRamadanService ramadanService)
+        IClock clock,
+        ILogger<MainViewModel> logger)
     {
-        _prayerTimeService = prayerTimeService;
-        _verseService = verseService;
-        _settingsService = settingsService;
-        _notificationService = notificationService;
+        _scheduleService = scheduleService;
+        _quranRepository = quranRepository;
+        _settingsStore = settingsStore;
+        _notificationCoordinator = notificationCoordinator;
         _widgetDataService = widgetDataService;
         _trackingService = trackingService;
-        _ramadanService = ramadanService;
-
-        WeakReferenceMessenger.Default.Register<VerseNotificationTappedMessage>(this, (_, message) =>
-        {
-            MainThread.BeginInvokeOnMainThread(() => ShowVerse(message.Value));
-        });
+        _clock = clock;
+        _logger = logger;
     }
+
+    /// <summary>Called from the page's OnAppearing; loads data once and resumes the countdown.</summary>
+    public async Task OnAppearingAsync()
+    {
+        var settings = _settingsStore.Get();
+        if (!settings.HasCompletedOnboarding)
+        {
+            await Shell.Current.GoToAsync("//OnboardingPage");
+            return;
+        }
+
+        if (!_initialized)
+        {
+            _initialized = true;
+            await InitializeAsync();
+        }
+        else
+        {
+            if (_loadedDate != _clock.Today)
+                await LoadAsync(forceRefresh: false, showBusy: false);
+
+            StartCountdown();
+        }
+    }
+
+    /// <summary>Called from the page's OnDisappearing; stops per-second UI updates.</summary>
+    public void OnDisappearing() => _countdownTimer?.Stop();
 
     [RelayCommand]
     public async Task InitializeAsync()
@@ -144,21 +122,10 @@ public partial class MainViewModel : ObservableObject
         try
         {
             IsBusy = true;
-            ErrorMessage = string.Empty;
             LoadTracking();
-
-            await _verseService.InitializeAsync();
-
-            var tappedVerse = App.ConsumePendingNotificationVerse();
-            if (tappedVerse is not null)
-                ShowVerse(tappedVerse);
-
-            if (await LoadHomeDataAsync(refreshVerse: tappedVerse is null, requestPermission: true))
-                StartCountdown();
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
+            await LoadVerseOfDayAsync();
+            await LoadAsync(forceRefresh: false, showBusy: true);
+            StartCountdown();
         }
         finally
         {
@@ -169,21 +136,11 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task RefreshPrayerTimesAsync()
     {
-        if (IsBusy)
-            return;
-
         try
         {
             IsRefreshing = true;
-            ErrorMessage = string.Empty;
-
-            await _verseService.InitializeAsync();
-            if (await LoadHomeDataAsync(refreshVerse: false, requestPermission: false))
-                StartCountdown();
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
+            await LoadAsync(forceRefresh: true, showBusy: false);
+            StartCountdown();
         }
         finally
         {
@@ -192,11 +149,35 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void RefreshVerse() => LoadVerseOfDay();
+    private async Task RefreshVerseAsync()
+    {
+        try
+        {
+            var total = await _quranRepository.GetTotalVerseCountAsync();
+            if (total <= 0)
+                return;
+
+            var verse = await _quranRepository.GetVerseByGlobalIndexAsync(Random.Shared.Next(total));
+            if (verse is not null)
+                ShowVerse(verse);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Random verse load failed");
+        }
+    }
 
     [RelayCommand]
-    private static async Task OpenSettingsAsync() =>
-        await Shell.Current.GoToAsync("//SettingsPage");
+    private static async Task OpenSettingsAsync() => await Shell.Current.GoToAsync("//SettingsPage");
+
+    [RelayCommand]
+    private static async Task OpenQiblaAsync() => await Shell.Current.GoToAsync("//QiblaPage");
+
+    [RelayCommand]
+    private static async Task OpenCalendarAsync() => await Shell.Current.GoToAsync("//CalendarPage");
+
+    [RelayCommand]
+    private static async Task OpenDhikrAsync() => await Shell.Current.GoToAsync("DhikrPage");
 
     [RelayCommand]
     private void TogglePrayer(PrayerTrackItem item)
@@ -212,12 +193,8 @@ public partial class MainViewModel : ObservableObject
         if (_currentVerse is null)
             return;
 
-        var text = $"\"{_currentVerse.Text}\"\n\n— {_currentVerse.SurahName} Suresi, {_currentVerse.AyahNumber}. Ayet\n\nEzan Vakti uygulaması";
-        await Share.Default.RequestAsync(new ShareTextRequest
-        {
-            Title = "Günün Ayeti",
-            Text = text
-        });
+        var text = $"\"{_currentVerse.Text}\"\n\n— {_currentVerse.Reference}\n\nEzan Vakti uygulaması";
+        await Share.Default.RequestAsync(new ShareTextRequest { Title = "Günün Ayeti", Text = text });
     }
 
     [RelayCommand]
@@ -226,16 +203,276 @@ public partial class MainViewModel : ObservableObject
         if (_currentVerse is null)
             return;
 
-        var text = $"\"{_currentVerse.Text}\" — {_currentVerse.SurahName} {_currentVerse.AyahNumber}";
-        await Clipboard.Default.SetTextAsync(text);
+        await Clipboard.Default.SetTextAsync($"\"{_currentVerse.Text}\" — {_currentVerse.Reference}");
         VerseActionMessage = "Ayet panoya kopyalandı";
         _ = ClearVerseActionMessageAsync();
     }
 
-    private async Task ClearVerseActionMessageAsync()
+    private async Task LoadAsync(bool forceRefresh, bool showBusy)
     {
-        await Task.Delay(2200);
+        ErrorMessage = string.Empty;
+        UpdateHeader();
+
+        var result = await _scheduleService.GetScheduleAsync(_clock.Today, 2, forceRefresh);
+        if (!result.IsSuccess)
+        {
+            ErrorMessage = result.Error.Message;
+            IsOffline = result.Error.Kind is ErrorKind.Network or ErrorKind.Timeout;
+            return;
+        }
+
+        _days = result.Value.Days;
+        _loadedDate = _clock.Today;
+        IsOffline = result.Value.IsFromCache && forceRefresh;
+        DataStatusText = BuildDataStatusText(result.Value);
+
+        var today = _days.FirstOrDefault(d => d.Date == _clock.Today);
+        HijriDate = string.IsNullOrWhiteSpace(today?.HijriDateText) ? "—" : today!.HijriDateText;
+
+        UpdatePrayerList(today);
+        UpdateRamadan(today);
+        UpdateCountdown();
+
+        // Notifications are replanned off the UI path; failures are logged, not shown.
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await _notificationCoordinator.RescheduleIfStaleAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Notification reschedule failed");
+            }
+        });
+    }
+
+    private string BuildDataStatusText(PrayerScheduleResult result)
+    {
+        if (result.LastFetchedAtUtc is not { } fetchedAt)
+            return string.Empty;
+
+        var local = fetchedAt.ToLocalTime();
+        var prefix = result.IsFromCache ? "Kayıtlı veri" : "Güncellendi";
+        return $"{prefix}: {local.ToString("d MMM HH:mm", TurkishCulture)}";
+    }
+
+    private void UpdateHeader()
+    {
+        var now = _clock.LocalNow;
+        TodayDate = now.ToString("d MMMM yyyy, dddd", TurkishCulture);
+        Greeting = now.Hour switch
+        {
+            >= 5 and < 12 => "Hayırlı Sabahlar",
+            >= 12 and < 17 => "Hayırlı Günler",
+            >= 17 and < 21 => "Hayırlı Akşamlar",
+            _ => "Hayırlı Geceler"
+        };
+        UpdateDayPeriod();
+
+        var settings = _settingsStore.Get();
+        CityDisplay = settings.Location?.DisplayName is { Length: > 0 } name ? name : "Konum seçilmedi";
+    }
+
+    private void UpdateDayPeriod()
+    {
+        DayPeriod = _clock.LocalNow.Hour switch
+        {
+            >= 5 and < 7 => "dawn",
+            >= 7 and < 12 => "morning",
+            >= 12 and < 17 => "day",
+            >= 17 and < 20 => "sunset",
+            _ => "night"
+        };
+    }
+
+    private async Task LoadVerseOfDayAsync()
+    {
+        try
+        {
+            var total = await _quranRepository.GetTotalVerseCountAsync();
+            if (total <= 0)
+                return;
+
+            var index = VerseOfDaySelector.GetGlobalIndex(_clock.Today, total);
+            var verse = await _quranRepository.GetVerseByGlobalIndexAsync(index);
+            if (verse is not null)
+                ShowVerse(verse);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Verse of day load failed");
+            VerseOfDay = "Günün ayeti yüklenemedi.";
+        }
+    }
+
+    private void ShowVerse(Verse verse)
+    {
+        _currentVerse = verse;
+        VerseOfDay = verse.Text;
+        VerseReference = verse.Reference;
         VerseActionMessage = string.Empty;
+    }
+
+    private void UpdatePrayerList(PrayerDay? today)
+    {
+        PrayerTimes.Clear();
+        if (today is null)
+            return;
+
+        foreach (var kind in PrayerKindExtensions.All)
+        {
+            if (!today.Times.TryGetValue(kind, out var time))
+                continue;
+
+            PrayerTimes.Add(new PrayerTime
+            {
+                Name = kind.ToString(),
+                TurkishName = kind.ToTurkishName(),
+                Glyph = GetGlyph(kind),
+                Time = time.ToTimeSpan()
+            });
+        }
+    }
+
+    private static string GetGlyph(PrayerKind kind) => kind switch
+    {
+        PrayerKind.Fajr => "🌙",
+        PrayerKind.Sunrise => "🌅",
+        PrayerKind.Dhuhr => "☀️",
+        PrayerKind.Asr => "🌤️",
+        PrayerKind.Maghrib => "🌇",
+        PrayerKind.Isha => "🌃",
+        _ => string.Empty
+    };
+
+    private void UpdateRamadan(PrayerDay? today)
+    {
+        var settings = _settingsStore.Get();
+        IsRamadanVisible = settings.RamadanModeEnabled && today?.HijriMonth == 9;
+        if (!IsRamadanVisible || today is null)
+            return;
+
+        RamadanDayText = $"{today.HijriDay}. gün";
+        RamadanIftarTime = today[PrayerKind.Maghrib].ToString("HH\\:mm");
+        RamadanSahurTime = today[PrayerKind.Fajr].ToString("HH\\:mm");
+    }
+
+    private void StartCountdown()
+    {
+        if (_countdownTimer is null)
+        {
+            _countdownTimer = Application.Current?.Dispatcher.CreateTimer();
+            if (_countdownTimer is null)
+                return;
+
+            _countdownTimer.Interval = TimeSpan.FromSeconds(1);
+            _countdownTimer.Tick += (_, _) => UpdateCountdown();
+        }
+
+        if (!_countdownTimer.IsRunning)
+            _countdownTimer.Start();
+    }
+
+    private void UpdateCountdown()
+    {
+        if (_days.Count == 0)
+            return;
+
+        // Day rollover while the page is open: reload today's data.
+        if (_loadedDate != _clock.Today)
+        {
+            _ = MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                await LoadAsync(forceRefresh: false, showBusy: false);
+                await LoadVerseOfDayAsync();
+                LoadTracking();
+            });
+            _loadedDate = _clock.Today;
+            return;
+        }
+
+        var now = _clock.LocalNow;
+        var next = NextPrayerCalculator.FindNext(_days, now);
+        if (next is null)
+        {
+            NextPrayerName = "-";
+            RemainingTime = "--:--:--";
+            return;
+        }
+
+        NextPrayerName = next.Kind.ToTurkishName();
+        NextPrayerTime = TimeOnly.FromDateTime(next.OccursAt.DateTime).ToString("HH\\:mm");
+        var remaining = next.Remaining;
+        RemainingTime = $"{(int)remaining.TotalHours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}";
+        RemainingHours = $"{(int)remaining.TotalHours:00}";
+        RemainingMinutes = $"{remaining.Minutes:00}";
+        RemainingSeconds = $"{remaining.Seconds:00}";
+
+        UpdateDayStates(now, next);
+        UpdateDayPeriod();
+        UpdateRamadanCountdown(now);
+        UpdateWidget(force: false);
+    }
+
+    private void UpdateDayStates(DateTimeOffset now, UpcomingPrayer next)
+    {
+        var passed = 0;
+        foreach (var prayer in PrayerTimes)
+        {
+            var isNext = next.Date == _clock.Today && next.Kind.ToTurkishName() == prayer.TurkishName;
+            prayer.IsNext = isNext;
+            prayer.IsPassed = !isNext && prayer.Time <= now.TimeOfDay;
+            if (prayer.IsPassed)
+                passed++;
+        }
+
+        PrayerProgressText = $"{passed}/{PrayerTimes.Count} vakit geçti";
+        DayProgress = CalculateProgress(next, now);
+    }
+
+    private double CalculateProgress(UpcomingPrayer next, DateTimeOffset now)
+    {
+        var ordered = _days
+            .SelectMany(d => d.Times.Select(t => new DateTimeOffset(d.Date.ToDateTime(t.Value), now.Offset)))
+            .OrderBy(t => t)
+            .ToList();
+
+        var previous = ordered.LastOrDefault(t => t <= now);
+        if (previous == default)
+            return 0;
+
+        var interval = next.OccursAt - previous;
+        if (interval <= TimeSpan.Zero)
+            return 0;
+
+        return Math.Clamp((now - previous).TotalSeconds / interval.TotalSeconds, 0, 1);
+    }
+
+    private void UpdateRamadanCountdown(DateTimeOffset now)
+    {
+        if (!IsRamadanVisible)
+            return;
+
+        var today = _days.FirstOrDefault(d => d.Date == _clock.Today);
+        if (today is null)
+            return;
+
+        var maghribAt = new DateTimeOffset(_clock.Today.ToDateTime(today[PrayerKind.Maghrib]), now.Offset);
+        if (now < maghribAt)
+        {
+            RamadanCountdownLabel = "İftara kalan";
+            var remaining = maghribAt - now;
+            RamadanCountdown = $"{(int)remaining.TotalHours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}";
+        }
+        else
+        {
+            var tomorrow = _days.FirstOrDefault(d => d.Date == _clock.Today.AddDays(1)) ?? today;
+            var fajrAt = new DateTimeOffset(_clock.Today.AddDays(1).ToDateTime(tomorrow[PrayerKind.Fajr]), now.Offset);
+            RamadanCountdownLabel = "Sahura kalan";
+            var remaining = fajrAt - now;
+            RamadanCountdown = $"{(int)remaining.TotalHours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}";
+        }
     }
 
     private void LoadTracking()
@@ -252,177 +489,6 @@ public partial class MainViewModel : ObservableObject
         TrackStreak = _trackingService.GetStreak();
     }
 
-    private async Task<bool> LoadHomeDataAsync(bool refreshVerse, bool requestPermission)
-    {
-        if (refreshVerse)
-            LoadVerseOfDay();
-
-        UpdateGreeting();
-        UpdateDayPeriod();
-        TodayDate = DateTime.Now.ToString("d MMMM yyyy, dddd", new CultureInfo("tr-TR"));
-
-        var settings = _settingsService.GetSettings();
-        CityDisplay = BuildCityDisplay(settings);
-        if (!settings.HasCompletedOnboarding)
-        {
-            ErrorMessage = "Namaz vakitlerini göstermek için önce şehir seçin.";
-            await Shell.Current.GoToAsync("//SettingsPage");
-            return false;
-        }
-
-        await LoadPrayerTimesAsync(settings);
-
-        if (requestPermission)
-            await _notificationService.RequestPermissionAsync();
-
-        await _notificationService.RescheduleIfStaleAsync(settings, _prayerTimes);
-        UpdateWidget(force: true);
-        return true;
-    }
-
-    private void UpdateGreeting()
-    {
-        var hour = DateTime.Now.Hour;
-        Greeting = hour switch
-        {
-            >= 5 and < 12 => "Hayırlı Sabahlar",
-            >= 12 and < 17 => "Hayırlı Günler",
-            >= 17 and < 21 => "Hayırlı Akşamlar",
-            _ => "Hayırlı Geceler"
-        };
-    }
-
-    private void UpdateDayPeriod()
-    {
-        var hour = DateTime.Now.Hour;
-        DayPeriod = hour switch
-        {
-            >= 5 and < 7 => "dawn",
-            >= 7 and < 12 => "morning",
-            >= 12 and < 17 => "day",
-            >= 17 and < 20 => "sunset",
-            _ => "night"
-        };
-    }
-
-    private void LoadVerseOfDay() => ShowVerse(_verseService.GetRandomVerse());
-
-    private void ShowVerse(QuranVerse verse)
-    {
-        _currentVerse = verse;
-        VerseOfDay = verse.Text;
-        VerseReference = $"{verse.SurahName} Suresi, {verse.AyahNumber}. Ayet";
-        VerseActionMessage = string.Empty;
-    }
-
-    private async Task LoadPrayerTimesAsync(AppSettings settings)
-    {
-        var result = await _prayerTimeService.GetTodayPrayerTimesAsync(settings.LocationQuery, settings.Country);
-        _dayResult = result;
-        _prayerTimes = result.Times;
-        HijriDate = string.IsNullOrWhiteSpace(result.HijriDate) ? "—" : result.HijriDate;
-
-        if (result.Latitude != 0 && result.Longitude != 0 &&
-            (settings.Latitude != result.Latitude || settings.Longitude != result.Longitude))
-        {
-            settings.Latitude = result.Latitude;
-            settings.Longitude = result.Longitude;
-            _settingsService.SaveSettings(settings);
-        }
-
-        UpdateRamadan(settings);
-        UpdatePrayerList();
-        UpdateCountdown();
-    }
-
-    private void UpdateRamadan(AppSettings settings)
-    {
-        if (_dayResult is null)
-        {
-            IsRamadanVisible = false;
-            return;
-        }
-
-        _ramadanInfo = _ramadanService.BuildInfo(_dayResult, _prayerTimes, settings.RamadanModeEnabled);
-        IsRamadanVisible = _ramadanInfo is not null;
-        if (_ramadanInfo is null)
-            return;
-
-        RamadanDayText = $"{_ramadanInfo.RamadanDay}. gün";
-        RamadanCountdownLabel = _ramadanInfo.NextEventLabel;
-        RamadanCountdown = _ramadanInfo.CountdownText;
-        RamadanIftarTime = _ramadanInfo.IftarTime;
-        RamadanSahurTime = _ramadanInfo.SahurTime;
-    }
-
-    private static string BuildCityDisplay(AppSettings settings)
-    {
-        var city = TurkishCities.FindByApiName(settings.City);
-        var cityName = city?.DisplayName ?? (string.IsNullOrWhiteSpace(settings.CityDisplay) ? settings.City : settings.CityDisplay);
-        return settings.HasDistrict ? $"{settings.District}, {cityName}" : cityName;
-    }
-
-    private void UpdatePrayerList()
-    {
-        var (next, _) = _prayerTimeService.GetNextPrayer(_prayerTimes);
-        PrayerTimes.Clear();
-        foreach (var prayer in _prayerTimes)
-        {
-            prayer.IsNext = next?.Name == prayer.Name;
-            PrayerTimes.Add(prayer);
-        }
-    }
-
-    private void StartCountdown()
-    {
-        _countdownTimer?.Stop();
-        _countdownTimer = Application.Current?.Dispatcher.CreateTimer();
-        if (_countdownTimer is null)
-            return;
-
-        _countdownTimer.Interval = TimeSpan.FromSeconds(1);
-        _countdownTimer.Tick += (_, _) => UpdateCountdown();
-        _countdownTimer.Start();
-    }
-
-    private void UpdateCountdown()
-    {
-        if (_prayerTimes.Count == 0)
-            return;
-
-        var (next, remaining) = _prayerTimeService.GetNextPrayer(_prayerTimes);
-        NextPrayerName = next?.TurkishName ?? "-";
-        NextPrayerTime = next is not null ? next.Time.ToString(@"hh\:mm") : "--:--";
-        RemainingTime = $"{(int)remaining.TotalHours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}";
-        RemainingHours = $"{(int)remaining.TotalHours:00}";
-        RemainingMinutes = $"{remaining.Minutes:00}";
-        RemainingSeconds = $"{remaining.Seconds:00}";
-        DayProgress = CalculateProgress(next, remaining);
-
-        var now = DateTime.Now.TimeOfDay;
-        var passed = 0;
-        foreach (var prayer in PrayerTimes)
-        {
-            prayer.IsNext = next?.Name == prayer.Name;
-            prayer.IsPassed = prayer.Time <= now && !prayer.IsNext;
-            if (prayer.IsPassed)
-                passed++;
-        }
-
-        PassedPrayersCount = passed;
-        PrayerProgressText = $"{passed}/{PrayerTimes.Count} vakit geçti";
-        UpdateDayPeriod();
-
-        if (_ramadanInfo is not null)
-        {
-            _ramadanInfo = _ramadanService.UpdateCountdown(_ramadanInfo, _prayerTimes);
-            RamadanCountdownLabel = _ramadanInfo.NextEventLabel;
-            RamadanCountdown = _ramadanInfo.CountdownText;
-        }
-
-        UpdateWidget(force: false);
-    }
-
     private void UpdateWidget(bool force)
     {
         if (!force && (DateTime.UtcNow - _lastWidgetUpdate).TotalSeconds < 55)
@@ -432,29 +498,9 @@ public partial class MainViewModel : ObservableObject
         _widgetDataService.Update(CityDisplay, NextPrayerName, NextPrayerTime, RemainingTime);
     }
 
-    private double CalculateProgress(PrayerTime? next, TimeSpan remaining)
+    private async Task ClearVerseActionMessageAsync()
     {
-        if (next is null)
-            return 0;
-
-        var ordered = _prayerTimes.OrderBy(p => p.Time).ToList();
-        var nextIndex = ordered.FindIndex(p => p.Name == next.Name);
-
-        TimeSpan interval;
-        if (nextIndex <= 0)
-        {
-            var lastPrayer = ordered[^1].Time;
-            interval = TimeSpan.FromHours(24) - lastPrayer + next.Time;
-        }
-        else
-        {
-            interval = next.Time - ordered[nextIndex - 1].Time;
-        }
-
-        if (interval <= TimeSpan.Zero)
-            return 0;
-
-        var elapsed = interval - remaining;
-        return Math.Clamp(elapsed.TotalSeconds / interval.TotalSeconds, 0, 1);
+        await Task.Delay(2200);
+        VerseActionMessage = string.Empty;
     }
 }

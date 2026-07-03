@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PrayerApp.ViewModels"
+             x:Class="PrayerApp.Views.DhikrPage"
+             x:DataType="vm:DhikrViewModel"
+             Title="Zikirmatik"
+             Shell.NavBarIsVisible="True">
+
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0" />
+                <GradientStop Color="{AppThemeBinding Light=#EEF2FF, Dark={StaticResource BackgroundMid}}" Offset="1" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <ScrollView>
+            <VerticalStackLayout Padding="20,16,20,32" Spacing="18">
+
+                <!-- Preset chips -->
+                <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                    <HorizontalStackLayout BindableLayout.ItemsSource="{Binding Presets}" Spacing="8">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:DhikrPreset">
+                                <Border Style="{StaticResource InfoChip}" Padding="12,8">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DhikrViewModel}}, Path=SelectPresetCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Label FontSize="13"
+                                           FontFamily="OpenSansSemibold"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="{Binding Name}" />
+                                                <Span Text=" · " TextColor="{StaticResource AccentGold}" />
+                                                <Span Text="{Binding Target}" TextColor="{StaticResource AccentGold}" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </HorizontalStackLayout>
+                </ScrollView>
+
+                <!-- Custom dhikr -->
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <Border Style="{StaticResource PremiumInput}">
+                        <Entry Placeholder="Özel zikir yazın..." Text="{Binding CustomDhikr}" />
+                    </Border>
+                    <Button Grid.Column="1" Text="Ekle"
+                            Style="{StaticResource OutlineButton}"
+                            Command="{Binding ApplyCustomDhikrCommand}" />
+                </Grid>
+
+                <!-- Big counter -->
+                <Border StrokeThickness="1"
+                        Stroke="{StaticResource GlassStroke}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceDark}}"
+                        StrokeShape="RoundRectangle 28"
+                        Padding="24,32"
+                        SemanticProperties.Description="Zikir saymak için dokunun">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding IncrementCommand}" />
+                    </Border.GestureRecognizers>
+                    <VerticalStackLayout Spacing="14" HorizontalOptions="Center">
+                        <Label Text="{Binding DhikrName}"
+                               FontFamily="OpenSansSemibold"
+                               FontSize="20"
+                               HorizontalTextAlignment="Center"
+                               TextColor="{StaticResource AccentGold}" />
+                        <Label Text="{Binding Count}"
+                               FontFamily="OpenSansSemibold"
+                               FontSize="88"
+                               HorizontalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                        <Label Text="{Binding ProgressText}"
+                               Style="{StaticResource BodyMuted}"
+                               FontSize="15"
+                               HorizontalTextAlignment="Center" />
+                        <ProgressBar Progress="{Binding Progress}"
+                                     ProgressColor="{StaticResource AccentEmerald}"
+                                     WidthRequest="220" />
+                        <Label Text="Hedefe ulaştınız"
+                               TextColor="{StaticResource AccentEmerald}"
+                               FontFamily="OpenSansSemibold"
+                               HorizontalTextAlignment="Center"
+                               IsVisible="{Binding TargetReached}" />
+                        <Label Text="Saymak için karta dokunun"
+                               Style="{StaticResource BodyMuted}"
+                               FontSize="12"
+                               HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <Button Text="Sıfırla"
+                            Style="{StaticResource GhostButton}"
+                            TextColor="{StaticResource Error}"
+                            Command="{Binding ResetCommand}" />
+                    <Border Grid.Column="1" Style="{StaticResource SettingsGroup}" Padding="12,0">
+                        <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                            <Label Text="Titreşim" FontSize="14" VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                            <Switch Grid.Column="1" IsToggled="{Binding VibrationEnabled}" Style="{StaticResource PremiumSwitch}" />
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- History -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Geçmiş" FontFamily="OpenSansSemibold" FontSize="17"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                    <Border Style="{StaticResource GlassCard}" Padding="8">
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding History}" Spacing="2">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:DhikrHistoryItem">
+                                    <Grid Padding="12,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                        <Label Text="{Binding DateText}" Style="{StaticResource BodyMuted}" FontSize="12"
+                                               VerticalOptions="Center" WidthRequest="52" />
+                                        <Label Grid.Column="1" Text="{Binding Name}" FontSize="14"
+                                               VerticalOptions="Center"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                        <Label Grid.Column="2" Text="{Binding CountText}"
+                                               FontFamily="OpenSansSemibold" FontSize="13"
+                                               TextColor="{StaticResource AccentGold}"
+                                               VerticalOptions="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                            <BindableLayout.EmptyView>
+                                <Label Text="Henüz kayıt yok" Style="{StaticResource BodyMuted}" Padding="12,10" />
+                            </BindableLayout.EmptyView>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
