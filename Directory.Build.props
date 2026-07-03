@@ -1,0 +1,21 @@
+<Project>
+
+	<PropertyGroup>
+		<!-- Central app identity/branding values consumed by the MAUI head project. -->
+		<PrayerAppDisplayName>Ezan Vakti</PrayerAppDisplayName>
+		<PrayerAppApplicationId>com.galleryusuf.ezanvakti</PrayerAppApplicationId>
+		<PrayerAppDisplayVersion>1.0.0</PrayerAppDisplayVersion>
+		<PrayerAppVersionCode>1</PrayerAppVersionCode>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!--
+		CVE-2025-6965 (SQLite < 3.50.2 aggregate-term memory corruption) is suppressed deliberately:
+		the app executes only its own parameterized SQL over local data; no untrusted SQL input exists.
+		Remove this once sqlite-net ships a stable release on SQLitePCLRaw 3.x.
+		See docs/DECISIONS.md for details.
+		-->
+		<NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+	</ItemGroup>
+
+</Project>

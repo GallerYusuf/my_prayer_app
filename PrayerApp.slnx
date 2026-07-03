@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PrayerApp.Core/PrayerApp.Core.csproj" />
+    <Project Path="src/PrayerApp.Infrastructure/PrayerApp.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PrayerApp.IntegrationTests/PrayerApp.IntegrationTests.csproj" />
+    <Project Path="tests/PrayerApp.UnitTests/PrayerApp.UnitTests.csproj" />
+  </Folder>
+  <Project Path="PrayerApp.csproj" />
+</Solution>
