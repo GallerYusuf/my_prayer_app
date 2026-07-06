@@ -6,8 +6,8 @@ Tarih: 2026-07-06 · Branch: `fable5/autonomous-evolution` · Ortam: Windows 11,
 
 | Proje | Sonuç | Adet | Süre |
 |---|---|---|---|
-| PrayerApp.UnitTests | ✅ BAŞARILI | 41/41 | ~0.3 sn |
-| PrayerApp.IntegrationTests | ✅ BAŞARILI | 25/25 | ~2 sn |
+| PrayerApp.UnitTests | ✅ BAŞARILI | 62/62 | ~0.2 sn |
+| PrayerApp.IntegrationTests | ✅ BAŞARILI | 37/37 | ~2 sn |
 
 Komutlar:
 ```
@@ -15,7 +15,7 @@ dotnet test tests/PrayerApp.UnitTests/PrayerApp.UnitTests.csproj
 dotnet test tests/PrayerApp.IntegrationTests/PrayerApp.IntegrationTests.csproj
 ```
 
-### Unit test kapsamı (41)
+### Unit test kapsamı (62)
 
 - **NextPrayerCalculator (8):** sabah→öğle, yatsı sonrası→yarın imsak, gece yarısı sonrası→bugün
   imsak, tam vakit anı→sonraki, veri yok→null, yalnız geçmiş günler→null, farklı UTC offset'te
@@ -33,8 +33,12 @@ dotnet test tests/PrayerApp.IntegrationTests/PrayerApp.IntegrationTests.csproj
   yalnız tazeleme, stale planda yeniden kurulum, tüm kategoriler kapalıyken iptal + sürekli
   bildirimin yaşaması, fetch hatasında eski planın korunması (atomiklik), eski ID'lerin
   değiştirilmesi, onboarding öncesi hiçbir şey yapılmaması.
+- **KerahatCalculator (9):** üç pencerenin sınırları, pencere içi/dışı anlar, uç değerler.
+- **ZakatCalculator (6):** nisap altı/üstü, %2,5 oranı, borç düşümü, negatif girdiler, clamp.
+- **ReligiousDaysCalculator (6):** 12 aylık sıralı liste, çekirdek günlerin varlığı,
+  Regaib'in perşembeye düşmesi, hicri round-trip, ay adları, aralık dışı null.
 
-### Integration test kapsamı (25)
+### Integration test kapsamı (37)
 
 - **AladhanProvider (6, FakeHttpHandler ile — gerçek ağ yok):** başarılı ay birleştirme +
   method=13/koordinat parametre doğrulaması, HTTP 500 retry→hata, bozuk JSON→InvalidData,
@@ -44,8 +48,12 @@ dotnet test tests/PrayerApp.IntegrationTests/PrayerApp.IntegrationTests.csproj
 - **PrayerScheduleService (8, FakeClock ile):** boş cache→fetch+cache, sıcak cache→ağsız,
   offline+cache→fallback, offline+cache yok→tipli hata, konumsuz→hata, konum değişimi→yeni fetch,
   düzeltmelerin uygulanması, incelen cache→proaktif yenileme.
-- **QuranRepository (6, temp SQLite):** JSON import, sıralı ayet listesi, büyük/küçük harf
-  duyarsız arama, kısa sorgu reddi, global indeks eşlemesi, favori ekle/çıkar.
+- **QuranRepository (11, temp SQLite):** JSON import, sıralı ayet listesi, büyük/küçük harf
+  duyarsız arama, kısa sorgu reddi, global indeks eşlemesi, favori ekle/çıkar, Arapça metin
+  importu, sayfa/cüz ataması, sayfa başlangıcı sorgusu, cüz listesi, import v2 yeniden
+  yüklemesinde favorilerin korunması.
+- **KhatmRepository (7, temp SQLite):** plan yok→null, plan başlatma, eski planın değişimi,
+  günlük ilerleme kaydı, clamp + 604'te tamamlanma, günlük hedef hesabı, plan silme.
 
 ## Build doğrulaması
 
@@ -81,5 +89,13 @@ veya normal geliştirici makinesinde `dotnet publish -c Release` ile yapılmalı
 | 14 | Sürekli bildirim | Açılışta görünür; vakit girince başlık değişir; ayardan kapatınca kaybolur; reboot sonrası geri gelir |
 | 15 | Widget ekle + uygulamayı kapat | Geri sayım akmaya devam eder (API 24+); vakit girince sıradaki vakit değişir; gün dönümünde yeni günün vakitleri gelir |
 | 16 | Widget + uçak modu | Cache'ten çizilir, internet gerekmez |
+| 17 | Güncelleme sonrası ilk Kur'an açılışı | Arapça metin görünür (v2 import ~1-2 sn); eski favoriler durur |
+| 18 | Sure ekranı | Arapça aç/kapat ve A−/A+ çalışır, tercihler kalıcı; sayfa/cüz etiketi doğru |
+| 19 | Hatim akışı | Plan başlat → sayfa kaydet → "Okumaya Git" doğru sayfayı açar; 604'te tebrik mesajı |
+| 20 | Kaldığın yerden devam | Sure içinde kaydır, çık; Kur'an ekranındaki kart son ayete döndürür |
+| 21 | Dini Günler | Liste sıralı, bir sonraki gün vurgulu; çevirici bugünün hicri tarihini verir |
+| 22 | Kaza / Zekât | Sayaçlar kalıcı; zekât nisap altı/üstü mesajları doğru |
+| 23 | Tesbihat | 33'e ulaşınca sonraki zikre otomatik geçer, üçüncüden sonra tamamlanır |
+| 24 | Kerahat chip'i | Doğuş+45 dk, öğle öncesi 45 dk, akşam öncesi 45 dk aralıklarında görünür |
 
 ADB tabanlı bildirim senaryoları: [NOTIFICATION_TESTING.md](NOTIFICATION_TESTING.md)

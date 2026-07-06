@@ -13,8 +13,14 @@ localization altyapısıyla yeni diller eklenebilir.
 - **Sürekli vakit bildirimi** — günün vakitleri ve sıradaki vakit bildirim çubuğunda sabit
   durur (sessiz, kapatılabilir); her vakit girişinde ve gece yarısında kendini günceller
 - **Kıble pusulası** — gerçek sensör verisi, Kabe mesafesi, sensörsüz cihazlar için açıklamalı fallback
-- **Kur'an meali** — 114 sure SQLite'ta, arama, favoriler, paylaşma, günün ayeti (gün boyu sabit)
-- **Zikirmatik** — hazır/özel zikirler, hedef, titreşim, günlük geçmiş
+- **Kur'an-ı Kerim** — Arapça metin (Amiri Quran fontu) + Türkçe meal, 114 sure, 30 cüz,
+  arama, favoriler, paylaşma, kaldığın yerden devam, günün ayeti (gün boyu sabit)
+- **Hatim takibi** — sayfa bazlı (604 sayfa) hatim planı: 30/60/90 gün veya serbest,
+  günlük hedef ve ilerleme
+- **Zikirmatik** — hazır/özel zikirler, rehberli namaz tesbihatı (33×3), hedef, titreşim, günlük geçmiş
+- **Dini içerik** — Esmaül Hüsna (99 isim), Kur'an'dan dualar, dini günler takvimi
+  (kandiller/bayramlar) + Miladi→Hicri çevirici
+- **İbadet araçları** — kaza takibi, zekât hesaplayıcı (offline), kerahat vakti göstergesi
 - **Offline-first** — internetsiz açılış, cache göstergesi, sakin çevrimdışı durumu
 - **Tema** — Light / Dark / System
 - **Android ana ekran widget'ı** — günün 6 vakti, sıradaki vakit ve uygulama kapalıyken de

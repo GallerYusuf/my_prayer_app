@@ -3,6 +3,15 @@
 ## [1.1.0-dev] — 2026-07-06 (fable5/autonomous-evolution)
 
 ### Eklendi
+- Kur'an: Arapça metin (Amiri Quran fontu, RTL) + meal birlikte; Arapça aç/kapat ve yazı
+  boyutu kontrolü; 30 cüz listesi; ayet bazlı "kaldığın yerden devam"; sayfa bazlı hatim
+  takibi (30/60/90 gün veya serbest, günlük hedef, ilerleme)
+- Kur'an'dan Dualar ekranı (26 küratif dua, kendi veritabanından, paylaşılabilir)
+- Esmaül Hüsna ekranı (99 isim, Arapça yazılış, anlam, arama)
+- Dini Günler ekranı (kandil/bayram takvimi, 12 ay) + Miladi→Hicri tarih çevirici
+- Kaza takibi (5 vakit + vitir + oruç sayaçları) ve Zekât hesaplayıcı (offline, nisap 80,18 g)
+- Ana ekranda kerahat vakti göstergesi; Zikirmatik'te rehberli namaz tesbihatı (33×3)
+- Ana ekran hızlı erişim alanı 8 modüle genişletildi
 - Sürekli vakit bildirimi (Android): günün vakitleri + sıradaki vakit bildirim çubuğunda
   sabit durur; sessiz kanal, ayarlardan kapatılabilir, reboot/güncelleme sonrası geri gelir
 - Widget'a günün 6 vaktinin tamamı ve uygulama kapalıyken de işleyen native geri sayım

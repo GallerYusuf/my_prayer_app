@@ -7,6 +7,8 @@
 - [x] Light/Dark/System tema
 - [x] Sürekli vakit bildirimi (ongoing, sessiz, kapatılabilir)
 - [x] Widget'ın yeni veri katmanından beslenmesi (alarm zinciri + native geri sayım)
+- [x] Kur'an: Arapça metin + cüz + kaldığın yerden devam + hatim takibi
+- [x] Esmaül Hüsna, Kur'an'dan dualar, dini günler, kaza takibi, zekât, tesbihat, kerahat
 - [ ] Diyanet referans karşılaştırması (manuel doğrulama — yayın öncesi)
 - [ ] Meal lisans teyidi
 
@@ -19,9 +21,10 @@
 
 ## v1.2
 - [ ] iOS yayın hazırlığı (bildirim limitleri, TestFlight)
-- [ ] Esmaü'l-Hüsna ve günlük dua bölümü
+- [x] Esmaü'l-Hüsna ve dua bölümü (v1.0'a öne alındı)
 - [ ] Namaz takibi istatistik ekranı
 - [ ] Tablet/geniş ekran düzenleri
+- [ ] Hatim istatistikleri (tamamlanan hatimler, günlük grafik)
 
 ## Teknik borç
 - [ ] sqlite-net 1.11 stabil çıkınca SQLitePCLRaw 3.x'e geçiş (CVE suppress kaldırılır)

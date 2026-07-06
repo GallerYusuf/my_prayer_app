@@ -55,6 +55,20 @@ streaming). Gerekçe: gizlilik-önce, offline-first, sunucusuz ürün kimliği.
   geçmişi ve vakit cache'i korunur. Kur'an içeriği import-sürümü anahtarıyla yeniden yüklenir.
 - Yeni veriler (hatim, kaza, zekât fiyatları) yalnızca cihazda.
 
+## Oturum 3 doğrulama sonuçları
+
+| Doğrulama | Sonuç |
+|---|---|
+| Unit testler (62; +21 yeni: kerahat 9, zekât 6, dini günler 6) | ✅ BAŞARILI |
+| Integration testler (37; +12 yeni: Kur'an import v2 5, hatim 7) | ✅ BAŞARILI |
+| Android Debug build | ✅ 0 hata, 0 uyarı (22 dk 39 sn) |
+| Android Release | Oturum 2'de doğrulandı; bu oturum sonunda tekrar önerilir (CI trimmed publish) |
+
+Commit'ler (oturum 3):
+- `feat: elevate Quran with Arabic text, juz navigation, reading resume and page-based khatm tracking`
+- `feat: add religious days calendar, Esmaul Husna, Quranic duas, kaza and zakat tools with kerahat indicator and guided tasbihat`
+- `docs: sync docs with Quran elevation and new content modules`
+
 ---
 
 ## 1. İncelenen mevcut durum
