@@ -5,6 +5,8 @@
 - [x] Güvenilir bildirim sistemi (exact alarm, reboot/timezone dayanıklı)
 - [x] Onboarding, takvim, kıble, Kur'an, zikirmatik
 - [x] Light/Dark/System tema
+- [x] Sürekli vakit bildirimi (ongoing, sessiz, kapatılabilir)
+- [x] Widget'ın yeni veri katmanından beslenmesi (alarm zinciri + native geri sayım)
 - [ ] Diyanet referans karşılaştırması (manuel doğrulama — yayın öncesi)
 - [ ] Meal lisans teyidi
 
@@ -12,7 +14,7 @@
 - [ ] İl bazlı varsayılan temkin/offset profilleri
 - [ ] Ezan sesi (lisanslı asset bulunursa) + kanal sesi seçimi
 - [ ] Aylık takvim görünümü (grid)
-- [ ] Widget'ın yeni veri katmanından beslenmesi ve tema uyumu
+- [ ] Widget tema uyumu (dinamik renkler / Material You)
 - [ ] İngilizce localization (`AppStrings.en.resx`)
 
 ## v1.2
@@ -24,5 +26,5 @@
 ## Teknik borç
 - [ ] sqlite-net 1.11 stabil çıkınca SQLitePCLRaw 3.x'e geçiş (CVE suppress kaldırılır)
 - [ ] UI metinlerinin tamamının AppStrings.resx'e taşınması (kısmi başlandı)
-- [ ] Emoji glyph'lerinin (vakit kartları) vector ikonlarla değiştirilmesi
+- [x] Emoji glyph'lerinin vector ikonlarla değiştirilmesi (2026-07-06)
 - [ ] MainViewModel'in countdown/verse/tracking alt-VM'lere bölünmesi

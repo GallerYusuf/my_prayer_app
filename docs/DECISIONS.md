@@ -58,3 +58,18 @@ Zorla Dark kaldırıldı; System/Light/Dark kullanıcı tercihi (`ThemeManager`)
 ## D11 — Widget, namaz takibi ve Ramazan modu korundu
 Mevcutta çalışan özellikler (Android widget, namaz takip streak'i, Ramazan kartı) kullanıcı
 değeri taşıdığı için yeni mimariye taşındı, silinmedi.
+
+## D12 — Sürekli bildirim + widget: tek alarm zinciri, foreground service yok
+İki "her zaman görünür" yüzey (ongoing bildirim ve widget) aynı anlarda değişir (vakit girişi,
+gece yarısı). Bu yüzden ikisi tek `PersistentNotificationService.RefreshAsync` yolundan beslenir
+ve kendini yeniden kuran tek bir exact alarm ile güncellenir. Foreground service bilinçli olarak
+kullanılmadı: Play politikası açısından gerekçelendirme yükü ve kalıcı pil maliyeti getirirken,
+alarm zinciri aynı doğruluğu çok daha ucuza sağlar. Sürekli bildirim Low-importance/sessiz
+kanaldadır ve ayarlardan kapatılabilir (varsayılan açık — kategori beklentisi).
+
+## D13 — Widget geri sayımı: native Chronometer (count-down)
+Uygulama süreci ölüyken saniye bazlı geri sayımın dürüst tek yolu RemoteViews `Chronometer`
+count-down modudur (API 24+); `SystemClock.elapsedRealtime` tabanlı olduğundan saat/dilim
+değişimlerinden etkilenmez. API 21-23'te count-down desteklenmediği için geri sayım gizlenir,
+yalnız vakit saati gösterilir — donmuş/yanlış değer göstermekten iyidir. Eski
+`WidgetDataService` (uygulama açıkken 55 sn'de bir SharedPreferences yazma) yolu kaldırıldı.

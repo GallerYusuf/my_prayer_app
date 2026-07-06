@@ -55,6 +55,11 @@ dotnet publish PrayerApp.csproj -f net10.0-android -c Release `
 
 Çıktı: `bin\Release\net10.0-android\publish\com.galleryusuf.ezanvakti-Signed.aab`
 
+> Not: Trimming'i kapatarak (ör. ILLink'in engellendiği kısıtlı ortamlarda
+> `-p:PublishTrimmed=false`) publish alıyorsanız `-p:RunAOTCompilation=false` da geçin;
+> aksi hâlde build XA1030 ("RunAOTCompilation yalnızca kırpma etkinken desteklenir")
+> hatasıyla durur. Mağaza yüklemesi için normal (trimmed) publish kullanılmalıdır.
+
 ### CI üzerinden imzalama (GitHub Secrets)
 
 Gerekli secrets: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASS`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASS`.

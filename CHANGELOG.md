@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.1.0-dev] — 2026-07-06 (fable5/autonomous-evolution)
+
+### Eklendi
+- Sürekli vakit bildirimi (Android): günün vakitleri + sıradaki vakit bildirim çubuğunda
+  sabit durur; sessiz kanal, ayarlardan kapatılabilir, reboot/güncelleme sonrası geri gelir
+- Widget'a günün 6 vaktinin tamamı ve uygulama kapalıyken de işleyen native geri sayım
+  (Chronometer count-down, API 24+)
+- Vakit türleri için özel vector ikon seti (10 SVG); tüm ekranlarda emoji glyph'lerin yerini aldı
+- `NotificationCoordinator` için 7 yeni unit test (toplam 66 test)
+
+### Değişti
+- Widget artık uygulama açıkken yazılan önbelleğe değil, doğrudan SQLite vakit cache'ine ve
+  vakit girişlerinde tetiklenen alarm zincirine bağlı — uygulama kapalıyken donmuş/yanlış
+  geri sayım gösterme hatası giderildi
+- `DisplayAlert` → `DisplayAlertAsync`; widget null-güvenliği ve API-level guard düzeltmeleri
+  (derleme uyarıları sıfırlandı)
+
+### Kaldırıldı
+- `WidgetDataService` / `IWidgetDataService` ve MainViewModel'deki 55 sn'lik widget güncelleme yolu
+- Git'te izlenen JVM crash logları ve `run_command` artığı
+
 ## [1.0.0] — 2026-07-03 (hazırlık)
 
 ### Eklendi

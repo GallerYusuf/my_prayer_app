@@ -11,6 +11,10 @@
 | `LocalNotificationScheduler` | MAUI head | Plugin.LocalNotification implementasyonu |
 | `SystemEventsReceiver` | Android | TIME_SET / TIMEZONE_CHANGED / exact-alarm izni değişimi |
 | Plugin restore receiver | Plugin | BOOT_COMPLETED + MY_PACKAGE_REPLACED sonrası kayıtlı alarmları geri yükler |
+| `IPersistentNotificationService` | Core contract | Sürekli bildirim + widget yüzeylerinin tazelenme soyutlaması |
+| `PersistentNotificationService` | Android | Sabit (ongoing) vakit bildirimi + widget'ı tek alarm zinciriyle günceller |
+| `PersistentNotificationReceiver` | Android | Zincir alarmı, BOOT_COMPLETED ve MY_PACKAGE_REPLACED sonrası yüzeyleri tazeler |
+| `WidgetRenderer` | Android | Cache'ten okunan veriyle widget RemoteViews çizimi (Chronometer geri sayım) |
 
 ## Notification ID şeması
 
@@ -23,6 +27,27 @@ Friday      : 400_000_000 + DayNumber
 
 Aynı gün + aynı vakit her zaman aynı ID'yi üretir → yeniden planlama idempotent'tir;
 `NotificationIds.GetCategory(id)` ile kategori geri çözülür.
+Sürekli bildirim sabit `900_000_001` ID'sini kullanır (kategori bazlarıyla çakışmaz)
+ve her seferinde yerinde güncellenir.
+
+## Sürekli bildirim + widget zinciri
+
+`PersistentNotificationService.RefreshAsync`:
+
+1. Onboarding tamamlanmamışsa veya (sürekli bildirim kapalı **ve** widget yoksa) yüzeyleri
+   temizler ve zinciri durdurur.
+2. SQLite cache'ten bugün + yarını okur (`IPrayerScheduleService`, tamamen offline).
+3. Sürekli bildirim açıksa ongoing bildirimi günceller (Low importance, sessiz, kalıcı).
+4. Widget varsa `WidgetRenderer` ile RemoteViews'u günceller; geri sayım API 24+'ta
+   native `Chronometer` (count-down) ile sistem tarafından işletilir — uygulama süreci
+   ölü olsa bile saniye saniye doğru akar.
+5. Bir sonraki içerik değişimi için (sıradaki vakit anı veya gece yarısı, +5 sn) tek bir
+   exact alarm kurar; alarm `PersistentNotificationReceiver`'a düşer ve adım 1'den tekrar başlar.
+
+Zincir; reboot, uygulama güncellemesi (receiver intent filter'ları), açılış/resume
+(`RescheduleIfStaleAsync`), ayar kaydetme ve sistem saat/timezone olayları
+(`RescheduleAsync`) üzerinden yeniden kurulur. Widget'ın `updatePeriodMillis`
+(30 dk) sistem güncellemesi de aynı yolu çağırdığı için emniyet ağı görevi görür.
 
 ## Kanallar (Android)
 

@@ -10,12 +10,16 @@ localization altyapısıyla yeni diller eklenebilir.
   35 günlük SQLite cache, vakit başına manuel dakika düzeltmesi, hicri tarih, Ramazan modu
 - **Güvenilir bildirimler** — AlarmManager tabanlı exact alarm, uygulama kapalıyken çalışır,
   reboot/saat/timezone değişiminde yeniden planlama, 4 ayrı bildirim kanalı, rolling 3 günlük plan
+- **Sürekli vakit bildirimi** — günün vakitleri ve sıradaki vakit bildirim çubuğunda sabit
+  durur (sessiz, kapatılabilir); her vakit girişinde ve gece yarısında kendini günceller
 - **Kıble pusulası** — gerçek sensör verisi, Kabe mesafesi, sensörsüz cihazlar için açıklamalı fallback
 - **Kur'an meali** — 114 sure SQLite'ta, arama, favoriler, paylaşma, günün ayeti (gün boyu sabit)
 - **Zikirmatik** — hazır/özel zikirler, hedef, titreşim, günlük geçmiş
 - **Offline-first** — internetsiz açılış, cache göstergesi, sakin çevrimdışı durumu
 - **Tema** — Light / Dark / System
-- Android ana ekran widget'ı, namaz takibi ve streak
+- **Android ana ekran widget'ı** — günün 6 vakti, sıradaki vakit ve uygulama kapalıyken de
+  işleyen native geri sayım (Chronometer); vakit girişlerinde alarm zinciriyle kendini yeniler
+- Namaz takibi ve streak
 
 ## Mimari
 

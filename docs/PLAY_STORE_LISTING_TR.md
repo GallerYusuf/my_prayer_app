@@ -28,9 +28,14 @@ bir tasarımda birleştiren, tamamen ücretsiz ve reklamsız bir İslami yaşam 
 
 🔔 GÜVENİLİR BİLDİRİMLER
 • Uygulama kapalıyken bile tam vaktinde ezan bildirimi
+• Bildirim çubuğunda sabit duran günlük vakit çizelgesi (isteğe bağlı)
 • Vakitten 5-30 dk önce hatırlatma seçeneği
 • Cuma hatırlatıcısı ve günün ayeti bildirimi
 • Vakit başına açma/kapama, ses ve titreşim kontrolü
+
+📱 ANA EKRAN WIDGET'I
+• Günün 6 vakti ve sıradaki vakte canlı geri sayım
+• Uygulama kapalıyken de doğru çalışır, internet gerektirmez
 
 🧭 KIBLE PUSULASI
 • Gerçek pusula sensörüyle canlı kıble yönü

@@ -1,12 +1,12 @@
 # Test Raporu
 
-Tarih: 2026-07-03 · Branch: `fable5/production-rebuild` · Ortam: Windows 11, .NET SDK 10.0.301
+Tarih: 2026-07-06 · Branch: `fable5/autonomous-evolution` · Ortam: Windows 11, .NET SDK 10.0.301
 
 ## Otomatik testler
 
 | Proje | Sonuç | Adet | Süre |
 |---|---|---|---|
-| PrayerApp.UnitTests | ✅ BAŞARILI | 34/34 | ~0.4 sn |
+| PrayerApp.UnitTests | ✅ BAŞARILI | 41/41 | ~0.3 sn |
 | PrayerApp.IntegrationTests | ✅ BAŞARILI | 25/25 | ~2 sn |
 
 Komutlar:
@@ -15,7 +15,7 @@ dotnet test tests/PrayerApp.UnitTests/PrayerApp.UnitTests.csproj
 dotnet test tests/PrayerApp.IntegrationTests/PrayerApp.IntegrationTests.csproj
 ```
 
-### Unit test kapsamı (34)
+### Unit test kapsamı (41)
 
 - **NextPrayerCalculator (8):** sabah→öğle, yatsı sonrası→yarın imsak, gece yarısı sonrası→bugün
   imsak, tam vakit anı→sonraki, veri yok→null, yalnız geçmiş günler→null, farklı UTC offset'te
@@ -29,6 +29,10 @@ dotnet test tests/PrayerApp.IntegrationTests/PrayerApp.IntegrationTests.csproj
   plana yansıması, Cuma bildirimi (aynı gün ve sonraki hafta), ID determinizmi + kategori çözümü.
 - **VerseOfDaySelector (5):** aynı gün sabit indeks, günler arası çeşitlilik, slot farkı,
   sınır kontrolü, sıfır ayet durumu.
+- **NotificationCoordinator (7):** plan kurulumu + sürekli bildirim tazelemesi, fresh planda
+  yalnız tazeleme, stale planda yeniden kurulum, tüm kategoriler kapalıyken iptal + sürekli
+  bildirimin yaşaması, fetch hatasında eski planın korunması (atomiklik), eski ID'lerin
+  değiştirilmesi, onboarding öncesi hiçbir şey yapılmaması.
 
 ### Integration test kapsamı (25)
 
@@ -47,8 +51,8 @@ dotnet test tests/PrayerApp.IntegrationTests/PrayerApp.IntegrationTests.csproj
 
 | Build | Sonuç |
 |---|---|
-| Android Debug (`net10.0-android`) | ✅ 0 hata |
-| Android Release AAB (`dotnet publish -c Release -p:AndroidPackageFormats=aab -p:PublishTrimmed=false`) | ✅ `bin/Release/net10.0-android/publish/com.galleryusuf.ezanvakti-Signed.aab` üretildi |
+| Android Debug (`net10.0-android`) | ✅ 0 hata, **0 uyarı** (2026-07-06) |
+| Android Release AAB (`dotnet publish -c Release -p:AndroidPackageFormats=aab -p:PublishTrimmed=false -p:RunAOTCompilation=false`) | ✅ `bin/Release/net10.0-android/publish/com.galleryusuf.ezanvakti-Signed.aab` üretildi (2026-07-06, 64 MB untrimmed) |
 
 **Trimming notu:** Bu geliştirme ortamında ILLink görevi, MSBuild alt sürecinin sandbox
 tarafından engellenmesi ("Cannot acquire required number of nodes / erişim engellendi")
@@ -74,5 +78,8 @@ veya normal geliştirici makinesinde `dotnet publish -c Release` ile yapılmalı
 | 11 | Bildirim izni reddi | Çökme yok; tanılamada "Kapalı" görünür |
 | 12 | Pusulasız emülatör | Kıble ekranı açıklamalı fallback gösterir |
 | 13 | Ayet bildirimine dokun | İlgili sure/ayet açılır |
+| 14 | Sürekli bildirim | Açılışta görünür; vakit girince başlık değişir; ayardan kapatınca kaybolur; reboot sonrası geri gelir |
+| 15 | Widget ekle + uygulamayı kapat | Geri sayım akmaya devam eder (API 24+); vakit girince sıradaki vakit değişir; gün dönümünde yeni günün vakitleri gelir |
+| 16 | Widget + uçak modu | Cache'ten çizilir, internet gerekmez |
 
 ADB tabanlı bildirim senaryoları: [NOTIFICATION_TESTING.md](NOTIFICATION_TESTING.md)

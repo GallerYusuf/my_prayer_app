@@ -1,6 +1,15 @@
 # Çalışma İlerleme Kaydı
 
-Son güncelleme: 2026-07-03 (oturum 1)
+Son güncelleme: 2026-07-06 (oturum 2 — `fable5/autonomous-evolution`)
+
+## Oturum 2 — Otonom ürün evrimi
+
+Ayrıntı: `docs/FABLE_AUTONOMOUS_EVOLUTION.md`
+
+- Yarım kalan sürekli vakit bildirimi tamamlandı, 7 koordinatör unit testi eklendi (66 test yeşil).
+- Widget alarm-tabanlı yeniden yazıldı (donmuş geri sayım hatası giderildi; native Chronometer).
+- Emoji glyph'ler 10 parçalık vector ikon setiyle değiştirildi.
+- Build uyarıları sıfırlandı; repo hijyeni (crash logları git'ten çıkarıldı).
 
 ## Tamamlanan fazlar
 
@@ -40,5 +49,5 @@ Son güncelleme: 2026-07-03 (oturum 1)
 
 - Meal lisans teyidi (CONTENT_SOURCES.md).
 - Diyanet referans tablosu manuel doldurulacak (PRAYER_TIME_VALIDATION.md).
-- Emoji glyph'leri vakit kartlarında dekoratif olarak duruyor (ROADMAP teknik borç).
-- Widget hâlâ eski WidgetDataService yolunu kullanıyor (çalışır durumda).
+- ~~Emoji glyph'leri~~ → oturum 2'de vector ikonlarla değiştirildi.
+- ~~Widget eski WidgetDataService yolu~~ → oturum 2'de alarm-tabanlı yeniden yazıldı.
