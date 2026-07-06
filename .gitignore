@@ -56,3 +56,5 @@ desktop.ini
 *.log
 *.tmp
 *.temp
+replay_pid*
+run_command
