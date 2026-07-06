@@ -2,6 +2,61 @@
 
 Tarih: 2026-07-06 · Branch: `fable5/autonomous-evolution` (taban: `fable5/production-rebuild`)
 
+---
+
+# Oturum 3 — Rakip analizi ve içerik genişlemesi (2026-07-06 öğleden sonra)
+
+Kullanıcı, rakip bir "Pro" namaz uygulamasının ekran görüntülerini paylaştı ve uygun
+özelliklerin eklenmesini, özellikle Kur'an bölümünün üst seviyeye taşınmasını istedi
+(kapsam onayı: 3 fazın tamamı; Amiri font paketlensin; hatim sayfa bazlı).
+
+## Kritik keşif
+
+Paketli `quran_tr.json` dosyası zaten her ayetin **Arapça metnini** içeriyordu; eski import
+bunu atıyordu. Arapça görünüm sıfır ek veri maliyetiyle eklendi.
+
+## Faz 1 — Kur'an yükseltmesi
+
+- **Arapça metin:** Import v2 Arapça + mushaf sayfası + cüz kolonlarını doldurur; mevcut
+  kurulumlar sürüm işaretiyle otomatik yeniden import eder, favoriler korunur (testli).
+  Sure ekranında Arapça (AmiriQuran fontu, RTL) + meal; Arapça aç/kapat ve A−/A+ yazı boyutu.
+- **Sayfa/cüz meta verisi:** Tanzil `quran-data.xml` → `QuranMetadata.cs` (604 sayfa, 30 cüz).
+- **Kaldığın yerden devam:** ayet bazlı konum (scroll takibi), Kur'an ekranında devam kartı.
+- **Cüz listesi:** 30 cüz, başlangıç suresi/ayeti ve sayfa aralığıyla; dokununca açılır.
+- **Hatim takibi (sayfa bazlı):** 30/60/90 gün veya serbest plan; sayfa işaretleme, ilerleme
+  yüzdesi, günlük okunan/hedef sayfa, plan geçmişi (SQLite `khatm_plans` + `khatm_log`).
+- **Kur'an'dan Dualar:** 26 küratif dua (sadece referans listesi; metin kendi DB'mizden).
+
+## Faz 2 — İçerik modülleri
+
+- **Kerahat vakitleri:** `KerahatCalculator` (Core, saf) + ana ekranda kerahat chip'i.
+- **Dini Günler:** `ReligiousDaysCalculator` (UmAlQura tabanlı, ±1 gün notu ekranda),
+  12 aylık liste + Miladi→Hicri çevirici.
+- **Esmaül Hüsna:** 99 isim (Arapça + anlam), arama destekli ekran.
+
+## Faz 3 — Araçlar
+
+- **Kaza takibi:** 5 vakit + vitir + oruç sayaçları (±1/±10), cihazda saklanır.
+- **Zekatmatik:** offline hesaplayıcı (nisap 80,18 g altın, %2,5); fiyatlar elle girilir
+  (fiyat servisi yok — gizlilik ilkesi), girilen fiyatlar hatırlanır.
+- **Tesbihat:** Zikirmatik'te rehberli 33×3 akış (otomatik adım geçişi, titreşim).
+- Ana ekran hızlı erişim grid'i 8 modüle genişletildi; 3 yeni ikon (dua, sayaç, para).
+
+## Bilinçli alınmayanlar (rakipten)
+
+Canlı yayın, Kur'an radyosu, multimedya, Dua Kardeşliği (sosyal), Yakın Camiler/Mescit
+(Places API + konum), Haftanın Hutbesi (sunucu içeriği), tebrik kartı, reklam kaldırma,
+camide otomatik sessize alma (DND izni), Kur'an Ezberle/ses (yüzlerce MB asset veya
+streaming). Gerekçe: gizlilik-önce, offline-first, sunucusuz ürün kimliği.
+
+## Veri güvenliği
+
+- DB şema v2 migration'ı: `CreateTableAsync` mevcut tabloya kolon ekler; favoriler, zikir
+  geçmişi ve vakit cache'i korunur. Kur'an içeriği import-sürümü anahtarıyla yeniden yüklenir.
+- Yeni veriler (hatim, kaza, zekât fiyatları) yalnızca cihazda.
+
+---
+
 ## 1. İncelenen mevcut durum
 
 - Git geçmişi, `docs/` seti (FABLE_PROGRESS, BASELINE_AUDIT, ROADMAP, DECISIONS,

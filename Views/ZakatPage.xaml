@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PrayerApp.ViewModels"
+             xmlns:conv="clr-namespace:PrayerApp.Converters"
+             x:Class="PrayerApp.Views.ZakatPage"
+             x:DataType="vm:ZakatViewModel"
+             Title="Zekât Hesaplama"
+             Shell.NavBarIsVisible="True">
+
+    <ContentPage.Resources>
+        <conv:StringNotEmptyConverter x:Key="StringNotEmpty" />
+
+        <Style x:Key="ZakatFieldLabel" TargetType="Label">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid Padding="20,12,20,0">
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0" />
+                <GradientStop Color="{AppThemeBinding Light=#EEF2FF, Dark={StaticResource BackgroundMid}}" Offset="1" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <ScrollView>
+            <VerticalStackLayout Spacing="14" Padding="0,0,0,32">
+
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="GÜNCEL FİYATLAR" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource SettingsGroup}">
+                        <VerticalStackLayout Spacing="10" Padding="4">
+                            <Grid ColumnDefinitions="*,130" ColumnSpacing="10">
+                                <Label Text="Gram altın fiyatı (TL)" Style="{StaticResource ZakatFieldLabel}" />
+                                <Border Grid.Column="1" Style="{StaticResource PremiumInput}" Padding="10,2">
+                                    <Entry Text="{Binding GoldPrice}" Keyboard="Numeric" FontSize="14" HorizontalTextAlignment="End" />
+                                </Border>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,130" ColumnSpacing="10">
+                                <Label Text="Gram gümüş fiyatı (TL)" Style="{StaticResource ZakatFieldLabel}" />
+                                <Border Grid.Column="1" Style="{StaticResource PremiumInput}" Padding="10,2">
+                                    <Entry Text="{Binding SilverPrice}" Keyboard="Numeric" FontSize="14" HorizontalTextAlignment="End" />
+                                </Border>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="VARLIKLAR" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource SettingsGroup}">
+                        <VerticalStackLayout Spacing="10" Padding="4">
+                            <Grid ColumnDefinitions="*,130" ColumnSpacing="10">
+                                <Label Text="Altın (gram)" Style="{StaticResource ZakatFieldLabel}" />
+                                <Border Grid.Column="1" Style="{StaticResource PremiumInput}" Padding="10,2">
+                                    <Entry Text="{Binding GoldGrams}" Keyboard="Numeric" FontSize="14" HorizontalTextAlignment="End" />
+                                </Border>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,130" ColumnSpacing="10">
+                                <Label Text="Gümüş (gram)" Style="{StaticResource ZakatFieldLabel}" />
+                                <Border Grid.Column="1" Style="{StaticResource PremiumInput}" Padding="10,2">
+                                    <Entry Text="{Binding SilverGrams}" Keyboard="Numeric" FontSize="14" HorizontalTextAlignment="End" />
+                                </Border>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,130" ColumnSpacing="10">
+                                <Label Text="Nakit / döviz / mevduat (TL)" Style="{StaticResource ZakatFieldLabel}" />
+                                <Border Grid.Column="1" Style="{StaticResource PremiumInput}" Padding="10,2">
+                                    <Entry Text="{Binding Cash}" Keyboard="Numeric" FontSize="14" HorizontalTextAlignment="End" />
+                                </Border>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,130" ColumnSpacing="10">
+                                <Label Text="Alacaklar (TL)" Style="{StaticResource ZakatFieldLabel}" />
+                                <Border Grid.Column="1" Style="{StaticResource PremiumInput}" Padding="10,2">
+                                    <Entry Text="{Binding Receivables}" Keyboard="Numeric" FontSize="14" HorizontalTextAlignment="End" />
+                                </Border>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,130" ColumnSpacing="10">
+                                <Label Text="Borçlar (TL)" Style="{StaticResource ZakatFieldLabel}" />
+                                <Border Grid.Column="1" Style="{StaticResource PremiumInput}" Padding="10,2">
+                                    <Entry Text="{Binding Debts}" Keyboard="Numeric" FontSize="14" HorizontalTextAlignment="End" />
+                                </Border>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <Button Text="Hesapla"
+                        Style="{StaticResource PremiumButton}"
+                        Command="{Binding CalculateCommand}" />
+
+                <Border IsVisible="{Binding ValidationMessage, Converter={StaticResource StringNotEmpty}}"
+                        StrokeThickness="1" Stroke="#40F87171" BackgroundColor="#1AF87171"
+                        StrokeShape="RoundRectangle 12" Padding="12,10">
+                    <Label Text="{Binding ValidationMessage}" TextColor="{StaticResource Error}" FontSize="13" />
+                </Border>
+
+                <Border IsVisible="{Binding HasResult}"
+                        StrokeThickness="1" Stroke="#5010B981" BackgroundColor="#1810B981"
+                        StrokeShape="RoundRectangle 14" Padding="16,14">
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{Binding ResultTitle}"
+                               FontSize="18" FontFamily="OpenSansSemibold"
+                               TextColor="{StaticResource AccentEmerald}" />
+                        <Label Text="{Binding ResultDetail}"
+                               Style="{StaticResource BodyMuted}"
+                               FontSize="13"
+                               LineHeight="1.4" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label Text="Nisap, 80,18 gram altın karşılığına göre hesaplanır (Diyanet ölçüsü); zekât oranı %2,5'tir. Bu hesaplama bilgilendirme amaçlıdır; özel durumlar için bir din görevlisine danışın."
+                       Style="{StaticResource BodyMuted}"
+                       FontSize="11"
+                       LineHeight="1.4" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

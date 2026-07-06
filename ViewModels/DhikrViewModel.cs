@@ -12,11 +12,20 @@ public sealed record DhikrHistoryItem(string DateText, string Name, string Count
 
 public partial class DhikrViewModel : ObservableObject
 {
+    /// <summary>Classic post-prayer tesbihat sequence; auto-advances between steps.</summary>
+    private static readonly (string Name, int Target)[] TesbihatSteps =
+    [
+        ("Sübhanallah", 33),
+        ("Elhamdülillah", 33),
+        ("Allahu Ekber", 33)
+    ];
+
     private readonly IDhikrRepository _dhikrRepository;
     private readonly ISettingsStore _settingsStore;
     private readonly IClock _clock;
 
     private DhikrSession? _session;
+    private int _tesbihatStep = -1;
 
     [ObservableProperty] private string _dhikrName = "Sübhanallah";
     [ObservableProperty] private int _count;
@@ -26,6 +35,8 @@ public partial class DhikrViewModel : ObservableObject
     [ObservableProperty] private bool _vibrationEnabled = true;
     [ObservableProperty] private bool _targetReached;
     [ObservableProperty] private string _customDhikr = string.Empty;
+    [ObservableProperty] private bool _isTesbihatMode;
+    [ObservableProperty] private string _tesbihatStepText = string.Empty;
 
     public ObservableCollection<DhikrPreset> Presets { get; } =
     [
@@ -71,6 +82,56 @@ public partial class DhikrViewModel : ObservableObject
             TryVibrate(Count == TargetCount ? 250 : 30);
 
         await PersistAsync();
+
+        if (IsTesbihatMode && Count >= TargetCount)
+            await AdvanceTesbihatAsync();
+    }
+
+    [RelayCommand]
+    private async Task StartTesbihatAsync()
+    {
+        _tesbihatStep = 0;
+        IsTesbihatMode = true;
+        await LoadTesbihatStepAsync();
+    }
+
+    [RelayCommand]
+    private void ExitTesbihat()
+    {
+        IsTesbihatMode = false;
+        _tesbihatStep = -1;
+        TesbihatStepText = string.Empty;
+    }
+
+    private async Task AdvanceTesbihatAsync()
+    {
+        if (_tesbihatStep >= TesbihatSteps.Length - 1)
+        {
+            IsTesbihatMode = false;
+            _tesbihatStep = -1;
+            TesbihatStepText = "Tesbihat tamamlandı";
+            if (VibrationEnabled)
+                TryVibrate(400);
+            return;
+        }
+
+        _tesbihatStep++;
+        if (VibrationEnabled)
+            TryVibrate(250);
+        await LoadTesbihatStepAsync();
+    }
+
+    private async Task LoadTesbihatStepAsync()
+    {
+        var (name, target) = TesbihatSteps[_tesbihatStep];
+        DhikrName = name;
+        TargetCount = target;
+        TesbihatStepText = $"Tesbihat {_tesbihatStep + 1}/{TesbihatSteps.Length}";
+
+        // Each tesbihat step starts from zero regardless of today's earlier counts.
+        _session = await _dhikrRepository.GetTodaySessionAsync(DhikrName, _clock.Today);
+        Count = 0;
+        UpdateProgress();
     }
 
     [RelayCommand]
@@ -96,6 +157,7 @@ public partial class DhikrViewModel : ObservableObject
     [RelayCommand]
     private async Task SelectPresetAsync(DhikrPreset preset)
     {
+        ExitTesbihat();
         DhikrName = preset.Name;
         TargetCount = preset.Target;
         await LoadSessionAsync();
@@ -108,6 +170,7 @@ public partial class DhikrViewModel : ObservableObject
         if (name.Length is < 2 or > 60)
             return;
 
+        ExitTesbihat();
         DhikrName = name;
         CustomDhikr = string.Empty;
         await LoadSessionAsync();

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PrayerApp.ViewModels"
+             x:Class="PrayerApp.Views.KazaPage"
+             x:DataType="vm:KazaViewModel"
+             Title="Kaza Takibi"
+             Shell.NavBarIsVisible="True">
+
+    <Grid Padding="20,12,20,0">
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0" />
+                <GradientStop Color="{AppThemeBinding Light=#EEF2FF, Dark={StaticResource BackgroundMid}}" Offset="1" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <ScrollView>
+            <VerticalStackLayout Spacing="12" Padding="0,0,0,24">
+                <Label Text="{Binding TotalText}"
+                       Style="{StaticResource BodyMuted}"
+                       FontSize="13" />
+
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Items}" Spacing="8">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:KazaItem">
+                            <Border Padding="14,12"
+                                    StrokeThickness="1" Stroke="{StaticResource GlassStroke}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceDark}}"
+                                    StrokeShape="RoundRectangle 14">
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="8">
+                                    <Image Source="{Binding Icon}" WidthRequest="20" HeightRequest="20" VerticalOptions="Center" />
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Name}"
+                                           FontSize="15" FontFamily="OpenSansSemibold"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                                           VerticalOptions="Center" />
+
+                                    <Border Grid.Column="2" Style="{StaticResource IconButton}"
+                                            WidthRequest="34" HeightRequest="34"
+                                            SemanticProperties.Description="On azalt">
+                                        <Label Text="−10" FontSize="10" FontFamily="OpenSansSemibold"
+                                               TextColor="{StaticResource AccentGold}"
+                                               HorizontalOptions="Center" VerticalOptions="Center" />
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:KazaViewModel}}, Path=DecrementTenCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                    <Border Grid.Column="3" Style="{StaticResource IconButton}"
+                                            WidthRequest="34" HeightRequest="34"
+                                            SemanticProperties.Description="Bir azalt">
+                                        <Label Text="−" FontSize="16" TextColor="{StaticResource AccentGold}"
+                                               HorizontalOptions="Center" VerticalOptions="Center" />
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:KazaViewModel}}, Path=DecrementCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                    </Border>
+
+                                    <Label Grid.Column="4"
+                                           Text="{Binding Count}"
+                                           FontSize="16" FontFamily="OpenSansSemibold"
+                                           TextColor="{StaticResource AccentEmerald}"
+                                           WidthRequest="52"
+                                           HorizontalTextAlignment="Center"
+                                           VerticalOptions="Center" />
+
+                                    <Border Grid.Column="5" Style="{StaticResource IconButton}"
+                                            WidthRequest="34" HeightRequest="34"
+                                            SemanticProperties.Description="Bir artır">
+                                        <Label Text="+" FontSize="16" TextColor="{StaticResource AccentGold}"
+                                               HorizontalOptions="Center" VerticalOptions="Center" />
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:KazaViewModel}}, Path=IncrementCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                    <Border Grid.Column="6" Style="{StaticResource IconButton}"
+                                            WidthRequest="34" HeightRequest="34"
+                                            SemanticProperties.Description="On artır">
+                                        <Label Text="+10" FontSize="10" FontFamily="OpenSansSemibold"
+                                               TextColor="{StaticResource AccentGold}"
+                                               HorizontalOptions="Center" VerticalOptions="Center" />
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:KazaViewModel}}, Path=IncrementTenCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <Label Text="Kıldığınız kaza namazlarını azaltarak takip edin. Sayılar yalnızca bu cihazda saklanır."
+                       Style="{StaticResource BodyMuted}"
+                       FontSize="12"
+                       LineHeight="1.4" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

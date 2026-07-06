@@ -60,6 +60,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private int _trackStreak;
     [ObservableProperty] private bool _isOffline;
     [ObservableProperty] private string _dataStatusText = string.Empty;
+    [ObservableProperty] private string _kerahatText = string.Empty;
 
     public ObservableCollection<PrayerTime> PrayerTimes { get; } = [];
     public ObservableCollection<PrayerTrackItem> TrackItems { get; } = [];
@@ -174,6 +175,21 @@ public partial class MainViewModel : ObservableObject
 
     [RelayCommand]
     private static async Task OpenDhikrAsync() => await Shell.Current.GoToAsync("DhikrPage");
+
+    [RelayCommand]
+    private static async Task OpenEsmaulHusnaAsync() => await Shell.Current.GoToAsync("EsmaulHusnaPage");
+
+    [RelayCommand]
+    private static async Task OpenDuasAsync() => await Shell.Current.GoToAsync("DuasPage");
+
+    [RelayCommand]
+    private static async Task OpenReligiousDaysAsync() => await Shell.Current.GoToAsync("ReligiousDaysPage");
+
+    [RelayCommand]
+    private static async Task OpenKazaAsync() => await Shell.Current.GoToAsync("KazaPage");
+
+    [RelayCommand]
+    private static async Task OpenZakatAsync() => await Shell.Current.GoToAsync("ZakatPage");
 
     [RelayCommand]
     private void TogglePrayer(PrayerTrackItem item)
@@ -397,6 +413,20 @@ public partial class MainViewModel : ObservableObject
         UpdateDayStates(now, next);
         UpdateDayPeriod();
         UpdateRamadanCountdown(now);
+        UpdateKerahat(now);
+    }
+
+    private void UpdateKerahat(DateTimeOffset now)
+    {
+        var today = _days.FirstOrDefault(d => d.Date == _clock.Today);
+        if (today is null)
+        {
+            KerahatText = string.Empty;
+            return;
+        }
+
+        var window = KerahatCalculator.GetCurrent(today, now);
+        KerahatText = window is null ? string.Empty : $"Kerahat vakti · {window.Name}";
     }
 
     private void UpdateDayStates(DateTimeOffset now, UpcomingPrayer next)

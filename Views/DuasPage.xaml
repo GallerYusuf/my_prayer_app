@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PrayerApp.ViewModels"
+             x:Class="PrayerApp.Views.DuasPage"
+             x:DataType="vm:DuasViewModel"
+             Title="Kur'an'dan Dualar"
+             Shell.NavBarIsVisible="True">
+
+    <Grid Padding="20,12,20,0">
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0" />
+                <GradientStop Color="{AppThemeBinding Light=#EEF2FF, Dark={StaticResource BackgroundMid}}" Offset="1" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <CollectionView ItemsSource="{Binding Duas}"
+                        SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:DuaItem">
+                    <Border Margin="0,5" Padding="16,14"
+                            StrokeThickness="1" Stroke="{StaticResource GlassStroke}"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceDark}}"
+                            StrokeShape="RoundRectangle 16">
+                        <VerticalStackLayout Spacing="10">
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                <Label Text="{Binding Title}"
+                                       FontSize="14" FontFamily="OpenSansSemibold"
+                                       TextColor="{StaticResource AccentGold}"
+                                       LineHeight="1.3"
+                                       VerticalOptions="Center" />
+                                <Border Grid.Column="1" Style="{StaticResource IconButton}"
+                                        WidthRequest="36" HeightRequest="36"
+                                        SemanticProperties.Description="Duayı paylaş">
+                                    <Label Text="↗" FontSize="14" TextColor="{StaticResource AccentGold}"
+                                           HorizontalOptions="Center" VerticalOptions="Center" />
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DuasViewModel}}, Path=ShareCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                </Border>
+                                <Border Grid.Column="2" Style="{StaticResource IconButton}"
+                                        WidthRequest="36" HeightRequest="36"
+                                        SemanticProperties.Description="Kur'an'da aç">
+                                    <Label Text="›" FontSize="18" TextColor="{StaticResource AccentGold}"
+                                           HorizontalOptions="Center" VerticalOptions="Center" />
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DuasViewModel}}, Path=OpenInQuranCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                </Border>
+                            </Grid>
+
+                            <Label Text="{Binding ArabicText}"
+                                   FontFamily="AmiriQuran"
+                                   FontSize="20"
+                                   LineHeight="1.7"
+                                   FlowDirection="RightToLeft"
+                                   HorizontalTextAlignment="End"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+
+                            <Label Text="{Binding Translation}"
+                                   FontSize="14"
+                                   LineHeight="1.4"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+
+                            <Label Text="{Binding Reference}"
+                                   Style="{StaticResource BodyMuted}"
+                                   FontSize="12" />
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                           Color="{StaticResource AccentEmerald}"
+                           VerticalOptions="Center" HorizontalOptions="Center" />
+    </Grid>
+</ContentPage>

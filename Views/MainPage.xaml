@@ -129,6 +129,15 @@
                             </Border>
 
                             <Border Style="{StaticResource InfoChip}"
+                                    IsVisible="{Binding KerahatText, Converter={StaticResource StringNotEmptyConverter}}">
+                                <Label Text="{Binding KerahatText}"
+                                       FontSize="12"
+                                       FontFamily="OpenSansSemibold"
+                                       TextColor="{StaticResource Error}"
+                                       VerticalOptions="Center" />
+                            </Border>
+
+                            <Border Style="{StaticResource InfoChip}"
                                     IsVisible="{Binding DataStatusText, Converter={StaticResource StringNotEmptyConverter}}">
                                 <Label Text="{Binding DataStatusText}"
                                        FontSize="12"
@@ -324,7 +333,8 @@
                     </Border>
 
                     <!-- Quick access -->
-                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*,*,*"
+                          ColumnSpacing="10" RowSpacing="10">
                         <Border Style="{StaticResource InfoChip}" Padding="0,12"
                                 SemanticProperties.Description="Kıble pusulasını aç">
                             <Border.GestureRecognizers>
@@ -332,7 +342,7 @@
                             </Border.GestureRecognizers>
                             <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
                                 <Image Source="tab_qibla.png" WidthRequest="20" HeightRequest="20" />
-                                <Label Text="Kıble" FontSize="12" FontFamily="OpenSansSemibold"
+                                <Label Text="Kıble" FontSize="11" FontFamily="OpenSansSemibold"
                                        TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
                                        HorizontalOptions="Center" />
                             </VerticalStackLayout>
@@ -343,8 +353,8 @@
                                 <TapGestureRecognizer Command="{Binding OpenDhikrCommand}" />
                             </Border.GestureRecognizers>
                             <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
-                                <Label Text="۝" FontSize="18" TextColor="{StaticResource AccentGold}" HorizontalOptions="Center" />
-                                <Label Text="Zikirmatik" FontSize="12" FontFamily="OpenSansSemibold"
+                                <Label Text="۝" FontSize="17" TextColor="{StaticResource AccentGold}" HorizontalOptions="Center" />
+                                <Label Text="Zikirmatik" FontSize="11" FontFamily="OpenSansSemibold"
                                        TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
                                        HorizontalOptions="Center" />
                             </VerticalStackLayout>
@@ -356,7 +366,68 @@
                             </Border.GestureRecognizers>
                             <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
                                 <Image Source="tab_calendar.png" WidthRequest="20" HeightRequest="20" />
-                                <Label Text="Takvim" FontSize="12" FontFamily="OpenSansSemibold"
+                                <Label Text="Takvim" FontSize="11" FontFamily="OpenSansSemibold"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <Border Grid.Column="3" Style="{StaticResource InfoChip}" Padding="0,12"
+                                SemanticProperties.Description="Dini günler takvimini aç">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenReligiousDaysCommand}" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                                <Image Source="icon_crescent.png" WidthRequest="20" HeightRequest="20" />
+                                <Label Text="Dini Günler" FontSize="11" FontFamily="OpenSansSemibold"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Border Grid.Row="1" Style="{StaticResource InfoChip}" Padding="0,12"
+                                SemanticProperties.Description="Esmaül Hüsna listesini aç">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenEsmaulHusnaCommand}" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                                <Image Source="icon_isha.png" WidthRequest="20" HeightRequest="20" />
+                                <Label Text="Esmaül Hüsna" FontSize="11" FontFamily="OpenSansSemibold"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoChip}" Padding="0,12"
+                                SemanticProperties.Description="Kur'an'dan duaları aç">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenDuasCommand}" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                                <Image Source="icon_dua.png" WidthRequest="20" HeightRequest="20" />
+                                <Label Text="Dualar" FontSize="11" FontFamily="OpenSansSemibold"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource InfoChip}" Padding="0,12"
+                                SemanticProperties.Description="Kaza takibini aç">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenKazaCommand}" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                                <Image Source="icon_counter.png" WidthRequest="20" HeightRequest="20" />
+                                <Label Text="Kaza" FontSize="11" FontFamily="OpenSansSemibold"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource InfoChip}" Padding="0,12"
+                                SemanticProperties.Description="Zekât hesaplayıcıyı aç">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenZakatCommand}" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                                <Image Source="icon_coin.png" WidthRequest="20" HeightRequest="20" />
+                                <Label Text="Zekât" FontSize="11" FontFamily="OpenSansSemibold"
                                        TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
                                        HorizontalOptions="Center" />
                             </VerticalStackLayout>

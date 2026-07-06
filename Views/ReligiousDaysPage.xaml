@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PrayerApp.ViewModels"
+             xmlns:conv="clr-namespace:PrayerApp.Converters"
+             x:Class="PrayerApp.Views.ReligiousDaysPage"
+             x:DataType="vm:ReligiousDaysViewModel"
+             Title="Dini Günler"
+             Shell.NavBarIsVisible="True">
+
+    <ContentPage.Resources>
+        <conv:StringNotEmptyConverter x:Key="StringNotEmpty" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*" Padding="20,12,20,0" RowSpacing="12">
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0" />
+                <GradientStop Color="{AppThemeBinding Light=#EEF2FF, Dark={StaticResource BackgroundMid}}" Offset="1" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <!-- Gregorian → Hijri converter -->
+        <Border Style="{StaticResource GlassCard}" Padding="14,12">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" RowDefinitions="Auto,Auto" RowSpacing="6">
+                <Label Text="Tarih çevirici" Style="{StaticResource SectionLabel}" FontSize="10" Grid.ColumnSpan="2" />
+                <DatePicker Grid.Row="1" Date="{Binding ConvertDate}" FontSize="14" />
+                <Label Grid.Row="1" Grid.Column="1"
+                       Text="{Binding ConvertedHijriText}"
+                       FontSize="15" FontFamily="OpenSansSemibold"
+                       TextColor="{StaticResource AccentGold}"
+                       VerticalOptions="Center"
+                       HorizontalOptions="End" />
+            </Grid>
+        </Border>
+
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding Days}"
+                        SelectionMode="None">
+            <CollectionView.Footer>
+                <Label Text="Tarihler Ümmü'l-Kura takvimine göre hesaplanır; Diyanet takvimiyle bir gün fark gösterebilir. Kandil geceleri, listelenen günü takip eden gecedir."
+                       Style="{StaticResource BodyMuted}"
+                       FontSize="11"
+                       LineHeight="1.4"
+                       Margin="4,10,4,24" />
+            </CollectionView.Footer>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:ReligiousDayItem">
+                    <Border Margin="0,4" Padding="14,12"
+                            StrokeThickness="1" Stroke="{StaticResource GlassStroke}"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceDark}}"
+                            StrokeShape="RoundRectangle 14">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsNext}" Value="True">
+                                <Setter Property="Stroke" Value="#6010B981" />
+                                <Setter Property="BackgroundColor" Value="#1810B981" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                            <VerticalStackLayout Spacing="3" VerticalOptions="Center">
+                                <Label Text="{Binding Name}"
+                                       FontSize="15" FontFamily="OpenSansSemibold"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsBayram}" Value="True">
+                                            <Setter Property="TextColor" Value="{StaticResource AccentGold}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                                <Label Text="{Binding Description}"
+                                       Style="{StaticResource BodyMuted}" FontSize="12"
+                                       IsVisible="{Binding Description, Converter={StaticResource StringNotEmpty}}" />
+                                <Label FontSize="12" Style="{StaticResource BodyMuted}">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding DateText}" />
+                                            <Span Text=", " />
+                                            <Span Text="{Binding DayOfWeekText}" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                            </VerticalStackLayout>
+                            <Border Grid.Column="1" Style="{StaticResource InfoChip}" Padding="10,6" VerticalOptions="Center">
+                                <Label Text="{Binding RemainingText}"
+                                       FontSize="11" FontFamily="OpenSansSemibold"
+                                       TextColor="{StaticResource AccentEmerald}" />
+                            </Border>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

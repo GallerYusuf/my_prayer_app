@@ -2,10 +2,15 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:PrayerApp.ViewModels"
+             xmlns:conv="clr-namespace:PrayerApp.Converters"
              x:Class="PrayerApp.Views.DhikrPage"
              x:DataType="vm:DhikrViewModel"
              Title="Zikirmatik"
              Shell.NavBarIsVisible="True">
+
+    <ContentPage.Resources>
+        <conv:InverseBoolConverter x:Key="InverseBool" />
+    </ContentPage.Resources>
 
     <Grid>
         <Grid.Background>
@@ -54,6 +59,25 @@
                     <Button Grid.Column="1" Text="Ekle"
                             Style="{StaticResource OutlineButton}"
                             Command="{Binding ApplyCustomDhikrCommand}" />
+                </Grid>
+
+                <!-- Guided tesbihat -->
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <Button Text="Namaz Tesbihatı Başlat (33 × 3)"
+                            Style="{StaticResource OutlineButton}"
+                            Command="{Binding StartTesbihatCommand}"
+                            IsVisible="{Binding IsTesbihatMode, Converter={StaticResource InverseBool}}" />
+                    <Border Style="{StaticResource InfoChip}" Padding="12,10"
+                            IsVisible="{Binding IsTesbihatMode}">
+                        <Label Text="{Binding TesbihatStepText}"
+                               FontSize="13" FontFamily="OpenSansSemibold"
+                               TextColor="{StaticResource AccentEmerald}"
+                               HorizontalOptions="Center" />
+                    </Border>
+                    <Button Grid.Column="1" Text="Bitir"
+                            Style="{StaticResource GhostButton}"
+                            Command="{Binding ExitTesbihatCommand}"
+                            IsVisible="{Binding IsTesbihatMode}" />
                 </Grid>
 
                 <!-- Big counter -->
