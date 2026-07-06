@@ -118,6 +118,15 @@
                                        TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
                                 <Switch Grid.Column="1" IsToggled="{Binding SunriseNotificationEnabled}" Style="{StaticResource PremiumSwitch}" />
                             </Grid>
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                                    <Label Text="Sürekli vakit bildirimi" FontSize="14"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                    <Label Text="Günün vakitleri bildirim çubuğunda sabit kalır"
+                                           Style="{StaticResource BodyMuted}" FontSize="11" />
+                                </VerticalStackLayout>
+                                <Switch Grid.Column="1" IsToggled="{Binding PersistentNotificationEnabled}" Style="{StaticResource PremiumSwitch}" />
+                            </Grid>
                             <BoxView Style="{StaticResource SettingsDivider}" />
                             <Label Text="Vakitten kaç dakika önce hatırlatılsın?" Style="{StaticResource BodyMuted}" FontSize="12" />
                             <HorizontalStackLayout Spacing="8">

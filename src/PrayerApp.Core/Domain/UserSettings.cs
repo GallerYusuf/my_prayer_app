@@ -40,6 +40,9 @@ public sealed record UserSettings
     public bool NotificationSoundEnabled { get; init; } = true;
     public bool NotificationVibrationEnabled { get; init; } = true;
 
+    /// <summary>Ongoing status-bar notification with today's prayer times (Android).</summary>
+    public bool PersistentNotificationEnabled { get; init; } = true;
+
     // Verse notifications
     public bool VerseNotificationsEnabled { get; init; } = true;
     public IReadOnlyList<TimeOnly> VerseNotificationTimes { get; init; } = [new(9, 0)];

@@ -45,6 +45,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private int _themeIndex;
     [ObservableProperty] private bool _prayerNotificationsEnabled = true;
     [ObservableProperty] private bool _sunriseNotificationEnabled;
+    [ObservableProperty] private bool _persistentNotificationEnabled = true;
     [ObservableProperty] private int _minutesBeforePrayer;
     [ObservableProperty] private bool _soundEnabled = true;
     [ObservableProperty] private bool _vibrationEnabled = true;
@@ -97,6 +98,7 @@ public partial class SettingsViewModel : ObservableObject
 
         PrayerNotificationsEnabled = settings.PrayerNotificationsEnabled;
         SunriseNotificationEnabled = !settings.PrayerNotificationToggles.TryGetValue(PrayerKind.Sunrise, out var sunrise) || sunrise;
+        PersistentNotificationEnabled = settings.PersistentNotificationEnabled;
         MinutesBeforePrayer = settings.MinutesBeforePrayer;
         SoundEnabled = settings.NotificationSoundEnabled;
         VibrationEnabled = settings.NotificationVibrationEnabled;
@@ -210,6 +212,7 @@ public partial class SettingsViewModel : ObservableObject
                 Adjustments = BuildAdjustments(),
                 PrayerNotificationsEnabled = PrayerNotificationsEnabled,
                 PrayerNotificationToggles = new Dictionary<PrayerKind, bool> { [PrayerKind.Sunrise] = SunriseNotificationEnabled },
+                PersistentNotificationEnabled = PersistentNotificationEnabled,
                 MinutesBeforePrayer = MinutesBeforePrayer,
                 NotificationSoundEnabled = SoundEnabled,
                 NotificationVibrationEnabled = VibrationEnabled,
@@ -223,7 +226,7 @@ public partial class SettingsViewModel : ObservableObject
             _settingsStore.Save(updated);
             ThemeManager.Apply(updated.Theme);
 
-            if (PrayerNotificationsEnabled || VerseNotificationsEnabled || FridayNotificationsEnabled)
+            if (PrayerNotificationsEnabled || VerseNotificationsEnabled || FridayNotificationsEnabled || PersistentNotificationEnabled)
                 await _notificationScheduler.RequestPermissionAsync();
 
             // Atomic replan: the coordinator fetches/validates data first and only

@@ -24,6 +24,7 @@ public sealed class NotificationCoordinator(
     INotificationScheduler scheduler,
     ISettingsStore settingsStore,
     IKeyValueStore keyValueStore,
+    IPersistentNotificationService persistentNotification,
     IClock clock) : INotificationCoordinator
 {
     private const string ScheduledIdsKey = "notification_scheduled_ids";
@@ -35,7 +36,12 @@ public sealed class NotificationCoordinator(
     {
         var lastPlanDate = keyValueStore.GetString(LastPlanDateKey);
         if (lastPlanDate == clock.Today.ToString("O"))
+        {
+            // Plan is fresh, but the ongoing notification may have been lost
+            // (e.g. force-stop cleared its alarm chain); restore it cheaply.
+            await persistentNotification.RefreshAsync(cancellationToken);
             return;
+        }
 
         await RescheduleAsync(cancellationToken: cancellationToken);
     }
@@ -57,6 +63,7 @@ public sealed class NotificationCoordinator(
             {
                 await CancelPreviousAsync();
                 keyValueStore.SetString(LastPlanDateKey, clock.Today.ToString("O"));
+                await persistentNotification.RefreshAsync(cancellationToken);
                 return 0;
             }
 
@@ -88,6 +95,8 @@ public sealed class NotificationCoordinator(
 
             keyValueStore.SetString(ScheduledIdsKey, string.Join(',', effectivePlan.Select(n => n.Id)));
             keyValueStore.SetString(LastPlanDateKey, clock.Today.ToString("O"));
+
+            await persistentNotification.RefreshAsync(cancellationToken);
             return effectivePlan.Count;
         }
         finally

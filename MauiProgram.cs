@@ -102,6 +102,11 @@ public static class MauiProgram
 
 		services.AddSingleton<INotificationScheduler, LocalNotificationScheduler>();
 		services.AddSingleton<INotificationCoordinator, NotificationCoordinator>();
+#if ANDROID
+		services.AddSingleton<IPersistentNotificationService, Platforms.Android.PersistentNotificationService>();
+#else
+		services.AddSingleton<IPersistentNotificationService, NullPersistentNotificationService>();
+#endif
 
 		services.AddSingleton<ILocationService, LocationService>();
 		services.AddSingleton<IWidgetDataService, WidgetDataService>();
