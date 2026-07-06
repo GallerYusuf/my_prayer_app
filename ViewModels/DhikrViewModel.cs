@@ -78,7 +78,7 @@ public partial class DhikrViewModel : ObservableObject
     {
         if (Count > 0)
         {
-            var confirmed = await Shell.Current.DisplayAlert(
+            var confirmed = await Shell.Current.DisplayAlertAsync(
                 "Sayacı Sıfırla",
                 $"{DhikrName} sayacındaki {Count} zikri sıfırlamak istiyor musunuz?",
                 "Sıfırla",
