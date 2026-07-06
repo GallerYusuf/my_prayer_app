@@ -165,7 +165,7 @@ public partial class CityPickerViewModel : ObservableObject
                 kind: PickerItemKind.District,
                 title: district.DisplayName,
                 subtitle: "İlçe",
-                badge: "📍",
+                badge: district.DisplayName[..1].ToUpperInvariant(),
                 showChevron: false,
                 isSelected: city.PlateCode == _selectedPlateCode &&
                             string.Equals(district.ApiName, _selectedDistrictApiName, StringComparison.OrdinalIgnoreCase),

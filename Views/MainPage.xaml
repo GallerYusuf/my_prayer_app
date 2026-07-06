@@ -82,8 +82,9 @@
                         <HorizontalStackLayout Spacing="8">
                             <Border Style="{StaticResource InfoChip}">
                                 <HorizontalStackLayout Spacing="6">
-                                    <Label Text="☪"
-                                           FontSize="12"
+                                    <Image Source="icon_crescent.png"
+                                           WidthRequest="13"
+                                           HeightRequest="13"
                                            VerticalOptions="Center" />
                                     <Label Text="{Binding HijriDate}"
                                            FontSize="12"
@@ -95,8 +96,9 @@
 
                             <Border Style="{StaticResource InfoChip}">
                                 <HorizontalStackLayout Spacing="6">
-                                    <Label Text="📍"
-                                           FontSize="12"
+                                    <Image Source="icon_pin.png"
+                                           WidthRequest="13"
+                                           HeightRequest="13"
                                            VerticalOptions="Center" />
                                     <Label Text="{Binding CityDisplay}"
                                            FontSize="12"
@@ -226,9 +228,6 @@
                                         Padding="12,6"
                                         VerticalOptions="Start">
                                     <HorizontalStackLayout Spacing="5">
-                                        <Label Text="🕐"
-                                               FontSize="11"
-                                               VerticalOptions="Center" />
                                         <Label Text="{Binding NextPrayerTime}"
                                                FontFamily="OpenSansSemibold"
                                                FontSize="14"
@@ -398,8 +397,9 @@
                                                 StrokeShape="RoundRectangle 18"
                                                 Padding="12,14">
                                             <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
-                                                <Label Text="{Binding Glyph}"
-                                                       FontSize="22"
+                                                <Image Source="{Binding Icon}"
+                                                       WidthRequest="22"
+                                                       HeightRequest="22"
                                                        HorizontalOptions="Center" />
                                                 <Label Text="{Binding TurkishName}"
                                                        FontSize="12"
@@ -445,10 +445,17 @@
                                 </Border>
                                 <Border Style="{StaticResource InfoChip}" Padding="8,4"
                                         IsVisible="{Binding TrackStreak}">
-                                    <Label Text="{Binding TrackStreak, StringFormat='🔥 {0} gün'}"
-                                           FontSize="11"
-                                           FontFamily="OpenSansSemibold"
-                                           TextColor="{StaticResource AccentGold}" />
+                                    <HorizontalStackLayout Spacing="4">
+                                        <Image Source="icon_flame.png"
+                                               WidthRequest="12"
+                                               HeightRequest="12"
+                                               VerticalOptions="Center" />
+                                        <Label Text="{Binding TrackStreak, StringFormat='{0} gün'}"
+                                               FontSize="11"
+                                               FontFamily="OpenSansSemibold"
+                                               TextColor="{StaticResource AccentGold}"
+                                               VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
                                 </Border>
                             </HorizontalStackLayout>
                         </Grid>
@@ -475,7 +482,10 @@
                                                 CommandParameter="{Binding .}" />
                                         </Border.GestureRecognizers>
                                         <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
-                                            <Label Text="{Binding Glyph}" FontSize="20" HorizontalOptions="Center" />
+                                            <Image Source="{Binding Icon}"
+                                                   WidthRequest="20"
+                                                   HeightRequest="20"
+                                                   HorizontalOptions="Center" />
                                             <Label Text="{Binding TurkishName}"
                                                    FontSize="11"
                                                    FontFamily="OpenSansSemibold"
@@ -524,8 +534,9 @@
                                                         BackgroundColor="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark=#1AFFFFFF}"
                                                         StrokeShape="RoundRectangle 12"
                                                         VerticalOptions="Center">
-                                                    <Label Text="{Binding Glyph}"
-                                                           FontSize="18"
+                                                    <Image Source="{Binding Icon}"
+                                                           WidthRequest="18"
+                                                           HeightRequest="18"
                                                            HorizontalOptions="Center"
                                                            VerticalOptions="Center" />
                                                 </Border>

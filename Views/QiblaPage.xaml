@@ -82,8 +82,9 @@
                                  HorizontalOptions="Center"
                                  VerticalOptions="Center" />
 
-                        <Label Text="☪"
-                               FontSize="28"
+                        <Image Source="icon_crescent.png"
+                               WidthRequest="28"
+                               HeightRequest="28"
                                HorizontalOptions="Center"
                                VerticalOptions="Center"
                                Opacity="0.25" />

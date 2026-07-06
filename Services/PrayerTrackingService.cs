@@ -11,13 +11,13 @@ public class PrayerTrackingService : IPrayerTrackingService
     private const string LastFullDateKey = "prayer_track_last_full";
     private static readonly string[] TrackablePrayers = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
 
-    private static readonly (string Name, string Turkish, string Glyph)[] TrackDefinitions =
+    private static readonly (string Name, string Turkish, string Icon)[] TrackDefinitions =
     [
-        ("Fajr", "Sabah", "🌙"),
-        ("Dhuhr", "Öğle", "☀️"),
-        ("Asr", "İkindi", "🌤️"),
-        ("Maghrib", "Akşam", "🌇"),
-        ("Isha", "Yatsı", "🌃")
+        ("Fajr", "Sabah", "icon_fajr.png"),
+        ("Dhuhr", "Öğle", "icon_dhuhr.png"),
+        ("Asr", "İkindi", "icon_asr.png"),
+        ("Maghrib", "Akşam", "icon_maghrib.png"),
+        ("Isha", "Yatsı", "icon_isha.png")
     ];
 
     public IReadOnlyList<PrayerTrackItem> GetTodayTrackItems()
@@ -28,7 +28,7 @@ public class PrayerTrackingService : IPrayerTrackingService
             {
                 Name = p.Name,
                 TurkishName = p.Turkish,
-                Glyph = p.Glyph,
+                Icon = p.Icon,
                 IsCompleted = completed.Contains(p.Name)
             })
             .ToList();
