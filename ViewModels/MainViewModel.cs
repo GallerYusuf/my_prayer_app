@@ -21,7 +21,6 @@ public partial class MainViewModel : ObservableObject
     private readonly IQuranRepository _quranRepository;
     private readonly ISettingsStore _settingsStore;
     private readonly INotificationCoordinator _notificationCoordinator;
-    private readonly IWidgetDataService _widgetDataService;
     private readonly IPrayerTrackingService _trackingService;
     private readonly IClock _clock;
     private readonly ILogger<MainViewModel> _logger;
@@ -30,7 +29,6 @@ public partial class MainViewModel : ObservableObject
     private IReadOnlyList<PrayerDay> _days = [];
     private DateOnly _loadedDate;
     private Verse? _currentVerse;
-    private DateTime _lastWidgetUpdate = DateTime.MinValue;
     private bool _initialized;
 
     [ObservableProperty] private string _cityDisplay = "—";
@@ -71,7 +69,6 @@ public partial class MainViewModel : ObservableObject
         IQuranRepository quranRepository,
         ISettingsStore settingsStore,
         INotificationCoordinator notificationCoordinator,
-        IWidgetDataService widgetDataService,
         IPrayerTrackingService trackingService,
         IClock clock,
         ILogger<MainViewModel> logger)
@@ -80,7 +77,6 @@ public partial class MainViewModel : ObservableObject
         _quranRepository = quranRepository;
         _settingsStore = settingsStore;
         _notificationCoordinator = notificationCoordinator;
-        _widgetDataService = widgetDataService;
         _trackingService = trackingService;
         _clock = clock;
         _logger = logger;
@@ -329,22 +325,11 @@ public partial class MainViewModel : ObservableObject
             {
                 Name = kind.ToString(),
                 TurkishName = kind.ToTurkishName(),
-                Glyph = GetGlyph(kind),
+                Icon = PrayerIcons.For(kind),
                 Time = time.ToTimeSpan()
             });
         }
     }
-
-    private static string GetGlyph(PrayerKind kind) => kind switch
-    {
-        PrayerKind.Fajr => "🌙",
-        PrayerKind.Sunrise => "🌅",
-        PrayerKind.Dhuhr => "☀️",
-        PrayerKind.Asr => "🌤️",
-        PrayerKind.Maghrib => "🌇",
-        PrayerKind.Isha => "🌃",
-        _ => string.Empty
-    };
 
     private void UpdateRamadan(PrayerDay? today)
     {
@@ -412,7 +397,6 @@ public partial class MainViewModel : ObservableObject
         UpdateDayStates(now, next);
         UpdateDayPeriod();
         UpdateRamadanCountdown(now);
-        UpdateWidget(force: false);
     }
 
     private void UpdateDayStates(DateTimeOffset now, UpcomingPrayer next)
@@ -487,15 +471,6 @@ public partial class MainViewModel : ObservableObject
     {
         TrackProgressText = _trackingService.GetProgressText();
         TrackStreak = _trackingService.GetStreak();
-    }
-
-    private void UpdateWidget(bool force)
-    {
-        if (!force && (DateTime.UtcNow - _lastWidgetUpdate).TotalSeconds < 55)
-            return;
-
-        _lastWidgetUpdate = DateTime.UtcNow;
-        _widgetDataService.Update(CityDisplay, NextPrayerName, NextPrayerTime, RemainingTime);
     }
 
     private async Task ClearVerseActionMessageAsync()

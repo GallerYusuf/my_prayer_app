@@ -109,7 +109,6 @@ public static class MauiProgram
 #endif
 
 		services.AddSingleton<ILocationService, LocationService>();
-		services.AddSingleton<IWidgetDataService, WidgetDataService>();
 		services.AddSingleton<IPrayerTrackingService, PrayerTrackingService>();
 	}
 

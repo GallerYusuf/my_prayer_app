@@ -10,10 +10,11 @@ using PrayerApp.Core.Services;
 namespace PrayerApp.Platforms.Android;
 
 /// <summary>
-/// Shows a single ongoing (non-dismissible) status-bar notification with today's
-/// prayer times and the upcoming prayer. The notification is updated in place
-/// (fixed id) by a self-rechaining AlarmManager alarm that fires at each prayer
-/// time and at midnight; no foreground service is needed.
+/// Keeps the two "always visible" surfaces up to date from cached schedule data:
+/// the ongoing (non-dismissible) status-bar notification and the home-screen widget.
+/// Both change at exactly the same moments (each prayer time and midnight), so one
+/// self-rechaining AlarmManager alarm drives them together; no foreground service
+/// or periodic polling is needed.
 /// </summary>
 public sealed class PersistentNotificationService(
     IPrayerScheduleService scheduleService,
@@ -30,8 +31,12 @@ public sealed class PersistentNotificationService(
     {
         try
         {
+            var context = global::Android.App.Application.Context;
             var settings = settingsStore.Get();
-            if (!settings.HasCompletedOnboarding || !settings.PersistentNotificationEnabled)
+            var hasWidgets = WidgetRenderer.HasWidgets(context);
+
+            if (!settings.HasCompletedOnboarding ||
+                (!settings.PersistentNotificationEnabled && !hasWidgets))
             {
                 Remove();
                 return;
@@ -43,7 +48,7 @@ public sealed class PersistentNotificationService(
 
             if (!schedule.IsSuccess)
             {
-                logger.LogWarning("Persistent notification skipped: {Error}", schedule.Error.Message);
+                logger.LogWarning("Persistent surfaces skipped: {Error}", schedule.Error.Message);
                 return;
             }
 
@@ -54,7 +59,14 @@ public sealed class PersistentNotificationService(
             var now = clock.LocalNow;
             var next = NextPrayerCalculator.FindNext(schedule.Value.Days, now);
 
-            ShowOrUpdate(today, next, settings);
+            if (settings.PersistentNotificationEnabled)
+                ShowOrUpdate(today, next, settings);
+            else
+                NotificationManagerCompat.From(context)?.Cancel(NotificationId);
+
+            if (hasWidgets)
+                WidgetRenderer.Render(context, today, next, settings.Location?.DisplayName, now);
+
             ScheduleNextUpdate(next, now);
         }
         catch (Exception ex)

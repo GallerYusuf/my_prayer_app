@@ -7,69 +7,238 @@
     android:padding="14dp"
     android:background="@drawable/widget_background">
 
-    <TextView
-        android:id="@+id/widget_app_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Ezan Vakti"
-        android:textColor="#99FFFFFF"
-        android:textSize="11sp" />
-
-    <TextView
-        android:id="@+id/widget_city"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:text="Van"
-        android:textColor="#FFD4AF37"
-        android:textSize="13sp"
-        android:textStyle="bold"
-        android:maxLines="1"
-        android:ellipsize="end" />
-
-    <TextView
-        android:id="@+id/widget_next_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="Sonraki vakit"
-        android:textColor="#99FFFFFF"
-        android:textSize="11sp" />
-
-    <TextView
-        android:id="@+id/widget_next_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Öğle"
-        android:textColor="#FFFFFFFF"
-        android:textSize="22sp"
-        android:textStyle="bold" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
         <TextView
-            android:id="@+id/widget_countdown"
+            android:id="@+id/widget_app_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="01:23:45"
-            android:textColor="#FF10B981"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:fontFamily="monospace" />
+            android:text="Ezan Vakti"
+            android:textColor="#99FFFFFF"
+            android:textSize="11sp" />
 
         <TextView
-            android:id="@+id/widget_next_time"
+            android:id="@+id/widget_city"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="13:15"
+            android:text="—"
             android:textColor="#FFD4AF37"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/widget_next_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sonraki vakit"
+                android:textColor="#99FFFFFF"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/widget_next_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Uygulamayı açın"
+                android:textColor="#FFFFFFFF"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="end">
+
+            <Chronometer
+                android:id="@+id/widget_countdown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="#FF10B981"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:fontFamily="monospace"
+                android:gravity="end" />
+
+            <TextView
+                android:id="@+id/widget_next_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--:--"
+                android:textColor="#FFD4AF37"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:gravity="end" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/widget_times_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+            <TextView
+                android:id="@+id/widget_time_0_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="İmsak"
+                android:textColor="#99FFFFFF"
+                android:textSize="9sp" />
+            <TextView
+                android:id="@+id/widget_time_0_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--:--"
+                android:textColor="#FFFFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+            <TextView
+                android:id="@+id/widget_time_1_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Güneş"
+                android:textColor="#99FFFFFF"
+                android:textSize="9sp" />
+            <TextView
+                android:id="@+id/widget_time_1_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--:--"
+                android:textColor="#FFFFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+            <TextView
+                android:id="@+id/widget_time_2_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Öğle"
+                android:textColor="#99FFFFFF"
+                android:textSize="9sp" />
+            <TextView
+                android:id="@+id/widget_time_2_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--:--"
+                android:textColor="#FFFFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+            <TextView
+                android:id="@+id/widget_time_3_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="İkindi"
+                android:textColor="#99FFFFFF"
+                android:textSize="9sp" />
+            <TextView
+                android:id="@+id/widget_time_3_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--:--"
+                android:textColor="#FFFFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+            <TextView
+                android:id="@+id/widget_time_4_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Akşam"
+                android:textColor="#99FFFFFF"
+                android:textSize="9sp" />
+            <TextView
+                android:id="@+id/widget_time_4_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--:--"
+                android:textColor="#FFFFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+            <TextView
+                android:id="@+id/widget_time_5_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Yatsı"
+                android:textColor="#99FFFFFF"
+                android:textSize="9sp" />
+            <TextView
+                android:id="@+id/widget_time_5_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--:--"
+                android:textColor="#FFFFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

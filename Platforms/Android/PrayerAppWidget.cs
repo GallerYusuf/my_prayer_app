@@ -1,43 +1,46 @@
 using Android.App;
 using Android.Appwidget;
 using Android.Content;
-using Android.Widget;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using PrayerApp.Core.Contracts;
 
 namespace PrayerApp;
 
+/// <summary>
+/// Home-screen widget provider. Rendering is delegated to the shared refresh path
+/// (<see cref="IPersistentNotificationService"/>), which reads the cached schedule,
+/// draws the widget and re-arms the alarm chain that keeps it accurate while the
+/// app is closed. System-triggered periodic updates act as a safety net.
+/// </summary>
 [BroadcastReceiver(Exported = true, Label = "Ezan Vakti Widget")]
-[IntentFilter(new[] { AppWidgetManager.ActionAppwidgetUpdate })]
+[IntentFilter([AppWidgetManager.ActionAppwidgetUpdate])]
 [MetaData("android.appwidget.provider", Resource = "@xml/prayer_appwidget_info")]
 public class PrayerAppWidget : AppWidgetProvider
 {
-    private const string PrefsName = "widget_data";
-
-    public override void OnUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds)
+    public override void OnUpdate(Context? context, AppWidgetManager? appWidgetManager, int[]? appWidgetIds)
     {
-        var prefs = context.GetSharedPreferences(PrefsName, global::Android.Content.FileCreationMode.Private);
-        var city = prefs.GetString("city", "—") ?? "—";
-        var nextName = prefs.GetString("next_name", "—") ?? "—";
-        var nextTime = prefs.GetString("next_time", "--:--") ?? "--:--";
-        var remaining = prefs.GetString("remaining", "--:--:--") ?? "--:--:--";
+        var services = IPlatformApplication.Current?.Services;
+        var refresher = services?.GetService<IPersistentNotificationService>();
+        if (refresher is null)
+            return;
 
-        foreach (var widgetId in appWidgetIds)
+        var logger = services?.GetService<ILogger<PrayerAppWidget>>();
+        var pendingResult = GoAsync();
+        _ = Task.Run(async () =>
         {
-            var views = new RemoteViews(context.PackageName, Resource.Layout.widget_prayer);
-            views.SetTextViewText(Resource.Id.widget_city, city);
-            views.SetTextViewText(Resource.Id.widget_next_name, nextName);
-            views.SetTextViewText(Resource.Id.widget_next_time, nextTime);
-            views.SetTextViewText(Resource.Id.widget_countdown, remaining);
-
-            var launchIntent = new Intent(context, typeof(MainActivity));
-            launchIntent.SetFlags(ActivityFlags.NewTask | ActivityFlags.ClearTop);
-            var pending = PendingIntent.GetActivity(
-                context,
-                0,
-                launchIntent,
-                PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
-            views.SetOnClickPendingIntent(Resource.Id.widget_root, pending);
-
-            appWidgetManager.UpdateAppWidget(widgetId, views);
-        }
+            try
+            {
+                await refresher.RefreshAsync();
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex, "Widget update failed");
+            }
+            finally
+            {
+                pendingResult?.Finish();
+            }
+        });
     }
 }
