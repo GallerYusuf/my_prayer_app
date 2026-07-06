@@ -20,4 +20,7 @@ public partial class SurahPage : ContentPage
         if (_viewModel.ScrollToVerse > 0 && _viewModel.Verses.Count >= _viewModel.ScrollToVerse)
             VersesView.ScrollTo(_viewModel.ScrollToVerse - 1, position: ScrollToPosition.Start, animate: false);
     }
+
+    private void OnVersesScrolled(object? sender, ItemsViewScrolledEventArgs e) =>
+        _viewModel.OnVisibleVerseChanged(e.CenterItemIndex);
 }

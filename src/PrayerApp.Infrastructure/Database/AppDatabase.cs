@@ -8,7 +8,7 @@ namespace PrayerApp.Infrastructure.Database;
 /// </summary>
 public sealed class AppDatabase : IAsyncDisposable
 {
-    public const int CurrentSchemaVersion = 1;
+    public const int CurrentSchemaVersion = 2;
 
     private readonly SQLiteAsyncConnection _connection;
     private readonly SemaphoreSlim _initLock = new(1, 1);
@@ -54,6 +54,18 @@ public sealed class AppDatabase : IAsyncDisposable
             await _connection.CreateTableAsync<Entities.VerseRow>();
             await _connection.CreateTableAsync<Entities.FavoriteVerseRow>();
             await _connection.CreateTableAsync<Entities.DhikrSessionRow>();
+        }
+
+        if (version < 2)
+        {
+            // v2: verses gain ArabicText/Page/Juz columns (CreateTable adds missing
+            // columns in-place; favorites and other user data are untouched) and the
+            // khatm (Quran completion) tracking tables are introduced. The Quran
+            // repository re-imports verse content when it detects the new columns
+            // are empty — driven by the import-version meta key, not by this migration.
+            await _connection.CreateTableAsync<Entities.VerseRow>();
+            await _connection.CreateTableAsync<Entities.KhatmPlanRow>();
+            await _connection.CreateTableAsync<Entities.KhatmLogRow>();
         }
 
         if (version != CurrentSchemaVersion)

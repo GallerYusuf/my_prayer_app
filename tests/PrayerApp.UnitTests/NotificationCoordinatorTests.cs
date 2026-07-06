@@ -237,6 +237,12 @@ public class NotificationCoordinatorTests
 
         public Task<int> GetTotalVerseCountAsync(CancellationToken cancellationToken = default) => Task.FromResult(0);
 
+        public Task<IReadOnlyList<JuzInfo>> GetJuzListAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<JuzInfo>>([]);
+
+        public Task<Verse?> GetPageStartAsync(int page, CancellationToken cancellationToken = default) =>
+            Task.FromResult<Verse?>(null);
+
         public Task<Verse?> GetVerseByGlobalIndexAsync(int globalIndex, CancellationToken cancellationToken = default) =>
             Task.FromResult<Verse?>(null);
 

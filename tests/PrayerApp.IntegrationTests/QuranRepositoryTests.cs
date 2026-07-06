@@ -104,4 +104,71 @@ public sealed class QuranRepositoryTests : IAsyncLifetime
         Assert.False(await _repository.IsFavoriteAsync(1, 1));
         Assert.Empty(await _repository.GetFavoritesAsync());
     }
+
+    [Fact]
+    public async Task Import_StoresArabicTextAlongsideTranslation()
+    {
+        var verses = await _repository.GetVersesAsync(1);
+
+        Assert.Equal("a", verses[0].ArabicText);
+        Assert.Equal("Rahman ve Rahim olan Allah'ın adıyla", verses[0].Text);
+    }
+
+    [Fact]
+    public async Task Import_AssignsMushafPageAndJuz()
+    {
+        // Page 2 and juz 1 metadata: page 2 starts at 2:1 (Tanzil table).
+        var fatiha = await _repository.GetVersesAsync(1);
+        var baqarah = await _repository.GetVersesAsync(2);
+
+        Assert.All(fatiha, v => Assert.Equal(1, v.Page));
+        Assert.All(fatiha, v => Assert.Equal(1, v.Juz));
+        Assert.All(baqarah, v => Assert.Equal(2, v.Page));
+        Assert.All(baqarah, v => Assert.Equal(1, v.Juz));
+    }
+
+    [Fact]
+    public async Task GetPageStart_ReturnsFirstVerseOfPage()
+    {
+        var start = await _repository.GetPageStartAsync(2);
+
+        Assert.NotNull(start);
+        Assert.Equal(2, start.SurahNumber);
+        Assert.Equal(1, start.VerseNumber);
+    }
+
+    [Fact]
+    public async Task GetJuzList_ReturnsRangesFromImportedData()
+    {
+        var juzList = await _repository.GetJuzListAsync();
+
+        var juz = Assert.Single(juzList); // sample data only covers juz 1
+        Assert.Equal(1, juz.Number);
+        Assert.Equal(1, juz.StartSurah);
+        Assert.Equal(1, juz.StartVerse);
+        Assert.Equal(1, juz.StartPage);
+        Assert.Equal(2, juz.EndPage);
+    }
+
+    [Fact]
+    public async Task Reimport_ForNewImportVersion_PreservesFavorites()
+    {
+        // Arrange: v1-era database — verses imported without the version marker.
+        await _repository.ToggleFavoriteAsync(2, 2);
+        var db = await _database.GetConnectionAsync();
+        await db.ExecuteAsync("DELETE FROM cache_meta WHERE Key LIKE 'quran_import_version%'");
+        await db.ExecuteAsync("UPDATE verses SET ArabicText = ''");
+
+        // Act: a fresh repository instance detects the missing marker and re-imports.
+        var freshRepository = new QuranRepository(
+            _database,
+            _ => Task.FromResult<Stream>(new MemoryStream(Encoding.UTF8.GetBytes(SampleJson))),
+            new FakeClock(new DateTimeOffset(2026, 7, 6, 10, 0, 0, TimeSpan.FromHours(3))),
+            NullLogger<QuranRepository>.Instance);
+
+        var verses = await freshRepository.GetVersesAsync(1);
+
+        Assert.Equal("a", verses[0].ArabicText);
+        Assert.True(await freshRepository.IsFavoriteAsync(2, 2));
+    }
 }

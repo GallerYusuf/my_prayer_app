@@ -2,12 +2,17 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:PrayerApp.ViewModels"
+             xmlns:conv="clr-namespace:PrayerApp.Converters"
              x:Class="PrayerApp.Views.SurahPage"
              x:DataType="vm:SurahViewModel"
              Title="{Binding SurahTitle}"
              Shell.NavBarIsVisible="True">
 
-    <Grid RowDefinitions="*">
+    <ContentPage.Resources>
+        <conv:StringNotEmptyConverter x:Key="StringNotEmpty" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*">
         <Grid.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0" />
@@ -15,18 +20,63 @@
             </LinearGradientBrush>
         </Grid.Background>
 
+        <!-- Reading toolbar -->
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8" Padding="20,10,20,4">
+            <Border Style="{StaticResource InfoChip}" Padding="12,7">
+                <Label FontSize="12" FontFamily="OpenSansSemibold"
+                       TextColor="{StaticResource AccentGold}">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding ShowArabic}" Value="True">
+                            <Setter Property="Text" Value="Arapça: Açık" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding ShowArabic}" Value="False">
+                            <Setter Property="Text" Value="Arapça: Kapalı" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ToggleArabicCommand}" />
+                </Border.GestureRecognizers>
+            </Border>
+
+            <BoxView Grid.Column="1" HeightRequest="1" Color="Transparent" />
+
+            <Border Grid.Column="2" Style="{StaticResource IconButton}"
+                    WidthRequest="38" HeightRequest="38"
+                    SemanticProperties.Description="Yazıyı küçült">
+                <Label Text="A−" FontSize="13" FontFamily="OpenSansSemibold"
+                       TextColor="{StaticResource AccentGold}"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding DecreaseFontCommand}" />
+                </Border.GestureRecognizers>
+            </Border>
+            <Border Grid.Column="3" Style="{StaticResource IconButton}"
+                    WidthRequest="38" HeightRequest="38"
+                    SemanticProperties.Description="Yazıyı büyüt">
+                <Label Text="A+" FontSize="15" FontFamily="OpenSansSemibold"
+                       TextColor="{StaticResource AccentGold}"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding IncreaseFontCommand}" />
+                </Border.GestureRecognizers>
+            </Border>
+        </Grid>
+
         <CollectionView x:Name="VersesView"
+                        Grid.Row="1"
                         ItemsSource="{Binding Verses}"
                         SelectionMode="None"
-                        Margin="20,10,20,0">
+                        Scrolled="OnVersesScrolled"
+                        Margin="20,4,20,0">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="vm:VerseItem">
                     <Border Margin="0,5" Padding="16,14"
                             StrokeThickness="1" Stroke="{StaticResource GlassStroke}"
                             BackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceDark}}"
                             StrokeShape="RoundRectangle 16">
-                        <Grid RowDefinitions="Auto,Auto" RowSpacing="10">
-                            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                        <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
+                            <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto" ColumnSpacing="10">
                                 <Border WidthRequest="30" HeightRequest="30"
                                         StrokeThickness="1" Stroke="#40D4AF37"
                                         StrokeShape="RoundRectangle 8"
@@ -37,8 +87,14 @@
                                            TextColor="{StaticResource AccentGold}"
                                            HorizontalOptions="Center" VerticalOptions="Center" />
                                 </Border>
-                                <BoxView Grid.Column="1" HeightRequest="1" Color="Transparent" />
-                                <Border Grid.Column="2" Style="{StaticResource IconButton}"
+                                <Label Grid.Column="1"
+                                       Text="{Binding PageInfo}"
+                                       Style="{StaticResource BodyMuted}"
+                                       FontSize="10"
+                                       VerticalOptions="Center"
+                                       IsVisible="{Binding PageInfo, Converter={StaticResource StringNotEmpty}}" />
+                                <BoxView Grid.Column="2" HeightRequest="1" Color="Transparent" />
+                                <Border Grid.Column="3" Style="{StaticResource IconButton}"
                                         WidthRequest="38" HeightRequest="38"
                                         SemanticProperties.Description="Ayeti paylaş">
                                     <Label Text="↗" FontSize="15" TextColor="{StaticResource AccentGold}"
@@ -49,7 +105,7 @@
                                             CommandParameter="{Binding .}" />
                                     </Border.GestureRecognizers>
                                 </Border>
-                                <Border Grid.Column="3" Style="{StaticResource IconButton}"
+                                <Border Grid.Column="4" Style="{StaticResource IconButton}"
                                         WidthRequest="38" HeightRequest="38"
                                         SemanticProperties.Description="Favorilere ekle veya çıkar">
                                     <Label Text="♡" FontSize="16" TextColor="{StaticResource AccentGold}"
@@ -68,9 +124,28 @@
                                     </Border.GestureRecognizers>
                                 </Border>
                             </Grid>
+
                             <Label Grid.Row="1"
+                                   Text="{Binding ArabicText}"
+                                   FontFamily="AmiriQuran"
+                                   FontSize="{Binding Source={RelativeSource AncestorType={x:Type vm:SurahViewModel}}, Path=ArabicFontSize}"
+                                   LineHeight="1.7"
+                                   FlowDirection="RightToLeft"
+                                   HorizontalTextAlignment="End"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                                   IsVisible="{Binding HasArabic}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding Source={RelativeSource AncestorType={x:Type vm:SurahViewModel}}, Path=ShowArabic}"
+                                                 Value="False">
+                                        <Setter Property="IsVisible" Value="False" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+
+                            <Label Grid.Row="2"
                                    Text="{Binding Text}"
-                                   FontSize="15"
+                                   FontSize="{Binding Source={RelativeSource AncestorType={x:Type vm:SurahViewModel}}, Path=TranslationFontSize}"
                                    LineHeight="1.45"
                                    TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
                         </Grid>
@@ -79,7 +154,8 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+        <ActivityIndicator Grid.Row="1"
+                           IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
                            Color="{StaticResource AccentEmerald}"
                            VerticalOptions="Center" HorizontalOptions="Center" />
     </Grid>

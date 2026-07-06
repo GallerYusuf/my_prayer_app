@@ -13,7 +13,7 @@
         <conv:InverseBoolConverter x:Key="InverseBool" />
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="Auto,Auto,*" Padding="20,16,20,0" RowSpacing="14">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" Padding="20,16,20,0" RowSpacing="12">
         <Grid.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0" />
@@ -21,25 +21,138 @@
             </LinearGradientBrush>
         </Grid.Background>
 
-        <Grid ColumnDefinitions="*,Auto">
+        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
             <VerticalStackLayout Spacing="4">
                 <Label Text="Kur'an-ı Kerim" Style="{StaticResource DisplayTitle}" FontSize="28" />
-                <Label Text="Türkçe meal · 114 sure" Style="{StaticResource BodyMuted}" FontSize="13" />
+                <Label Text="Arapça metin ve Türkçe meal · 114 sure" Style="{StaticResource BodyMuted}" FontSize="13" />
             </VerticalStackLayout>
             <Button Grid.Column="1"
+                    Text="Cüzler"
+                    Style="{StaticResource GhostButton}"
+                    Command="{Binding ToggleJuzListCommand}"
+                    VerticalOptions="Start" />
+            <Button Grid.Column="2"
                     Text="Favoriler"
                     Style="{StaticResource OutlineButton}"
                     Command="{Binding ToggleFavoritesViewCommand}"
                     VerticalOptions="Start" />
         </Grid>
 
-        <Border Grid.Row="1" Style="{StaticResource PremiumInput}">
+        <!-- Continue reading -->
+        <Border Grid.Row="1"
+                Style="{StaticResource GlassCard}"
+                Padding="14,12"
+                IsVisible="{Binding HasLastRead}">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ContinueReadingCommand}" />
+            </Border.GestureRecognizers>
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                    <Label Text="Kaldığın yerden devam et" Style="{StaticResource SectionLabel}" FontSize="10" />
+                    <Label Text="{Binding LastReadText}"
+                           FontSize="14" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource AccentGold}" />
+                </VerticalStackLayout>
+                <Label Grid.Column="1" Text="›" FontSize="24"
+                       TextColor="{StaticResource AccentGold}" VerticalOptions="Center" />
+            </Grid>
+        </Border>
+
+        <!-- Khatm tracker -->
+        <Border Grid.Row="2" Style="{StaticResource GlassCard}" Padding="14,12">
+            <VerticalStackLayout Spacing="10">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Text="Hatim Takibi"
+                           FontSize="14" FontFamily="OpenSansSemibold"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                           VerticalOptions="Center" />
+                    <Button Grid.Column="1"
+                            Text="Hatim Başlat"
+                            Style="{StaticResource GhostButton}"
+                            Command="{Binding ToggleKhatmPanelCommand}"
+                            IsVisible="{Binding HasActiveKhatm, Converter={StaticResource InverseBool}}" />
+                </Grid>
+
+                <!-- Duration picker (start panel) -->
+                <VerticalStackLayout Spacing="8" IsVisible="{Binding IsKhatmPanelOpen}">
+                    <Label Text="Hedef süre seçin" Style="{StaticResource BodyMuted}" FontSize="12" />
+                    <HorizontalStackLayout Spacing="8">
+                        <Border Style="{StaticResource InfoChip}" Padding="12,8">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding StartKhatmCommand}" CommandParameter="30" />
+                            </Border.GestureRecognizers>
+                            <Label Text="30 gün" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                        </Border>
+                        <Border Style="{StaticResource InfoChip}" Padding="12,8">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding StartKhatmCommand}" CommandParameter="60" />
+                            </Border.GestureRecognizers>
+                            <Label Text="60 gün" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                        </Border>
+                        <Border Style="{StaticResource InfoChip}" Padding="12,8">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding StartKhatmCommand}" CommandParameter="90" />
+                            </Border.GestureRecognizers>
+                            <Label Text="90 gün" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                        </Border>
+                        <Border Style="{StaticResource InfoChip}" Padding="12,8">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding StartKhatmCommand}" CommandParameter="0" />
+                            </Border.GestureRecognizers>
+                            <Label Text="Serbest" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                        </Border>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- Active plan -->
+                <VerticalStackLayout Spacing="8" IsVisible="{Binding HasActiveKhatm}">
+                    <ProgressBar Progress="{Binding KhatmProgress}"
+                                 ProgressColor="{StaticResource AccentEmerald}" />
+                    <Label Text="{Binding KhatmProgressText}"
+                           FontSize="13" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource AccentEmerald}" />
+                    <Label Text="{Binding KhatmDailyText}" Style="{StaticResource BodyMuted}" FontSize="12" />
+
+                    <Grid ColumnDefinitions="Auto,90,Auto,*" ColumnSpacing="10">
+                        <Label Text="Kaldığım sayfa:" Style="{StaticResource BodyMuted}" FontSize="13" VerticalOptions="Center" />
+                        <Border Grid.Column="1" Style="{StaticResource PremiumInput}" Padding="10,2">
+                            <Entry Text="{Binding KhatmPageText}"
+                                   Keyboard="Numeric"
+                                   MaxLength="3"
+                                   FontSize="14"
+                                   HorizontalTextAlignment="Center" />
+                        </Border>
+                        <Button Grid.Column="2"
+                                Text="Kaydet"
+                                Style="{StaticResource OutlineButton}"
+                                Command="{Binding SaveKhatmPageCommand}" />
+                        <Button Grid.Column="3"
+                                Text="Okumaya Git"
+                                Style="{StaticResource GhostButton}"
+                                Command="{Binding OpenKhatmPageCommand}" />
+                    </Grid>
+
+                    <Button Text="Yeni Hatim Başlat"
+                            Style="{StaticResource GhostButton}"
+                            Command="{Binding ToggleKhatmPanelCommand}"
+                            HorizontalOptions="Start"
+                            IsVisible="{Binding IsKhatmPanelOpen, Converter={StaticResource InverseBool}}" />
+                </VerticalStackLayout>
+
+                <Label Text="{Binding KhatmCompletedMessage}"
+                       FontSize="13" FontFamily="OpenSansSemibold"
+                       TextColor="{StaticResource AccentGold}"
+                       IsVisible="{Binding KhatmCompletedMessage, Converter={StaticResource StringNotEmpty}}" />
+            </VerticalStackLayout>
+        </Border>
+
+        <Border Grid.Row="3" Style="{StaticResource PremiumInput}">
             <Entry Placeholder="Ayet veya kelime ara..."
                    Text="{Binding SearchText}"
                    ClearButtonVisibility="WhileEditing" />
         </Border>
 
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="4">
             <!-- Surah list -->
             <CollectionView x:Name="SurahsView"
                             ItemsSource="{Binding Surahs}"
@@ -76,6 +189,63 @@
                                        Text="{Binding VerseCount, StringFormat='{0} ayet'}"
                                        Style="{StaticResource BodyMuted}" FontSize="12"
                                        VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Juz list -->
+            <CollectionView x:Name="JuzView"
+                            ItemsSource="{Binding JuzList}"
+                            SelectionMode="None"
+                            IsVisible="False">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="contracts:JuzInfo">
+                        <Border Margin="0,4" Padding="14,12"
+                                StrokeThickness="1" Stroke="{StaticResource GlassStroke}"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceDark}}"
+                                StrokeShape="RoundRectangle 14">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:QuranViewModel}}, Path=OpenJuzCommand}"
+                                    CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                                <Border WidthRequest="38" HeightRequest="38"
+                                        StrokeThickness="1" Stroke="#4010B981"
+                                        BackgroundColor="Transparent"
+                                        StrokeShape="RoundRectangle 10"
+                                        VerticalOptions="Center">
+                                    <Label Text="{Binding Number}"
+                                           FontSize="13" FontFamily="OpenSansSemibold"
+                                           TextColor="{StaticResource AccentEmerald}"
+                                           HorizontalOptions="Center" VerticalOptions="Center" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                    <Label Text="{Binding Number, StringFormat='{0}. Cüz'}"
+                                           FontSize="15" FontFamily="OpenSansSemibold"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                    <Label FontSize="12" Style="{StaticResource BodyMuted}">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="{Binding StartSurahName}" />
+                                                <Span Text=" " />
+                                                <Span Text="{Binding StartVerse, StringFormat='{0}. ayetten başlar'}" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                </VerticalStackLayout>
+                                <Label Grid.Column="2" FontSize="12" Style="{StaticResource BodyMuted}" VerticalOptions="Center">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding StartPage}" />
+                                            <Span Text="-" />
+                                            <Span Text="{Binding EndPage}" />
+                                            <Span Text=". sayfa" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
                             </Grid>
                         </Border>
                     </DataTemplate>

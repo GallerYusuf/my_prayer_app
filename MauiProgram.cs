@@ -59,6 +59,7 @@ public static class MauiProgram
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+				fonts.AddFont("AmiriQuran.ttf", "AmiriQuran");
 			});
 
 		RegisterCoreServices(builder.Services);
@@ -99,6 +100,7 @@ public static class MauiProgram
 			sp.GetRequiredService<ILogger<QuranRepository>>()));
 
 		services.AddSingleton<IDhikrRepository, DhikrRepository>();
+		services.AddSingleton<IKhatmRepository, KhatmRepository>();
 
 		services.AddSingleton<INotificationScheduler, LocalNotificationScheduler>();
 		services.AddSingleton<INotificationCoordinator, NotificationCoordinator>();
@@ -122,6 +124,11 @@ public static class MauiProgram
 		services.AddTransient<DhikrViewModel>();
 		services.AddTransient<SettingsViewModel>();
 		services.AddTransient<OnboardingViewModel>();
+		services.AddTransient<EsmaulHusnaViewModel>();
+		services.AddTransient<DuasViewModel>();
+		services.AddTransient<ReligiousDaysViewModel>();
+		services.AddTransient<KazaViewModel>();
+		services.AddTransient<ZakatViewModel>();
 
 		services.AddTransient<MainPage>();
 		services.AddTransient<CalendarPage>();
@@ -131,5 +138,10 @@ public static class MauiProgram
 		services.AddTransient<DhikrPage>();
 		services.AddTransient<SettingsPage>();
 		services.AddTransient<OnboardingPage>();
+		services.AddTransient<EsmaulHusnaPage>();
+		services.AddTransient<DuasPage>();
+		services.AddTransient<ReligiousDaysPage>();
+		services.AddTransient<KazaPage>();
+		services.AddTransient<ZakatPage>();
 	}
 }

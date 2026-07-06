@@ -11,10 +11,12 @@ public partial class QuranPage : ContentPage
         InitializeComponent();
         BindingContext = _viewModel = viewModel;
 
-        // ResultsView shows either search results or favorites; swap its source in one place.
+        // One list is visible at a time: search results, favorites, juz list or surahs.
         _viewModel.PropertyChanged += (_, e) =>
         {
-            if (e.PropertyName is nameof(QuranViewModel.IsSearchMode) or nameof(QuranViewModel.ShowFavorites))
+            if (e.PropertyName is nameof(QuranViewModel.IsSearchMode)
+                or nameof(QuranViewModel.ShowFavorites)
+                or nameof(QuranViewModel.ShowJuzList))
                 UpdateResultsView();
         };
     }
@@ -36,7 +38,8 @@ public partial class QuranPage : ContentPage
             ResultsView.IsVisible = false;
         }
 
-        SurahsView.IsVisible = !ResultsView.IsVisible;
+        JuzView.IsVisible = !ResultsView.IsVisible && _viewModel.ShowJuzList;
+        SurahsView.IsVisible = !ResultsView.IsVisible && !JuzView.IsVisible;
     }
 
     protected override async void OnAppearing()
