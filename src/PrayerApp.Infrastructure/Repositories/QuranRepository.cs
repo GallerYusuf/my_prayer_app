@@ -29,7 +29,7 @@ public sealed class QuranRepository(
     {
         var db = await EnsureImportedAsync(cancellationToken);
         var rows = await db.Table<Entities.SurahRow>().OrderBy(s => s.Number).ToListAsync();
-        return rows.Select(r => new SurahInfo(r.Number, r.Name, r.TranslatedName, r.VerseCount, Database.QuranMetadata.SurahNuzulOrder[r.Number])).ToList();
+        return rows.Select(r => new SurahInfo(r.Number, r.Name, r.TranslatedName, r.VerseCount, Core.Domain.QuranMetadata.SurahNuzulOrder[r.Number])).ToList();
     }
 
     public async Task<IReadOnlyList<Verse>> GetVersesAsync(int surahNumber, CancellationToken cancellationToken = default)

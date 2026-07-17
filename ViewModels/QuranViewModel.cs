@@ -4,6 +4,8 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using PrayerApp.Core.Common;
 using PrayerApp.Core.Contracts;
+using PrayerApp.Core.Domain;
+using PrayerApp.Core.Services;
 
 namespace PrayerApp.ViewModels;
 
@@ -25,6 +27,10 @@ public partial class QuranViewModel : ObservableObject
     [ObservableProperty] private bool _isSearchMode;
     [ObservableProperty] private bool _showFavorites;
     [ObservableProperty] private bool _showJuzList;
+    [ObservableProperty] private bool _showTopics;
+    [ObservableProperty] private bool _showTopicVerses;
+    [ObservableProperty] private string _selectedTopicName = string.Empty;
+    [ObservableProperty] private bool _sortByNuzul;
     [ObservableProperty] private string _emptyMessage = string.Empty;
 
     // "Continue reading" card
@@ -44,6 +50,8 @@ public partial class QuranViewModel : ObservableObject
     public ObservableCollection<JuzInfo> JuzList { get; } = [];
     public ObservableCollection<Verse> SearchResults { get; } = [];
     public ObservableCollection<Verse> Favorites { get; } = [];
+    public ObservableCollection<QuranTopic> Topics { get; } = [];
+    public ObservableCollection<Verse> TopicVerses { get; } = [];
 
     public QuranViewModel(
         IQuranRepository quranRepository,
@@ -71,20 +79,36 @@ public partial class QuranViewModel : ObservableObject
         await RefreshKhatmAsync();
     }
 
+    private void SortSurahs()
+    {
+        var sorted = SortByNuzul 
+            ? _allSurahs.OrderBy(s => s.NuzulNumber).ToList() 
+            : _allSurahs.OrderBy(s => s.Number).ToList();
+            
+        Surahs.Clear();
+        foreach (var surah in sorted)
+            Surahs.Add(surah);
+    }
+
     private async Task LoadSurahsAsync()
     {
         try
         {
             IsBusy = true;
             _allSurahs = await _quranRepository.GetSurahsAsync();
-            Surahs.Clear();
-            foreach (var surah in _allSurahs)
-                Surahs.Add(surah);
+            SortSurahs();
 
             var juzList = await _quranRepository.GetJuzListAsync();
             JuzList.Clear();
             foreach (var juz in juzList)
                 JuzList.Add(juz);
+
+            if (Topics.Count == 0)
+            {
+                var topics = QuranTopicProvider.GetTopics();
+                foreach (var topic in topics)
+                    Topics.Add(topic);
+            }
         }
         catch (Exception ex)
         {
@@ -147,16 +171,73 @@ public partial class QuranViewModel : ObservableObject
             await Shell.Current.GoToAsync($"SurahPage?surah={position.Surah}&verse={position.Verse}");
     }
 
+    private void ResetViews()
+    {
+        ShowJuzList = false;
+        ShowFavorites = false;
+        ShowTopics = false;
+        ShowTopicVerses = false;
+        IsSearchMode = false;
+        SearchText = string.Empty;
+    }
+
+    [RelayCommand]
+    private void ShowSurahList() => ResetViews();
+
     [RelayCommand]
     private void ToggleJuzList()
     {
-        ShowJuzList = !ShowJuzList;
-        if (ShowJuzList)
+        var next = !ShowJuzList;
+        ResetViews();
+        ShowJuzList = next;
+    }
+
+    [RelayCommand]
+    private void ToggleTopics()
+    {
+        var next = !ShowTopics;
+        ResetViews();
+        ShowTopics = next;
+    }
+
+    [RelayCommand]
+    private async Task OpenTopicAsync(QuranTopic topic)
+    {
+        try
         {
-            ShowFavorites = false;
-            IsSearchMode = false;
-            SearchText = string.Empty;
+            IsBusy = true;
+            SelectedTopicName = topic.Name;
+            ResetViews();
+            ShowTopicVerses = true;
+            TopicVerses.Clear();
+            
+            foreach (var refVal in topic.Verses)
+            {
+                var verse = await _quranRepository.GetVerseAsync(refVal.Surah, refVal.Verse);
+                if (verse != null)
+                {
+                    TopicVerses.Add(verse);
+                }
+            }
+            
+            EmptyMessage = TopicVerses.Count == 0 ? "Bu konuya ait ayet bulunamadı." : string.Empty;
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load topic verses");
+            EmptyMessage = "Ayetler yüklenemedi.";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private void ToggleSortOrder()
+    {
+        SortByNuzul = !SortByNuzul;
+        SortSurahs();
     }
 
     [RelayCommand]
@@ -263,6 +344,8 @@ public partial class QuranViewModel : ObservableObject
             IsSearchMode = true;
             ShowFavorites = false;
             ShowJuzList = false;
+            ShowTopics = false;
+            ShowTopicVerses = false;
             SearchResults.Clear();
             foreach (var verse in results)
                 SearchResults.Add(verse);
@@ -282,10 +365,9 @@ public partial class QuranViewModel : ObservableObject
     [RelayCommand]
     private async Task ToggleFavoritesViewAsync()
     {
-        ShowFavorites = !ShowFavorites;
-        IsSearchMode = false;
-        ShowJuzList = false;
-        SearchText = string.Empty;
+        var next = !ShowFavorites;
+        ResetViews();
+        ShowFavorites = next;
 
         if (ShowFavorites)
             await LoadFavoritesAsync();

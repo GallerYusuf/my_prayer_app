@@ -11,12 +11,14 @@ public partial class QuranPage : ContentPage
         InitializeComponent();
         BindingContext = _viewModel = viewModel;
 
-        // One list is visible at a time: search results, favorites, juz list or surahs.
+        // One list is visible at a time: search results, favorites, topics, topic verses, juz list or surahs.
         _viewModel.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName is nameof(QuranViewModel.IsSearchMode)
                 or nameof(QuranViewModel.ShowFavorites)
-                or nameof(QuranViewModel.ShowJuzList))
+                or nameof(QuranViewModel.ShowJuzList)
+                or nameof(QuranViewModel.ShowTopics)
+                or nameof(QuranViewModel.ShowTopicVerses))
                 UpdateResultsView();
         };
     }
@@ -27,19 +29,37 @@ public partial class QuranPage : ContentPage
         {
             ResultsView.ItemsSource = _viewModel.SearchResults;
             ResultsView.IsVisible = true;
+            TopicsView.IsVisible = false;
+            TopicVersesView.IsVisible = false;
         }
         else if (_viewModel.ShowFavorites)
         {
             ResultsView.ItemsSource = _viewModel.Favorites;
             ResultsView.IsVisible = true;
+            TopicsView.IsVisible = false;
+            TopicVersesView.IsVisible = false;
+        }
+        else if (_viewModel.ShowTopicVerses)
+        {
+            ResultsView.IsVisible = false;
+            TopicsView.IsVisible = false;
+            TopicVersesView.IsVisible = true;
+        }
+        else if (_viewModel.ShowTopics)
+        {
+            ResultsView.IsVisible = false;
+            TopicsView.IsVisible = true;
+            TopicVersesView.IsVisible = false;
         }
         else
         {
             ResultsView.IsVisible = false;
+            TopicsView.IsVisible = false;
+            TopicVersesView.IsVisible = false;
         }
 
-        JuzView.IsVisible = !ResultsView.IsVisible && _viewModel.ShowJuzList;
-        SurahsView.IsVisible = !ResultsView.IsVisible && !JuzView.IsVisible;
+        JuzView.IsVisible = !ResultsView.IsVisible && !TopicsView.IsVisible && !TopicVersesView.IsVisible && _viewModel.ShowJuzList;
+        SurahsView.IsVisible = !ResultsView.IsVisible && !TopicsView.IsVisible && !TopicVersesView.IsVisible && !JuzView.IsVisible;
     }
 
     protected override async void OnAppearing()

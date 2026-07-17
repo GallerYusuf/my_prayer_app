@@ -10,9 +10,10 @@
 
     <ContentPage.Resources>
         <conv:StringNotEmptyConverter x:Key="StringNotEmpty" />
+        <conv:InverseBoolConverter x:Key="InverseBool" />
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,*,Auto">
         <Grid.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0" />
@@ -21,7 +22,7 @@
         </Grid.Background>
 
         <!-- Reading toolbar -->
-        <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8" Padding="20,10,20,4">
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="8" Padding="20,10,20,4">
             <Border Style="{StaticResource InfoChip}" Padding="12,7">
                 <Label FontSize="12" FontFamily="OpenSansSemibold"
                        TextColor="{StaticResource AccentGold}">
@@ -41,7 +42,53 @@
 
             <BoxView Grid.Column="1" HeightRequest="1" Color="Transparent" />
 
-            <Border Grid.Column="2" Style="{StaticResource IconButton}"
+            <!-- Audio controls in Column 2 -->
+            <Grid Grid.Column="2" WidthRequest="38" HeightRequest="38">
+                <!-- Play Button -->
+                <Border Style="{StaticResource IconButton}" WidthRequest="38" HeightRequest="38"
+                        SemanticProperties.Description="Sureyi başlat">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding PlayAudioCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsAudioLoading}" Value="True">
+                            <Setter Property="IsVisible" Value="False" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsPlaying}" Value="True">
+                            <Setter Property="IsVisible" Value="False" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label Text="▶" FontSize="13" TextColor="{StaticResource AccentGold}"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+
+                <!-- Pause Button -->
+                <Border Style="{StaticResource IconButton}" WidthRequest="38" HeightRequest="38"
+                        SemanticProperties.Description="Sureyi duraklat" IsVisible="False">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding PauseAudioCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <MultiTrigger TargetType="Border">
+                            <MultiTrigger.Conditions>
+                                <Condition Binding="{Binding IsAudioLoading}" Value="False" />
+                                <Condition Binding="{Binding IsPlaying}" Value="True" />
+                            </MultiTrigger.Conditions>
+                            <Setter Property="IsVisible" Value="True" />
+                        </MultiTrigger>
+                    </Border.Triggers>
+                    <Label Text="⏸" FontSize="13" TextColor="{StaticResource AccentGold}"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+
+                <!-- Loading Spinner -->
+                <ActivityIndicator IsRunning="{Binding IsAudioLoading}" IsVisible="{Binding IsAudioLoading}"
+                                   Color="{StaticResource AccentGold}" WidthRequest="22" HeightRequest="22"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+            </Grid>
+
+            <!-- Shifted Font controls to Columns 3 & 4 -->
+            <Border Grid.Column="3" Style="{StaticResource IconButton}"
                     WidthRequest="38" HeightRequest="38"
                     SemanticProperties.Description="Yazıyı küçült">
                 <Label Text="A−" FontSize="13" FontFamily="OpenSansSemibold"
@@ -51,7 +98,7 @@
                     <TapGestureRecognizer Command="{Binding DecreaseFontCommand}" />
                 </Border.GestureRecognizers>
             </Border>
-            <Border Grid.Column="3" Style="{StaticResource IconButton}"
+            <Border Grid.Column="4" Style="{StaticResource IconButton}"
                     WidthRequest="38" HeightRequest="38"
                     SemanticProperties.Description="Yazıyı büyüt">
                 <Label Text="A+" FontSize="15" FontFamily="OpenSansSemibold"
@@ -158,5 +205,44 @@
                            IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
                            Color="{StaticResource AccentEmerald}"
                            VerticalOptions="Center" HorizontalOptions="Center" />
+
+        <!-- Bottom Controls Bar (Row 2) -->
+        <VerticalStackLayout Grid.Row="2" Spacing="8" Padding="20,10" BackgroundColor="{AppThemeBinding Light=#FFFDF6, Dark={StaticResource BackgroundDeep}}">
+            <!-- Hatim Update Card -->
+            <Border StrokeThickness="1" Stroke="{StaticResource GlassStroke}"
+                    BackgroundColor="{AppThemeBinding Light=#E0F2FE, Dark=#1E3A8A}"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="12,10"
+                    IsVisible="{Binding ShowHatimUpdateChip}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding UpdateHatimPageCommand}" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="Hatim Takibini Güncelle" FontSize="11" FontFamily="OpenSansSemibold" TextColor="{StaticResource AccentGold}" />
+                        <Label Text="{Binding CurrentVisiblePage, StringFormat='Okuduğunuz sayfayı hatim planınıza kaydedin (Sayfa {0})'}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                    </VerticalStackLayout>
+                    <Label Grid.Column="1" Text="✓" FontSize="20" TextColor="{StaticResource AccentEmerald}" VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
+            <!-- Audio Player Control Bar -->
+            <Border StrokeThickness="1" Stroke="{StaticResource GlassStroke}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceDark}}"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="14,10"
+                    IsVisible="{Binding IsPlaying}">
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+                    <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                        <Label Text="Sesli Okunuş" FontSize="11" FontFamily="OpenSansSemibold" TextColor="{StaticResource AccentGold}" />
+                        <Label Text="Mishary Rashid Al-Afasy" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                    </VerticalStackLayout>
+                    <!-- Pause Button (inline) -->
+                    <Button Grid.Column="1" Text="Duraklat" Style="{StaticResource OutlineButton}" Command="{Binding PauseAudioCommand}" HeightRequest="36" Padding="12,0" />
+                    <!-- Stop Button (inline) -->
+                    <Button Grid.Column="2" Text="Kapat" Style="{StaticResource GhostButton}" Command="{Binding StopAudioCommand}" HeightRequest="36" Padding="12,0" />
+                </Grid>
+            </Border>
+        </VerticalStackLayout>
     </Grid>
 </ContentPage>

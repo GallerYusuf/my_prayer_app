@@ -21,6 +21,12 @@ public partial class SurahPage : ContentPage
             VersesView.ScrollTo(_viewModel.ScrollToVerse - 1, position: ScrollToPosition.Start, animate: false);
     }
 
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        _viewModel.OnDisappearing();
+    }
+
     private void OnVersesScrolled(object? sender, ItemsViewScrolledEventArgs e) =>
         _viewModel.OnVisibleVerseChanged(e.CenterItemIndex);
 }

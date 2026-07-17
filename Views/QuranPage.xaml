@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:PrayerApp.ViewModels"
              xmlns:contracts="clr-namespace:PrayerApp.Core.Contracts;assembly=PrayerApp.Core"
+             xmlns:domain="clr-namespace:PrayerApp.Core.Domain;assembly=PrayerApp.Core"
              xmlns:conv="clr-namespace:PrayerApp.Converters"
              x:Class="PrayerApp.Views.QuranPage"
              x:DataType="vm:QuranViewModel"
@@ -21,22 +22,126 @@
             </LinearGradientBrush>
         </Grid.Background>
 
-        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-            <VerticalStackLayout Spacing="4">
-                <Label Text="Kur'an-ı Kerim" Style="{StaticResource DisplayTitle}" FontSize="28" />
-                <Label Text="Arapça metin ve Türkçe meal · 114 sure" Style="{StaticResource BodyMuted}" FontSize="13" />
-            </VerticalStackLayout>
-            <Button Grid.Column="1"
-                    Text="Cüzler"
-                    Style="{StaticResource GhostButton}"
-                    Command="{Binding ToggleJuzListCommand}"
-                    VerticalOptions="Start" />
-            <Button Grid.Column="2"
-                    Text="Favoriler"
-                    Style="{StaticResource OutlineButton}"
-                    Command="{Binding ToggleFavoritesViewCommand}"
-                    VerticalOptions="Start" />
-        </Grid>
+        <VerticalStackLayout Spacing="10">
+            <!-- Title, Description and Sorting -->
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Kur'an-ı Kerim" Style="{StaticResource DisplayTitle}" FontSize="28" />
+                    <Label Text="Arapça metin ve Türkçe meal · 114 sure" Style="{StaticResource BodyMuted}" FontSize="13" />
+                </VerticalStackLayout>
+
+                <!-- Sorting toggle button, hidden if not in Surah list mode -->
+                <Border Grid.Column="1" Style="{StaticResource InfoChip}" Padding="10,6" VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleSortOrderCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding ShowJuzList}" Value="True">
+                            <Setter Property="IsVisible" Value="False" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding ShowFavorites}" Value="True">
+                            <Setter Property="IsVisible" Value="False" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding ShowTopics}" Value="True">
+                            <Setter Property="IsVisible" Value="False" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding ShowTopicVerses}" Value="True">
+                            <Setter Property="IsVisible" Value="False" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsSearchMode}" Value="True">
+                            <Setter Property="IsVisible" Value="False" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label FontSize="12" FontFamily="OpenSansSemibold" TextColor="{StaticResource AccentGold}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding SortByNuzul}" Value="True">
+                                <Setter Property="Text" Value="Sıra: Nuzül" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding SortByNuzul}" Value="False">
+                                <Setter Property="Text" Value="Sıra: Mushaf" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Border>
+            </Grid>
+
+            <!-- Segmented Tab Bar -->
+            <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="4">
+                <!-- Sureler -->
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 8" Padding="2,8"
+                        BackgroundColor="{AppThemeBinding Light=#12000000, Dark=#20FFFFFF}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ShowSurahListCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label Text="Sureler" HorizontalOptions="Center" FontSize="12" FontFamily="OpenSansSemibold"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}">
+                        <Label.Triggers>
+                            <MultiTrigger TargetType="Label">
+                                <MultiTrigger.Conditions>
+                                    <Condition Binding="{Binding ShowJuzList}" Value="False" />
+                                    <Condition Binding="{Binding ShowFavorites}" Value="False" />
+                                    <Condition Binding="{Binding ShowTopics}" Value="False" />
+                                    <Condition Binding="{Binding ShowTopicVerses}" Value="False" />
+                                    <Condition Binding="{Binding IsSearchMode}" Value="False" />
+                                </MultiTrigger.Conditions>
+                                <Setter Property="TextColor" Value="{StaticResource AccentGold}" />
+                            </MultiTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Border>
+
+                <!-- Cüzler -->
+                <Border Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 8" Padding="2,8"
+                        BackgroundColor="{AppThemeBinding Light=#12000000, Dark=#20FFFFFF}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleJuzListCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label Text="Cüzler" HorizontalOptions="Center" FontSize="12" FontFamily="OpenSansSemibold"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding ShowJuzList}" Value="True">
+                                <Setter Property="TextColor" Value="{StaticResource AccentGold}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Border>
+
+                <!-- Fihrist -->
+                <Border Grid.Column="2" StrokeThickness="0" StrokeShape="RoundRectangle 8" Padding="2,8"
+                        BackgroundColor="{AppThemeBinding Light=#12000000, Dark=#20FFFFFF}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleTopicsCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label Text="Fihrist" HorizontalOptions="Center" FontSize="12" FontFamily="OpenSansSemibold"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding ShowTopics}" Value="True">
+                                <Setter Property="TextColor" Value="{StaticResource AccentGold}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding ShowTopicVerses}" Value="True">
+                                <Setter Property="TextColor" Value="{StaticResource AccentGold}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Border>
+
+                <!-- Favoriler -->
+                <Border Grid.Column="3" StrokeThickness="0" StrokeShape="RoundRectangle 8" Padding="2,8"
+                        BackgroundColor="{AppThemeBinding Light=#12000000, Dark=#20FFFFFF}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleFavoritesViewCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label Text="Favoriler" HorizontalOptions="Center" FontSize="12" FontFamily="OpenSansSemibold"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding ShowFavorites}" Value="True">
+                                <Setter Property="TextColor" Value="{StaticResource AccentGold}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </Border>
+            </Grid>
+        </VerticalStackLayout>
 
         <!-- Continue reading -->
         <Border Grid.Row="1"
@@ -251,6 +356,72 @@
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
+
+            <!-- Topics list -->
+            <CollectionView x:Name="TopicsView"
+                            ItemsSource="{Binding Topics}"
+                            SelectionMode="None"
+                            IsVisible="False">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="domain:QuranTopic">
+                        <Border Margin="0,4" Padding="14,12"
+                                StrokeThickness="1" Stroke="{StaticResource GlassStroke}"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceDark}}"
+                                StrokeShape="RoundRectangle 14">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:QuranViewModel}}, Path=OpenTopicCommand}"
+                                    CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                                <Label Text="{Binding Icon}"
+                                       FontSize="24"
+                                       VerticalOptions="Center" />
+                                <Label Grid.Column="1"
+                                       Text="{Binding Name}"
+                                       FontSize="15" FontFamily="OpenSansSemibold"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                                       VerticalOptions="Center" />
+                                <Label Grid.Column="2" Text="›" FontSize="24"
+                                       TextColor="{StaticResource AccentGold}" VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Topic Verses view -->
+            <Grid x:Name="TopicVersesView" RowDefinitions="Auto,*" IsVisible="False">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Margin="0,0,0,8">
+                    <Button Text="← Geri" Style="{StaticResource GhostButton}" Command="{Binding ToggleTopicsCommand}" HorizontalOptions="Start" Padding="10,0" HeightRequest="36" />
+                    <Label Grid.Column="1" Text="{Binding SelectedTopicName}" FontSize="16" FontFamily="OpenSansSemibold" TextColor="{StaticResource AccentGold}" VerticalOptions="Center" />
+                </Grid>
+                <CollectionView Grid.Row="1" ItemsSource="{Binding TopicVerses}" SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="contracts:Verse">
+                            <Border Margin="0,4" Padding="14,12"
+                                    StrokeThickness="1" Stroke="{StaticResource GlassStroke}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceDark}}"
+                                    StrokeShape="RoundRectangle 14">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:QuranViewModel}}, Path=OpenVerseCommand}"
+                                        CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="{Binding Text}"
+                                           FontSize="14"
+                                           LineHeight="1.35"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                    <Label Text="{Binding Reference}"
+                                           FontSize="12" FontFamily="OpenSansSemibold"
+                                           TextColor="{StaticResource AccentGold}" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
 
             <!-- Search results / favorites -->
             <CollectionView x:Name="ResultsView"
