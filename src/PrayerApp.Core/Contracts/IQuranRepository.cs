@@ -30,7 +30,7 @@ public interface IQuranRepository
     Task<IReadOnlyList<Verse>> GetFavoritesAsync(CancellationToken cancellationToken = default);
 }
 
-public sealed record SurahInfo(int Number, string Name, string TranslatedName, int VerseCount);
+public sealed record SurahInfo(int Number, string Name, string TranslatedName, int VerseCount, int NuzulNumber);
 
 /// <summary>
 /// A single verse. <paramref name="ArabicText"/>, <paramref name="Page"/> and

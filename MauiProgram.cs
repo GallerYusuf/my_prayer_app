@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
 using Plugin.LocalNotification.Core.Models.AndroidOption;
 using PrayerApp.Core.Common;
@@ -106,8 +106,13 @@ public static class MauiProgram
 		services.AddSingleton<INotificationCoordinator, NotificationCoordinator>();
 #if ANDROID
 		services.AddSingleton<IPersistentNotificationService, Platforms.Android.PersistentNotificationService>();
+		services.AddSingleton<IAudioPlayer, Platforms.Android.AudioPlayer>();
+#elif IOS || MACCATALYST
+		services.AddSingleton<IPersistentNotificationService, NullPersistentNotificationService>();
+		services.AddSingleton<IAudioPlayer, Platforms.iOS.AudioPlayer>();
 #else
 		services.AddSingleton<IPersistentNotificationService, NullPersistentNotificationService>();
+		services.AddSingleton<IAudioPlayer, NullAudioPlayer>();
 #endif
 
 		services.AddSingleton<ILocationService, LocationService>();
