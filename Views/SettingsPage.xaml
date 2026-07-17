@@ -222,6 +222,26 @@
                                 <Label Text="Ramazan modu" FontSize="14" VerticalOptions="Center"
                                        TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
                                 <Switch Grid.Column="1" IsToggled="{Binding RamadanModeEnabled}" Style="{StaticResource PremiumSwitch}" />
+                             </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- VERİ YÖNETİMİ -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="VERİ YÖNETİMİ" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource SettingsGroup}">
+                        <VerticalStackLayout Spacing="12" Padding="4">
+                            <Label Text="Uygulama verilerini, ayarlarınızı ve hatim takibinizi cihazınızda yerel olarak yedekleyebilir veya yedeğinizi geri yükleyebilirsiniz."
+                                   Style="{StaticResource BodyMuted}" FontSize="12" LineHeight="1.4" />
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                <Button Text="Yedek Al"
+                                        Style="{StaticResource OutlineButton}"
+                                        Command="{Binding BackupDataCommand}" />
+                                <Button Grid.Column="1"
+                                        Text="Yedek Yükle"
+                                        Style="{StaticResource GhostButton}"
+                                        Command="{Binding RestoreDataCommand}" />
                             </Grid>
                         </VerticalStackLayout>
                     </Border>

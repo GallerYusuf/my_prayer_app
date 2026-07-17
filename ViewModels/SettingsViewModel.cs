@@ -33,6 +33,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly ILocationService _locationService;
     private readonly INotificationScheduler _notificationScheduler;
     private readonly Core.Services.INotificationCoordinator _notificationCoordinator;
+    private readonly IBackupService _backupService;
     private readonly ILogger<SettingsViewModel> _logger;
 
     private GeoLocation? _pendingLocation;
@@ -70,12 +71,14 @@ public partial class SettingsViewModel : ObservableObject
         ILocationService locationService,
         INotificationScheduler notificationScheduler,
         Core.Services.INotificationCoordinator notificationCoordinator,
+        IBackupService backupService,
         ILogger<SettingsViewModel> logger)
     {
         _settingsStore = settingsStore;
         _locationService = locationService;
         _notificationScheduler = notificationScheduler;
         _notificationCoordinator = notificationCoordinator;
+        _backupService = backupService;
         _logger = logger;
 
         MethodOptions = CalculationMethodExtensions.All
@@ -358,5 +361,81 @@ public partial class SettingsViewModel : ObservableObject
         Plugin.LocalNotification.LocalNotificationCenter.AndroidService?.RequestExactAlarmsPermission();
 #endif
         return Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    private async Task BackupDataAsync()
+    {
+        try
+        {
+            StatusMessage = "Yedek hazırlanıyor...";
+            var backupJson = await _backupService.ExportBackupAsync();
+            
+            var backupPath = Path.Combine(FileSystem.CacheDirectory, "prayer_app_backup.json");
+            await File.WriteAllTextAsync(backupPath, backupJson);
+
+            await Share.Default.RequestAsync(new ShareFileRequest
+            {
+                Title = "Namaz Vakti Yedek Dosyası",
+                File = new ShareFile(backupPath)
+            });
+
+            StatusMessage = "Yedek dosyası başarıyla dışa aktarıldı.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Backup failed");
+            StatusMessage = "Yedek alınırken bir sorun oluştu.";
+        }
+    }
+
+    [RelayCommand]
+    private async Task RestoreDataAsync()
+    {
+        try
+        {
+            StatusMessage = "Yedek dosyası seçiliyor...";
+            var result = await FilePicker.Default.PickAsync(new PickOptions
+            {
+                PickerTitle = "Yedek Dosyası Seçin (.json)",
+                FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+                {
+                    { DevicePlatform.Android, ["application/json"] },
+                    { DevicePlatform.iOS, ["public.json"] },
+                    { DevicePlatform.WinUI, [".json"] }
+                })
+            });
+
+            if (result == null)
+            {
+                StatusMessage = "Yedek yükleme iptal edildi.";
+                return;
+            }
+
+            StatusMessage = "Yedek veriler yükleniyor...";
+            var jsonContent = await File.ReadAllTextAsync(result.FullPath);
+            var success = await _backupService.ImportBackupAsync(jsonContent);
+
+            if (success)
+            {
+                // Refresh ViewModel values
+                LoadSettings();
+
+                // Re-plan notifications
+                var replan = await _notificationCoordinator.RescheduleAsync(force: true);
+                StatusMessage = replan.IsSuccess
+                    ? $"Yedek başarıyla geri yüklendi. {replan.Value} bildirim planlandı."
+                    : $"Yedek geri yüklendi. Bildirim planlanırken sorun oluştu: {replan.Error.Message}";
+            }
+            else
+            {
+                StatusMessage = "Yedek yüklenemedi. Geçersiz yedek dosyası.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Restore failed");
+            StatusMessage = "Yedek yüklenirken hata oluştu.";
+        }
     }
 }

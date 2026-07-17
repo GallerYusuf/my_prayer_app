@@ -14,8 +14,11 @@ public sealed class AppDatabase : IAsyncDisposable
     private readonly SemaphoreSlim _initLock = new(1, 1);
     private bool _initialized;
 
+    public string DatabasePath { get; }
+
     public AppDatabase(string databasePath)
     {
+        DatabasePath = databasePath;
         _connection = new SQLiteAsyncConnection(
             databasePath,
             SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create | SQLiteOpenFlags.SharedCache);
@@ -70,6 +73,20 @@ public sealed class AppDatabase : IAsyncDisposable
 
         if (version != CurrentSchemaVersion)
             await _connection.ExecuteAsync($"PRAGMA user_version = {CurrentSchemaVersion}");
+    }
+
+    public async Task CloseConnectionAsync()
+    {
+        await _initLock.WaitAsync();
+        try
+        {
+            await _connection.CloseAsync();
+            _initialized = false;
+        }
+        finally
+        {
+            _initLock.Release();
+        }
     }
 
     public async ValueTask DisposeAsync()

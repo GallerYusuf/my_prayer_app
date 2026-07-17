@@ -7,6 +7,7 @@ using PrayerApp.Core.Services;
 using PrayerApp.Infrastructure.Database;
 using PrayerApp.Infrastructure.Providers;
 using PrayerApp.Infrastructure.Repositories;
+using PrayerApp.Infrastructure.Services;
 using PrayerApp.Services;
 using PrayerApp.Services.Interfaces;
 using PrayerApp.ViewModels;
@@ -101,6 +102,7 @@ public static class MauiProgram
 
 		services.AddSingleton<IDhikrRepository, DhikrRepository>();
 		services.AddSingleton<IKhatmRepository, KhatmRepository>();
+		services.AddSingleton<IBackupService, BackupService>();
 
 		services.AddSingleton<INotificationScheduler, LocalNotificationScheduler>();
 		services.AddSingleton<INotificationCoordinator, NotificationCoordinator>();
