@@ -12,107 +12,299 @@
         <conv:InverseBoolConverter x:Key="InverseBool" />
     </ContentPage.Resources>
 
-    <Grid>
-        <Grid.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0" />
-                <GradientStop Color="{AppThemeBinding Light=#EEF2FF, Dark={StaticResource BackgroundMid}}" Offset="1" />
-            </LinearGradientBrush>
-        </Grid.Background>
+    <Grid RowDefinitions="Auto,*">
+        <!-- Header & Segmented Switcher -->
+        <VerticalStackLayout Padding="16,14,16,10" Spacing="12">
+            <VerticalStackLayout Spacing="2">
+                <Label Text="Takvim &amp; Dini Günler" Style="{StaticResource DisplayTitle}" />
+                <Label Style="{StaticResource BodyMuted}" FontSize="12">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="{Binding LocationText}" />
+                            <Span Text=" · " />
+                            <Span Text="{Binding MethodText}" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+            </VerticalStackLayout>
 
-        <ScrollView>
-            <VerticalStackLayout Padding="20,16,20,32" Spacing="18">
+            <!-- Shared native date sections. -->
+            <Border Style="{StaticResource GlassCardCompact}" Padding="4" StrokeShape="RoundRectangle 12">
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="4">
+                    <Button Text="Günlük Vakitler" Style="{StaticResource SectionTabButton}"
+                            Command="{Binding SelectTabCommand}" CommandParameter="0">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsTimesTab}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}" />
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource AccentEmeraldDeep}, Dark={StaticResource AccentEmeraldSoft}}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <Button Grid.Column="1" Text="Dini Günler &amp; Hicri" Style="{StaticResource SectionTabButton}"
+                            Command="{Binding SelectTabCommand}" CommandParameter="1">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsReligiousDaysTab}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}" />
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource AccentEmeraldDeep}, Dark={StaticResource AccentEmeraldSoft}}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                </Grid>
+            </Border>
+        </VerticalStackLayout>
 
-                <VerticalStackLayout Spacing="4">
-                    <Label Text="Vakit Takvimi" Style="{StaticResource DisplayTitle}" FontSize="28" />
-                    <Label Style="{StaticResource BodyMuted}" FontSize="13">
-                        <Label.FormattedText>
-                            <FormattedString>
-                                <Span Text="{Binding LocationText}" />
-                                <Span Text=" · " />
-                                <Span Text="{Binding MethodText}" />
-                            </FormattedString>
-                        </Label.FormattedText>
-                    </Label>
+        <!-- Content ScrollView -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16,4,16,28" Spacing="14">
+
+                <!-- ==================== TAB 0: GÜNLÜK VAKİTLER ==================== -->
+                <VerticalStackLayout Spacing="14" IsVisible="{Binding IsTimesTab}">
+
+                    <!-- Date Navigation Card with Direct DatePicker + Hijri + Special Day Badge -->
+                    <Border Style="{StaticResource GlassCard}" Padding="14">
+                        <VerticalStackLayout Spacing="10">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                <Border Style="{StaticResource IconButton}" WidthRequest="42" HeightRequest="42"
+                                        SemanticProperties.Description="Önceki gün">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding GoPreviousDayCommand}" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="‹" FontSize="22" FontFamily="OpenSansSemibold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                </Border>
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center" HorizontalOptions="Center">
+                                    <Label Text="{Binding SelectedDateText}"
+                                           FontFamily="OpenSansSemibold"
+                                           FontSize="15"
+                                           HorizontalTextAlignment="Center" />
+                                    <Label Text="{Binding HijriDateText}"
+                                           FontSize="12"
+                                           FontFamily="OpenSansSemibold"
+                                           TextColor="{AppThemeBinding Light={StaticResource AccentGoldMuted}, Dark={StaticResource AccentGold}}"
+                                           HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+
+                                <Border Grid.Column="2" Style="{StaticResource IconButton}" WidthRequest="42" HeightRequest="42"
+                                        SemanticProperties.Description="Sonraki gün">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding GoNextDayCommand}" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="›" FontSize="22" FontFamily="OpenSansSemibold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                </Border>
+                            </Grid>
+
+                            <!-- Religious Day Highlight on Selected Date -->
+                            <Border IsVisible="{Binding SelectedReligiousDayName, Converter={StaticResource StringNotEmpty}}"
+                                    StrokeThickness="1"
+                                    Stroke="#50D4AF37"
+                                    BackgroundColor="{AppThemeBinding Light=#FDF8EC, Dark=#1D180D}"
+                                    StrokeShape="RoundRectangle 12"
+                                    Padding="12,8">
+                                <HorizontalStackLayout Spacing="8" HorizontalOptions="Center">
+                                    <Image Source="icon_crescent.png" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                    <Label Text="{Binding SelectedReligiousDayName}"
+                                           FontFamily="OpenSansSemibold"
+                                           FontSize="13"
+                                           TextColor="{AppThemeBinding Light={StaticResource AccentGoldMuted}, Dark={StaticResource AccentGold}}" />
+                                </HorizontalStackLayout>
+                            </Border>
+
+                            <!-- Quick Jump DatePicker & Go Today -->
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                <Label Text="Tarihe git:" Style="{StaticResource BodyMuted}" FontSize="12" VerticalOptions="Center" />
+                                <Border Grid.Column="1" Style="{StaticResource PremiumInput}" Padding="10,0">
+                                    <DatePicker Date="{Binding PickerDate}" Format="d MMMM yyyy" />
+                                </Border>
+                                <Button Grid.Column="2"
+                                        Text="Bugün"
+                                        Style="{StaticResource OutlineButton}"
+                                        Padding="12,6"
+                                        MinimumHeightRequest="38"
+                                        Command="{Binding GoTodayCommand}"
+                                        IsVisible="{Binding IsToday, Converter={StaticResource InverseBool}}" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Prayer Time Rows for Selected Date -->
+                    <Border Style="{StaticResource GlassCard}" Padding="12,10"
+                            IsVisible="{Binding HasRows}">
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Rows}" Spacing="4">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:CalendarRow">
+                                    <Border Padding="12,10"
+                                            StrokeThickness="1"
+                                            Stroke="Transparent"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}"
+                                            StrokeShape="RoundRectangle 10">
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsHighlighted}" Value="True">
+                                                <Setter Property="Stroke" Value="#6010B981" />
+                                                <Setter Property="BackgroundColor" Value="#1810B981" />
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                            <Image Source="{Binding Icon}" WidthRequest="18" HeightRequest="18" VerticalOptions="Center" />
+                                            <Label Grid.Column="1" Text="{Binding Name}" FontSize="15" FontFamily="OpenSansSemibold" VerticalOptions="Center" />
+                                            <Label Grid.Column="2"
+                                                   Text="{Binding Time}"
+                                                   FontFamily="OpenSansSemibold"
+                                                   FontSize="16"
+                                                   TextColor="{AppThemeBinding Light={StaticResource AccentEmeraldDeep}, Dark={StaticResource AccentGold}}"
+                                                   VerticalOptions="Center" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" />
+
+                    <!-- Out-of-cache / Notice Banner -->
+                    <Border IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmpty}}"
+                            Style="{StaticResource GlassCardCompact}"
+                            Stroke="#50D97706">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="{Binding ErrorMessage}" Style="{StaticResource BodyMuted}" FontSize="13" />
+                            <Button Text="Bugünün Vakitlerine Dön"
+                                    Style="{StaticResource OutlineButton}"
+                                    Command="{Binding GoTodayCommand}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Share & Adjustments Actions -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <Button Text="Günün Vakitlerini Paylaş"
+                                Style="{StaticResource OutlineButton}"
+                                Command="{Binding ShareCommand}" />
+                        <Button Grid.Column="1"
+                                Text="Dakika Düzeltmeleri"
+                                Style="{StaticResource GhostButton}"
+                                Command="{Binding OpenAdjustmentsCommand}" />
+                    </Grid>
+
+                    <!-- Upcoming 3 Religious Days Preview (Tappable to jump to that date!) -->
+                    <VerticalStackLayout Spacing="8" Margin="0,4,0,0">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="YAKLAŞAN DİNİ GÜNLER" Style="{StaticResource SectionLabel}" VerticalOptions="Center" />
+                            <Button Grid.Column="1" Text="Tümünü Gör ›" Style="{StaticResource GhostButton}"
+                                    Padding="8,4" MinimumHeightRequest="32"
+                                    Command="{Binding SelectTabCommand}" CommandParameter="1" />
+                        </Grid>
+
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding NextThreeReligiousDays}" Spacing="6">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:CalendarReligiousDayItem">
+                                    <Border Style="{StaticResource GlassCardCompact}">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CalendarViewModel}}, Path=SelectReligiousDayCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                            <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                                                <Label Text="{Binding Name}" FontSize="14" FontFamily="OpenSansSemibold" />
+                                                <Label FontSize="12" Style="{StaticResource BodyMuted}">
+                                                    <Label.FormattedText>
+                                                        <FormattedString>
+                                                            <Span Text="{Binding DateText}" />
+                                                            <Span Text=" · " />
+                                                            <Span Text="{Binding DayOfWeekText}" />
+                                                        </FormattedString>
+                                                    </Label.FormattedText>
+                                                </Label>
+                                            </VerticalStackLayout>
+                                            <Border Grid.Column="1" Style="{StaticResource InfoChip}" Padding="10,5" VerticalOptions="Center">
+                                                <Label Text="{Binding RemainingText}"
+                                                       FontSize="11" FontFamily="OpenSansSemibold"
+                                                       TextColor="{StaticResource AccentEmerald}" />
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
 
-                <!-- Date navigation -->
-                <Border Style="{StaticResource GlassCard}" Padding="14">
-                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
-                        <Button Text="‹"
-                                Style="{StaticResource GhostButton}"
-                                FontSize="22"
-                                WidthRequest="48"
-                                Command="{Binding GoPreviousDayCommand}"
-                                IsEnabled="{Binding CanGoBack}"
-                                SemanticProperties.Description="Önceki gün" />
-                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                            <Label Text="{Binding SelectedDateText}"
-                                   FontFamily="OpenSansSemibold"
-                                   FontSize="15"
-                                   HorizontalTextAlignment="Center"
-                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                            <Label Text="{Binding HijriDateText}"
-                                   Style="{StaticResource BodyMuted}"
-                                   FontSize="12"
-                                   HorizontalTextAlignment="Center"
-                                   IsVisible="{Binding HijriDateText, Converter={StaticResource StringNotEmpty}}" />
+                <!-- ==================== TAB 1: DİNİ GÜNLER & HİCRİ ÇEVİRİCİ ==================== -->
+                <VerticalStackLayout Spacing="14" IsVisible="{Binding IsReligiousDaysTab}">
+
+                    <!-- Gregorian → Hijri Converter -->
+                    <Border Style="{StaticResource GlassCard}" Padding="16,14">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="MİLADİ → HİCRİ TARİH ÇEVİRİCİ" Style="{StaticResource SectionLabel}" />
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <Border Style="{StaticResource PremiumInput}" Padding="10,0">
+                                    <DatePicker Date="{Binding ConvertDate}" Format="d MMMM yyyy" />
+                                </Border>
+                                <Label Grid.Column="1"
+                                       Text="{Binding ConvertedHijriText}"
+                                       FontSize="15" FontFamily="OpenSansSemibold"
+                                       TextColor="{AppThemeBinding Light={StaticResource AccentGoldMuted}, Dark={StaticResource AccentGold}}"
+                                       VerticalOptions="Center"
+                                       HorizontalOptions="End" />
+                            </Grid>
                         </VerticalStackLayout>
-                        <Button Grid.Column="2" Text="›"
-                                Style="{StaticResource GhostButton}"
-                                FontSize="22"
-                                WidthRequest="48"
-                                Command="{Binding GoNextDayCommand}"
-                                IsEnabled="{Binding CanGoForward}"
-                                SemanticProperties.Description="Sonraki gün" />
-                    </Grid>
-                </Border>
+                    </Border>
 
-                <Button Text="Bugüne Dön"
-                        Style="{StaticResource OutlineButton}"
-                        Command="{Binding GoTodayCommand}"
-                        IsVisible="{Binding IsToday, Converter={StaticResource InverseBool}}" />
+                    <Label Text="Bir dini güne dokunarak o tarihin namaz vakitlerini açabilirsiniz."
+                           Style="{StaticResource BodyMuted}" FontSize="12" />
 
-                <!-- Day rows -->
-                <Border Style="{StaticResource GlassCard}" Padding="8">
-                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Rows}" Spacing="2">
+                    <!-- Full Upcoming Religious Days List -->
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding ReligiousDays}" Spacing="8">
                         <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="vm:CalendarRow">
-                                <Grid Padding="14,12" ColumnDefinitions="*,Auto">
-                                    <Label Text="{Binding Name}"
-                                           FontSize="15"
-                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                                    <Label Grid.Column="1"
-                                           Text="{Binding Time}"
-                                           FontFamily="OpenSansSemibold"
-                                           FontSize="16"
-                                           TextColor="{StaticResource AccentGold}" />
-                                </Grid>
+                            <DataTemplate x:DataType="vm:CalendarReligiousDayItem">
+                                <Border Style="{StaticResource GlassCardCompact}">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CalendarViewModel}}, Path=SelectReligiousDayCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsNext}" Value="True">
+                                            <Setter Property="Stroke" Value="#6010B981" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                        <VerticalStackLayout Spacing="3" VerticalOptions="Center">
+                                            <Label Text="{Binding Name}" FontSize="15" FontFamily="OpenSansSemibold">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsBayram}" Value="True">
+                                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource AccentGoldMuted}, Dark={StaticResource AccentGold}}" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                            <Label Text="{Binding Description}"
+                                                   Style="{StaticResource BodyMuted}" FontSize="12"
+                                                   IsVisible="{Binding Description, Converter={StaticResource StringNotEmpty}}" />
+                                            <Label FontSize="12" Style="{StaticResource BodyMuted}">
+                                                <Label.FormattedText>
+                                                    <FormattedString>
+                                                        <Span Text="{Binding DateText}" />
+                                                        <Span Text=", " />
+                                                        <Span Text="{Binding DayOfWeekText}" />
+                                                    </FormattedString>
+                                                </Label.FormattedText>
+                                            </Label>
+                                        </VerticalStackLayout>
+                                        <Border Grid.Column="1" Style="{StaticResource InfoChip}" Padding="10,6" VerticalOptions="Center">
+                                            <Label Text="{Binding RemainingText}"
+                                                   FontSize="11" FontFamily="OpenSansSemibold"
+                                                   TextColor="{StaticResource AccentEmerald}" />
+                                        </Border>
+                                    </Grid>
+                                </Border>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
-                </Border>
 
-                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
-                                   Color="{StaticResource AccentEmerald}"
-                                   HorizontalOptions="Center" />
-
-                <Border IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmpty}}"
-                        StrokeThickness="1" Stroke="#40F87171" BackgroundColor="#1AF87171"
-                        StrokeShape="RoundRectangle 14" Padding="16,12">
-                    <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Error}"
-                           HorizontalTextAlignment="Center" FontSize="13" />
-                </Border>
-
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                    <Button Text="Paylaş"
-                            Style="{StaticResource OutlineButton}"
-                            Command="{Binding ShareCommand}" />
-                    <Button Grid.Column="1"
-                            Text="Vakit Düzeltmeleri"
-                            Style="{StaticResource GhostButton}"
-                            Command="{Binding OpenAdjustmentsCommand}" />
-                </Grid>
+                    <Label Text="Tarihler Ümmü'l-Kura takvimine göre hesaplanır; Diyanet takvimiyle bir gün fark gösterebilir. Kandil geceleri, listelenen günü takip eden gecedir."
+                           Style="{StaticResource BodyMuted}"
+                           FontSize="11"
+                           LineHeight="1.4" />
+                </VerticalStackLayout>
 
             </VerticalStackLayout>
         </ScrollView>

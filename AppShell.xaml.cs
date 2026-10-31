@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using PrayerApp.Core.Contracts;
 using PrayerApp.Views;
 
@@ -17,6 +17,8 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute("ReligiousDaysPage", typeof(ReligiousDaysPage));
 		Routing.RegisterRoute("KazaPage", typeof(KazaPage));
 		Routing.RegisterRoute("ZakatPage", typeof(ZakatPage));
+		Routing.RegisterRoute("QiblaPage", typeof(QiblaPage));
+		Routing.RegisterRoute("SettingsPage", typeof(SettingsPage));
 
 		// Skip onboarding for returning users without a visible redirect.
 		var settings = IPlatformApplication.Current?.Services.GetService<ISettingsStore>()?.Get();

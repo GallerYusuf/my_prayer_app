@@ -9,11 +9,12 @@ public class PrayerTrackingService : IPrayerTrackingService
 {
     private const string StreakKey = "prayer_track_streak";
     private const string LastFullDateKey = "prayer_track_last_full";
+    private static readonly CultureInfo TurkishCulture = new("tr-TR");
     private static readonly string[] TrackablePrayers = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
 
     private static readonly (string Name, string Turkish, string Icon)[] TrackDefinitions =
     [
-        ("Fajr", "Sabah", "icon_fajr.png"),
+        ("Fajr", "İmsak / Sabah", "icon_fajr.png"),
         ("Dhuhr", "Öğle", "icon_dhuhr.png"),
         ("Asr", "İkindi", "icon_asr.png"),
         ("Maghrib", "Akşam", "icon_maghrib.png"),
@@ -22,7 +23,7 @@ public class PrayerTrackingService : IPrayerTrackingService
 
     public IReadOnlyList<PrayerTrackItem> GetTodayTrackItems()
     {
-        var completed = LoadCompletedToday();
+        var completed = LoadCompletedForDate(DateOnly.FromDateTime(DateTime.Today));
         return TrackDefinitions
             .Select(p => new PrayerTrackItem
             {
@@ -34,37 +35,63 @@ public class PrayerTrackingService : IPrayerTrackingService
             .ToList();
     }
 
+    public bool IsCompletedToday(string prayerName)
+    {
+        if (!TrackablePrayers.Contains(prayerName))
+            return false;
+
+        return LoadCompletedForDate(DateOnly.FromDateTime(DateTime.Today)).Contains(prayerName);
+    }
+
     public void Toggle(string prayerName)
     {
         if (!TrackablePrayers.Contains(prayerName))
             return;
 
-        var completed = LoadCompletedToday();
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var completed = LoadCompletedForDate(today);
         if (completed.Contains(prayerName))
             completed.Remove(prayerName);
         else
             completed.Add(prayerName);
 
-        SaveCompletedToday(completed);
+        SaveCompletedForDate(today, completed);
         UpdateStreakIfNeeded(completed);
     }
 
-    public int GetCompletedCountToday() => LoadCompletedToday().Count;
+    public int GetCompletedCountToday() => LoadCompletedForDate(DateOnly.FromDateTime(DateTime.Today)).Count;
 
     public int GetStreak() => Preferences.Default.Get(StreakKey, 0);
 
     public string GetProgressText()
     {
         var done = GetCompletedCountToday();
-        return $"{done}/{TrackablePrayers.Length} kılındı";
+        return $"{done}/{TrackablePrayers.Length} vakit kılındı";
     }
 
-    private static string TodayKey() =>
-        $"prayer_track_{DateTime.Today:yyyy-MM-dd}";
-
-    private static HashSet<string> LoadCompletedToday()
+    public IReadOnlyList<DailyPrayerSummary> GetRecentDaysSummary(int days = 7)
     {
-        var json = Preferences.Default.Get(TodayKey(), string.Empty);
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var result = new List<DailyPrayerSummary>(days);
+        for (var i = days - 1; i >= 0; i--)
+        {
+            var date = today.AddDays(-i);
+            var completed = LoadCompletedForDate(date).Count;
+            var label = i == 0
+                ? "Bugün"
+                : date.ToDateTime(TimeOnly.MinValue).ToString("ddd", TurkishCulture);
+            result.Add(new DailyPrayerSummary(date, label, completed, TrackablePrayers.Length));
+        }
+
+        return result;
+    }
+
+    private static string DateKey(DateOnly date) =>
+        $"prayer_track_{date:yyyy-MM-dd}";
+
+    private static HashSet<string> LoadCompletedForDate(DateOnly date)
+    {
+        var json = Preferences.Default.Get(DateKey(date), string.Empty);
         if (string.IsNullOrWhiteSpace(json))
             return [];
 
@@ -78,8 +105,8 @@ public class PrayerTrackingService : IPrayerTrackingService
         }
     }
 
-    private static void SaveCompletedToday(HashSet<string> completed) =>
-        Preferences.Default.Set(TodayKey(), JsonSerializer.Serialize(completed));
+    private static void SaveCompletedForDate(DateOnly date, HashSet<string> completed) =>
+        Preferences.Default.Set(DateKey(date), JsonSerializer.Serialize(completed));
 
     private static void UpdateStreakIfNeeded(HashSet<string> completed)
     {

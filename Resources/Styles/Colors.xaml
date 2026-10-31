@@ -1,95 +1,98 @@
-﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <!-- Premium accent palette -->
+    <!-- Balanced Emerald & Warm Gold brand palette -->
     <Color x:Key="AccentGold">#D4AF37</Color>
-    <Color x:Key="AccentGoldSoft">#E8C97A</Color>
-    <Color x:Key="AccentGoldMuted">#B8942E</Color>
+    <Color x:Key="AccentGoldSoft">#E5C76B</Color>
+    <Color x:Key="AccentGoldMuted">#8C6D1F</Color>
     <Color x:Key="AccentEmerald">#10B981</Color>
     <Color x:Key="AccentEmeraldSoft">#34D399</Color>
     <Color x:Key="AccentEmeraldDeep">#059669</Color>
 
-    <!-- Legacy brand keys (mapped to premium palette) -->
-    <Color x:Key="Primary">#10B981</Color>
+    <!-- Legacy brand keys (preserved for compatibility) -->
+    <Color x:Key="Primary">#0D9488</Color>
     <Color x:Key="PrimaryDark">#059669</Color>
-    <Color x:Key="PrimaryDarkText">#0F172A</Color>
-    <Color x:Key="Secondary">#1E293B</Color>
+    <Color x:Key="PrimaryDarkText">#0B1411</Color>
+    <Color x:Key="Secondary">#13211C</Color>
     <Color x:Key="SecondaryDarkText">#D4AF37</Color>
-    <Color x:Key="Tertiary">#334155</Color>
+    <Color x:Key="Tertiary">#1E332B</Color>
     <Color x:Key="Emerald">#10B981</Color>
     <Color x:Key="EmeraldDeep">#059669</Color>
-    <Color x:Key="EmeraldNight">#064E3B</Color>
-    <Color x:Key="Teal">#14B8A6</Color>
+    <Color x:Key="EmeraldNight">#063E2E</Color>
+    <Color x:Key="Teal">#0D9488</Color>
     <Color x:Key="Gold">#D4AF37</Color>
-    <Color x:Key="GoldSoft">#E8C97A</Color>
+    <Color x:Key="GoldSoft">#E5C76B</Color>
 
-    <!-- Deep backgrounds -->
-    <Color x:Key="BackgroundDeep">#0F172A</Color>
-    <Color x:Key="BackgroundElevated">#121212</Color>
-    <Color x:Key="BackgroundMid">#1E293B</Color>
+    <!-- Deep backgrounds (Dark theme) -->
+    <Color x:Key="BackgroundDeep">#0B1411</Color>
+    <Color x:Key="BackgroundElevated">#101C18</Color>
+    <Color x:Key="BackgroundMid">#13211C</Color>
     <Color x:Key="BackgroundGlow">#10B981</Color>
 
-    <!-- Glass surfaces (ARGB) -->
-    <Color x:Key="GlassFill">#CC1E293B</Color>
-    <Color x:Key="GlassFillLight">#40FFFFFF</Color>
-    <Color x:Key="GlassStroke">#33FFFFFF</Color>
+    <!-- Subtle surface borders & fills -->
+    <Color x:Key="GlassFill">#13211C</Color>
+    <Color x:Key="GlassFillLight">#FFFFFF</Color>
+    <Color x:Key="GlassStroke">#243B32</Color>
+    <Color x:Key="GlassStrokeLight">#D8E2DC</Color>
     <Color x:Key="GlassHighlight">#14FFFFFF</Color>
 
-    <!-- Surfaces (Light fallback) -->
-    <Color x:Key="AppBackground">#F8FAFC</Color>
+    <!-- Surfaces (Light theme — warm stone/paper) -->
+    <Color x:Key="AppBackground">#F5F7F5</Color>
     <Color x:Key="CardSurface">#FFFFFF</Color>
-    <Color x:Key="CardSurfaceAlt">#F1F5F9</Color>
-    <Color x:Key="HairLine">#E2E8F0</Color>
+    <Color x:Key="CardSurfaceAlt">#EBF0EC</Color>
+    <Color x:Key="HairLine">#D8E2DC</Color>
 
-    <!-- Surfaces (Dark — default experience) -->
-    <Color x:Key="AppBackgroundDark">#0F172A</Color>
-    <Color x:Key="CardSurfaceDark">#CC1E293B</Color>
-    <Color x:Key="CardSurfaceAltDark">#991E293B</Color>
-    <Color x:Key="HairLineDark">#1E293B</Color>
+    <!-- Surfaces (Dark theme — deep calm forest) -->
+    <Color x:Key="AppBackgroundDark">#0B1411</Color>
+    <Color x:Key="CardSurfaceDark">#13211C</Color>
+    <Color x:Key="CardSurfaceAltDark">#1A2C25</Color>
+    <Color x:Key="HairLineDark">#243B32</Color>
 
     <!-- Typography -->
-    <Color x:Key="TextPrimary">#0F172A</Color>
-    <Color x:Key="TextSecondary">#64748B</Color>
-    <Color x:Key="TextPrimaryDark">#FFFFFF</Color>
-    <Color x:Key="TextSecondaryDark">#9CA3AF</Color>
-    <Color x:Key="TextMutedDark">#6B7280</Color>
+    <Color x:Key="TextPrimary">#111C18</Color>
+    <Color x:Key="TextSecondary">#52635B</Color>
+    <Color x:Key="TextMuted">#73857C</Color>
+    <Color x:Key="TextPrimaryDark">#F1F5F3</Color>
+    <Color x:Key="TextSecondaryDark">#99ADA4</Color>
+    <Color x:Key="TextMutedDark">#687D73</Color>
 
     <!-- Semantic -->
-    <Color x:Key="Error">#F87171</Color>
+    <Color x:Key="Error">#EF4444</Color>
+    <Color x:Key="Warning">#D97706</Color>
     <Color x:Key="Success">#10B981</Color>
 
-    <!-- Time-of-day hero accents -->
-    <Color x:Key="HeroDawnStart">#1E3A5F</Color>
-    <Color x:Key="HeroDawnEnd">#7C3AED</Color>
-    <Color x:Key="HeroMorningStart">#065F46</Color>
-    <Color x:Key="HeroMorningEnd">#10B981</Color>
-    <Color x:Key="HeroDayStart">#0E7490</Color>
-    <Color x:Key="HeroDayEnd">#059669</Color>
-    <Color x:Key="HeroSunsetStart">#9A3412</Color>
-    <Color x:Key="HeroSunsetEnd">#D97706</Color>
-    <Color x:Key="HeroNightStart">#0F172A</Color>
-    <Color x:Key="HeroNightEnd">#1E1B4B</Color>
+    <!-- Calm time-of-day hero surfaces -->
+    <Color x:Key="HeroDawnStart">#14332B</Color>
+    <Color x:Key="HeroDawnEnd">#1E3F38</Color>
+    <Color x:Key="HeroMorningStart">#0A4D3C</Color>
+    <Color x:Key="HeroMorningEnd">#0D6B53</Color>
+    <Color x:Key="HeroDayStart">#0B5345</Color>
+    <Color x:Key="HeroDayEnd">#0E6655</Color>
+    <Color x:Key="HeroSunsetStart">#5C3412</Color>
+    <Color x:Key="HeroSunsetEnd">#784212</Color>
+    <Color x:Key="HeroNightStart">#0E1E19</Color>
+    <Color x:Key="HeroNightEnd">#152A23</Color>
 
     <!-- Tab bar -->
-    <Color x:Key="TabBarBackground">#E60F172A</Color>
-    <Color x:Key="TabBarBorder">#33FFFFFF</Color>
+    <Color x:Key="TabBarBackground">#101C18</Color>
+    <Color x:Key="TabBarBorder">#243B32</Color>
 
     <Color x:Key="White">#FFFFFF</Color>
     <Color x:Key="Black">#000000</Color>
     <Color x:Key="Magenta">#D4AF37</Color>
-    <Color x:Key="MidnightBlue">#0F172A</Color>
-    <Color x:Key="OffBlack">#0F172A</Color>
+    <Color x:Key="MidnightBlue">#111C18</Color>
+    <Color x:Key="OffBlack">#0B1411</Color>
 
-    <Color x:Key="Gray100">#F1F5F9</Color>
-    <Color x:Key="Gray200">#E2E8F0</Color>
-    <Color x:Key="Gray300">#CBD5E1</Color>
-    <Color x:Key="Gray400">#94A3B8</Color>
-    <Color x:Key="Gray500">#64748B</Color>
-    <Color x:Key="Gray600">#475569</Color>
-    <Color x:Key="Gray900">#1E293B</Color>
-    <Color x:Key="Gray950">#0F172A</Color>
+    <Color x:Key="Gray100">#EBF0EC</Color>
+    <Color x:Key="Gray200">#D8E2DC</Color>
+    <Color x:Key="Gray300">#B8C7BE</Color>
+    <Color x:Key="Gray400">#8DA196</Color>
+    <Color x:Key="Gray500">#52635B</Color>
+    <Color x:Key="Gray600">#3B4D45</Color>
+    <Color x:Key="Gray900">#13211C</Color>
+    <Color x:Key="Gray950">#0B1411</Color>
 
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}" />
     <SolidColorBrush x:Key="AccentGoldBrush" Color="{StaticResource AccentGold}" />

@@ -14,96 +14,97 @@
         <conv:InverseBoolConverter x:Key="InverseBool" />
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="Auto,*,Auto" Padding="24,32,24,24">
-        <Grid.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0" />
-                <GradientStop Color="{AppThemeBinding Light=#EEF2FF, Dark={StaticResource BackgroundMid}}" Offset="1" />
-            </LinearGradientBrush>
-        </Grid.Background>
+    <Grid RowDefinitions="Auto,*,Auto" Padding="20,24,20,20" RowSpacing="14">
 
-        <!-- Step indicator -->
+        <!-- 2-Step Progress Indicator -->
         <HorizontalStackLayout Spacing="8" HorizontalOptions="Center">
-            <BoxView WidthRequest="28" HeightRequest="4" CornerRadius="2" Color="{StaticResource AccentGold}" />
-            <BoxView WidthRequest="28" HeightRequest="4" CornerRadius="2" Color="{StaticResource AccentGold}"
+            <BoxView WidthRequest="44" HeightRequest="4" CornerRadius="2" Color="{StaticResource AccentEmerald}" />
+            <BoxView WidthRequest="44" HeightRequest="4" CornerRadius="2" Color="{StaticResource AccentEmerald}"
                      Opacity="{Binding Indicator2Opacity}" />
-            <BoxView WidthRequest="28" HeightRequest="4" CornerRadius="2" Color="{StaticResource AccentGold}"
-                     Opacity="{Binding Indicator3Opacity}" />
-            <BoxView WidthRequest="28" HeightRequest="4" CornerRadius="2" Color="{StaticResource AccentGold}"
-                     Opacity="{Binding Indicator4Opacity}" />
         </HorizontalStackLayout>
 
-        <!-- STEP 0: Welcome -->
-        <VerticalStackLayout Grid.Row="1" Spacing="20" VerticalOptions="Center"
-                             IsVisible="{Binding IsStep0}">
-            <Label Text="Ezan Vakti"
-                   Style="{StaticResource DisplayTitle}"
-                   FontSize="34"
-                   HorizontalTextAlignment="Center" />
-            <Label Text="Namaz vakitleri, kıble, Kur'an meali ve zikir sayacı — hepsi tek uygulamada, internetsiz de çalışır."
-                   Style="{StaticResource BodyMuted}"
-                   FontSize="16"
-                   HorizontalTextAlignment="Center" />
-            <Border Style="{StaticResource GlassCard}" Margin="0,12,0,0">
-                <VerticalStackLayout Spacing="14">
-                    <Label Text="• Diyanet uyumlu vakit hesabı" Style="{StaticResource BodyMuted}" FontSize="14" />
-                    <Label Text="• Uygulama kapalıyken bile vakit bildirimleri" Style="{StaticResource BodyMuted}" FontSize="14" />
-                    <Label Text="• Verileriniz cihazınızda kalır; hesap ve reklam yok" Style="{StaticResource BodyMuted}" FontSize="14" />
-                </VerticalStackLayout>
-            </Border>
-        </VerticalStackLayout>
-
-        <!-- STEP 1: Location -->
-        <Grid Grid.Row="1" RowDefinitions="Auto,Auto,Auto,*"
-              IsVisible="{Binding IsStep1}"
-              RowSpacing="14"
-              Margin="0,20,0,0">
-            <VerticalStackLayout Spacing="6">
-                <Label Text="Konumunuz" Style="{StaticResource DisplayTitle}" FontSize="26" />
-                <Label Text="Vakitler ve kıble yönü için konum gerekir. Konum yalnızca bu hesaplamalar için kullanılır, hiçbir yerde saklanmaz."
-                       Style="{StaticResource BodyMuted}" FontSize="14" />
+        <!-- STEP 0: Welcome + Prominent Manual City Selection -->
+        <Grid Grid.Row="1" RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="10"
+              IsVisible="{Binding IsStep0}">
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Ezan Vakti'ne Hoş Geldiniz" Style="{StaticResource DisplayTitle}" FontSize="24" />
+                <Label Text="Diyanet uyumlu namaz vakitleri ve kıble açısı için şehrinizi seçin. Dilerseniz GPS izni vermeden doğrudan listeden seçebilirsiniz."
+                       Style="{StaticResource BodyMuted}" FontSize="13" LineHeight="1.35" />
             </VerticalStackLayout>
 
-            <Button Grid.Row="1"
-                    Text="Konumumu Kullan"
-                    Style="{StaticResource PremiumButton}"
-                    Command="{Binding UseDeviceLocationCommand}"
-                    IsEnabled="{Binding IsLocating, Converter={StaticResource InverseBool}}" />
-
-            <VerticalStackLayout Grid.Row="2" Spacing="8">
-                <Border IsVisible="{Binding HasLocation}"
-                        StrokeThickness="1" Stroke="#5010B981" BackgroundColor="#2010B981"
-                        StrokeShape="RoundRectangle 12" Padding="12,10">
-                    <Label Text="{Binding LocationSummary, StringFormat='Seçilen konum: {0}'}"
-                           TextColor="{StaticResource AccentEmerald}" FontSize="13" />
+            <!-- Selected City Confirmation + Optional GPS Button -->
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <Border Padding="12,8"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="{AppThemeBinding Light={StaticResource HairLine}, Dark={StaticResource HairLineDark}}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceDark}}">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding HasLocation}" Value="True">
+                            <Setter Property="Stroke" Value="#6010B981" />
+                            <Setter Property="BackgroundColor" Value="#1810B981" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                        <Image Source="icon_pin.png" WidthRequest="14" HeightRequest="14" VerticalOptions="Center" />
+                        <Label Text="{Binding LocationSummary}" FontSize="14" FontFamily="OpenSansSemibold" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
                 </Border>
+
+                <Button Grid.Column="1"
+                        Text="GPS ile Bul"
+                        Style="{StaticResource OutlineButton}"
+                        Command="{Binding UseDeviceLocationCommand}"
+                        IsEnabled="{Binding IsLocating, Converter={StaticResource InverseBool}}" />
+            </Grid>
+
+            <!-- Quick Popular Cities Chips -->
+            <ScrollView Grid.Row="2" Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                <HorizontalStackLayout BindableLayout.ItemsSource="{Binding PopularCities}" Spacing="6">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:TurkishCity">
+                            <Border Style="{StaticResource InfoChip}" Padding="12,7">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:OnboardingViewModel}}, Path=SelectCityCommand}"
+                                        CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+                                <Label Text="{Binding DisplayName}" FontSize="12" FontFamily="OpenSansSemibold" />
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </HorizontalStackLayout>
+            </ScrollView>
+
+            <!-- Search Input & Error Notice -->
+            <VerticalStackLayout Grid.Row="3" Spacing="6">
                 <Label Text="{Binding LocationError}"
-                       TextColor="{StaticResource Error}" FontSize="13"
+                       TextColor="{StaticResource Error}" FontSize="12"
                        IsVisible="{Binding LocationError, Converter={StaticResource StringNotEmpty}}" />
-                <Label Text="veya şehir seçin" Style="{StaticResource BodyMuted}" FontSize="13" />
                 <Border Style="{StaticResource PremiumInput}">
-                    <Entry Placeholder="Şehir ara..." Text="{Binding CitySearch}" />
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                        <Image Source="icon_search.png" WidthRequest="15" HeightRequest="15" Opacity="0.65" VerticalOptions="Center" />
+                        <Entry Grid.Column="1" Placeholder="81 il içinde şehir veya plaka ara..." Text="{Binding CitySearch}" ClearButtonVisibility="WhileEditing" />
+                    </Grid>
                 </Border>
             </VerticalStackLayout>
 
-            <CollectionView Grid.Row="3" ItemsSource="{Binding FilteredCities}" SelectionMode="None">
+            <!-- 81 Cities List -->
+            <CollectionView Grid.Row="4" ItemsSource="{Binding FilteredCities}" SelectionMode="None">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:TurkishCity">
-                        <Border Margin="0,3" Padding="14,12"
-                                StrokeThickness="1" Stroke="{StaticResource GlassStroke}"
-                                BackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceDark}}"
-                                StrokeShape="RoundRectangle 12">
+                        <Border Margin="0,3" Padding="14,11"
+                                Style="{StaticResource GlassCardCompact}">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:OnboardingViewModel}}, Path=SelectCityCommand}"
                                     CommandParameter="{Binding .}" />
                             </Border.GestureRecognizers>
-                            <Grid ColumnDefinitions="Auto,*">
-                                <Label Text="{Binding PlateLabel}" TextColor="{StaticResource AccentGold}"
-                                       FontFamily="OpenSansSemibold" FontSize="13" VerticalOptions="Center" />
-                                <Label Grid.Column="1" Text="{Binding DisplayName}" Margin="12,0,0,0"
-                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
-                                       FontSize="15" VerticalOptions="Center" />
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <Label Text="{Binding PlateLabel}" TextColor="{StaticResource AccentEmerald}"
+                                       FontFamily="OpenSansSemibold" FontSize="13" VerticalOptions="Center" WidthRequest="32" />
+                                <Label Grid.Column="1" Text="{Binding DisplayName}"
+                                       FontSize="15" FontFamily="OpenSansSemibold" VerticalOptions="Center" />
+                                <Label Grid.Column="2" Text="Seç ›" Style="{StaticResource BodyMuted}" FontSize="12" VerticalOptions="Center" />
                             </Grid>
                         </Border>
                     </DataTemplate>
@@ -111,55 +112,70 @@
             </CollectionView>
         </Grid>
 
-        <!-- STEP 2: Method + theme -->
-        <VerticalStackLayout Grid.Row="1" Spacing="20" VerticalOptions="Center"
-                             IsVisible="{Binding IsStep2}">
-            <Label Text="Görünüm" Style="{StaticResource DisplayTitle}" FontSize="26" />
-            <Label Text="Vakitler Diyanet İşleri Başkanlığı yöntemiyle hesaplanır; dilerseniz ayarlardan değiştirebilirsiniz."
-                   Style="{StaticResource BodyMuted}" FontSize="14" />
-            <Border Style="{StaticResource GlassCard}">
-                <VerticalStackLayout Spacing="12">
-                    <Label Text="Tema" FontFamily="OpenSansSemibold" FontSize="15"
-                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                    <Picker SelectedIndex="{Binding ThemeIndex}"
-                            Title="Tema seçin">
-                        <Picker.ItemsSource>
-                            <x:Array Type="{x:Type x:String}">
-                                <x:String>Sistem temasına uy</x:String>
-                                <x:String>Açık tema</x:String>
-                                <x:String>Koyu tema</x:String>
-                            </x:Array>
-                        </Picker.ItemsSource>
-                    </Picker>
+        <!-- STEP 1: Theme + Contextual Notification Explanation -->
+        <ScrollView Grid.Row="1" IsVisible="{Binding IsStep1}">
+            <VerticalStackLayout Spacing="16" VerticalOptions="Center">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Görünüm ve Bildirimler" Style="{StaticResource DisplayTitle}" FontSize="24" />
+                    <Label Text="Seçtiğiniz şehir: " Style="{StaticResource BodyMuted}" FontSize="13">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="Seçili konum: " />
+                                <Span Text="{Binding LocationSummary}" FontFamily="OpenSansSemibold" TextColor="{StaticResource AccentEmerald}" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
                 </VerticalStackLayout>
-            </Border>
-        </VerticalStackLayout>
 
-        <!-- STEP 3: Notifications + privacy -->
-        <VerticalStackLayout Grid.Row="1" Spacing="20" VerticalOptions="Center"
-                             IsVisible="{Binding IsStep3}">
-            <Label Text="Bildirimler" Style="{StaticResource DisplayTitle}" FontSize="26" />
-            <Label Text="Namaz vakitlerinde ve günün ayetinde bildirim almak için izin gerekir. İzin, 'Başla' dediğinizde sorulur."
-                   Style="{StaticResource BodyMuted}" FontSize="14" />
-            <Border Style="{StaticResource GlassCard}">
-                <Grid ColumnDefinitions="*,Auto">
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="Vakit bildirimleri" FontFamily="OpenSansSemibold" FontSize="15"
-                               TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                        <Label Text="Uygulama kapalıyken de çalışır" Style="{StaticResource BodyMuted}" FontSize="12" />
+                <!-- Theme Card -->
+                <Border Style="{StaticResource GlassCard}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="GÖRÜNÜM TEMASI" Style="{StaticResource SectionLabel}" />
+                        <Border Style="{StaticResource PremiumInput}" Padding="10,0">
+                            <Picker SelectedIndex="{Binding ThemeIndex}" Title="Tema seçin">
+                                <Picker.ItemsSource>
+                                    <x:Array Type="{x:Type x:String}">
+                                        <x:String>Sistem temasına uy</x:String>
+                                        <x:String>Açık tema</x:String>
+                                        <x:String>Koyu tema</x:String>
+                                    </x:Array>
+                                </Picker.ItemsSource>
+                            </Picker>
+                        </Border>
                     </VerticalStackLayout>
-                    <Switch Grid.Column="1" IsToggled="{Binding NotificationsEnabled}" Style="{StaticResource PremiumSwitch}" />
-                </Grid>
-            </Border>
-            <Border Style="{StaticResource GlassCardCompact}">
-                <Label Text="Gizlilik: Verileriniz cihazınızda saklanır. Konumunuz yalnızca vakit hesaplamak için namaz vakti servisine iletilir; hesap, analiz veya reklam yoktur."
-                       Style="{StaticResource BodyMuted}" FontSize="12" />
-            </Border>
-        </VerticalStackLayout>
+                </Border>
 
-        <!-- Navigation buttons -->
+                <!-- Contextual Notifications Card -->
+                <Border Style="{StaticResource GlassCard}">
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                                <Label Text="VAKİT BİLDİRİMLERİ" Style="{StaticResource SectionLabel}" />
+                                <Label Text="Uygulama kapalıyken vakit girdiğinde haber ver" FontFamily="OpenSansSemibold" FontSize="15" />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="{Binding NotificationsEnabled}" Style="{StaticResource PremiumSwitch}" />
+                        </Grid>
+                        <Label Text="Neden izin gerekiyor? Android, namaz vakti hatırlatmalarını ve bildirim çubuğundaki vakit göstergesini sunabilmek için bildirim izni ister. İzin vermeseniz bile tüm özellikleri kullanabilirsiniz."
+                               Style="{StaticResource BodyMuted}" FontSize="12" LineHeight="1.4" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Privacy Guarantee -->
+                <Border Style="{StaticResource GlassCardCompact}">
+                    <Label Text="Gizlilik: Verileriniz yalnızca cihazınızda saklanır. Hesap, reklam veya takip kodu yoktur."
+                           Style="{StaticResource BodyMuted}" FontSize="12" />
+                </Border>
+
+                <Button Text="İzin Vermeden Devam Et"
+                        Style="{StaticResource GhostButton}"
+                        Command="{Binding FinishWithoutNotificationsCommand}"
+                        HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Bottom Navigation Buttons -->
         <Grid Grid.Row="2" ColumnDefinitions="Auto,*" ColumnSpacing="12">
-            <Button Text="Geri"
+            <Button Text="← Şehir Seçimi"
                     Style="{StaticResource GhostButton}"
                     Command="{Binding BackCommand}"
                     IsVisible="{Binding IsNotFirstStep}" />

@@ -12,13 +12,8 @@
         <conv:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="Auto,*">
-        <Grid.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0.0" />
-                <GradientStop Color="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource BackgroundElevated}}" Offset="1.0" />
-            </LinearGradientBrush>
-        </Grid.Background>
+    <Grid RowDefinitions="Auto,*"
+          BackgroundColor="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}">
 
         <!-- Header + search -->
         <VerticalStackLayout Grid.Row="0" Padding="20,16,20,12" Spacing="16">

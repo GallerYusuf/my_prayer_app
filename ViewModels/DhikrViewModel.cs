@@ -10,6 +10,8 @@ public sealed record DhikrPreset(string Name, int Target);
 
 public sealed record DhikrHistoryItem(string DateText, string Name, string CountText);
 
+[QueryProperty(nameof(InitialDhikrName), "preset")]
+[QueryProperty(nameof(InitialTarget), "target")]
 public partial class DhikrViewModel : ObservableObject
 {
     /// <summary>Classic post-prayer tesbihat sequence; auto-advances between steps.</summary>
@@ -26,9 +28,16 @@ public partial class DhikrViewModel : ObservableObject
 
     private DhikrSession? _session;
     private int _tesbihatStep = -1;
+    private int? _lastResetCount;
+    private string? _lastResetDhikrName;
+
+    [ObservableProperty] private string _initialDhikrName = string.Empty;
+    [ObservableProperty] private int _initialTarget;
 
     [ObservableProperty] private string _dhikrName = "Sübhanallah";
-    [ObservableProperty] private int _count;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanDecrement))]
+    private int _count;
     [ObservableProperty] private int _targetCount = 33;
     [ObservableProperty] private string _progressText = "0 / 33";
     [ObservableProperty] private double _progress;
@@ -37,6 +46,10 @@ public partial class DhikrViewModel : ObservableObject
     [ObservableProperty] private string _customDhikr = string.Empty;
     [ObservableProperty] private bool _isTesbihatMode;
     [ObservableProperty] private string _tesbihatStepText = string.Empty;
+    [ObservableProperty] private bool _canUndoReset;
+    [ObservableProperty] private string _undoResetText = string.Empty;
+
+    public bool CanDecrement => Count > 0;
 
     public ObservableCollection<DhikrPreset> Presets { get; } =
     [
@@ -59,6 +72,13 @@ public partial class DhikrViewModel : ObservableObject
 
     public async Task OnAppearingAsync()
     {
+        if (!string.IsNullOrWhiteSpace(InitialDhikrName))
+        {
+            DhikrName = Uri.UnescapeDataString(InitialDhikrName);
+            TargetCount = InitialTarget > 0 ? InitialTarget : 99;
+            InitialDhikrName = string.Empty;
+        }
+
         await LoadSessionAsync();
         await LoadHistoryAsync();
     }
@@ -75,11 +95,12 @@ public partial class DhikrViewModel : ObservableObject
     [RelayCommand]
     private async Task IncrementAsync()
     {
+        CanUndoReset = false;
         Count++;
         UpdateProgress();
 
         if (VibrationEnabled)
-            TryVibrate(Count == TargetCount ? 250 : 30);
+            TryVibrate(Count == TargetCount ? 250 : 25);
 
         await PersistAsync();
 
@@ -88,10 +109,25 @@ public partial class DhikrViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task DecrementAsync()
+    {
+        if (Count <= 0)
+            return;
+
+        Count--;
+        UpdateProgress();
+        if (VibrationEnabled)
+            TryVibrate(15);
+
+        await PersistAsync();
+    }
+
+    [RelayCommand]
     private async Task StartTesbihatAsync()
     {
         _tesbihatStep = 0;
         IsTesbihatMode = true;
+        CanUndoReset = false;
         await LoadTesbihatStepAsync();
     }
 
@@ -109,7 +145,7 @@ public partial class DhikrViewModel : ObservableObject
         {
             IsTesbihatMode = false;
             _tesbihatStep = -1;
-            TesbihatStepText = "Tesbihat tamamlandı";
+            TesbihatStepText = "Namaz tesbihatı tamamlandı (99/99)";
             if (VibrationEnabled)
                 TryVibrate(400);
             return;
@@ -126,30 +162,44 @@ public partial class DhikrViewModel : ObservableObject
         var (name, target) = TesbihatSteps[_tesbihatStep];
         DhikrName = name;
         TargetCount = target;
-        TesbihatStepText = $"Tesbihat {_tesbihatStep + 1}/{TesbihatSteps.Length}";
+        TesbihatStepText = $"Adım {_tesbihatStep + 1}/{TesbihatSteps.Length} · {name} ({target})";
 
-        // Each tesbihat step starts from zero regardless of today's earlier counts.
         _session = await _dhikrRepository.GetTodaySessionAsync(DhikrName, _clock.Today);
-        Count = 0;
+        Count = _session?.Count ?? 0;
         UpdateProgress();
     }
 
     [RelayCommand]
     private async Task ResetAsync()
     {
-        if (Count > 0)
-        {
-            var confirmed = await Shell.Current.DisplayAlertAsync(
-                "Sayacı Sıfırla",
-                $"{DhikrName} sayacındaki {Count} zikri sıfırlamak istiyor musunuz?",
-                "Sıfırla",
-                "Vazgeç");
+        if (Count <= 0)
+            return;
 
-            if (!confirmed)
-                return;
-        }
+        _lastResetCount = Count;
+        _lastResetDhikrName = DhikrName;
+        UndoResetText = $"{DhikrName} ({Count}) sıfırlandı";
+        CanUndoReset = true;
 
         Count = 0;
+        UpdateProgress();
+        await PersistAsync();
+    }
+
+    [RelayCommand]
+    private async Task UndoResetAsync()
+    {
+        if (!CanUndoReset || _lastResetCount is null)
+            return;
+
+        if (!string.IsNullOrEmpty(_lastResetDhikrName) && _lastResetDhikrName != DhikrName)
+        {
+            DhikrName = _lastResetDhikrName;
+            _session = await _dhikrRepository.GetTodaySessionAsync(DhikrName, _clock.Today);
+        }
+
+        Count = _lastResetCount.Value;
+        CanUndoReset = false;
+        _lastResetCount = null;
         UpdateProgress();
         await PersistAsync();
     }
@@ -158,6 +208,7 @@ public partial class DhikrViewModel : ObservableObject
     private async Task SelectPresetAsync(DhikrPreset preset)
     {
         ExitTesbihat();
+        CanUndoReset = false;
         DhikrName = preset.Name;
         TargetCount = preset.Target;
         await LoadSessionAsync();
@@ -171,6 +222,7 @@ public partial class DhikrViewModel : ObservableObject
             return;
 
         ExitTesbihat();
+        CanUndoReset = false;
         DhikrName = name;
         CustomDhikr = string.Empty;
         await LoadSessionAsync();
@@ -212,7 +264,6 @@ public partial class DhikrViewModel : ObservableObject
         }
         catch (FeatureNotSupportedException)
         {
-            // Device has no vibrator; counting still works.
         }
     }
 }

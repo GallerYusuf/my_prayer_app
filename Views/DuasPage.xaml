@@ -2,82 +2,164 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:PrayerApp.ViewModels"
+             xmlns:conv="clr-namespace:PrayerApp.Converters"
              x:Class="PrayerApp.Views.DuasPage"
              x:DataType="vm:DuasViewModel"
              Title="Kur'an'dan Dualar"
              Shell.NavBarIsVisible="True">
 
-    <Grid Padding="20,12,20,0">
-        <Grid.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0" />
-                <GradientStop Color="{AppThemeBinding Light=#EEF2FF, Dark={StaticResource BackgroundMid}}" Offset="1" />
-            </LinearGradientBrush>
-        </Grid.Background>
+    <ContentPage.Resources>
+        <conv:StringNotEmptyConverter x:Key="StringNotEmpty" />
+    </ContentPage.Resources>
 
-        <CollectionView ItemsSource="{Binding Duas}"
+    <Grid RowDefinitions="Auto,*,Auto" Padding="16,10,16,0" RowSpacing="10">
+
+        <!-- Search + All / Favorites Filter -->
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Border Style="{StaticResource PremiumInput}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                    <Image Source="icon_search.png" WidthRequest="15" HeightRequest="15" Opacity="0.65" VerticalOptions="Center" />
+                    <Entry Grid.Column="1"
+                           Placeholder="Dua başlığı, meal veya sure ara..."
+                           Text="{Binding SearchText}"
+                           ClearButtonVisibility="WhileEditing" />
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1"
+                    Style="{StaticResource InfoChip}"
+                    Padding="12,8"
+                    VerticalOptions="Center"
+                    SemanticProperties.Description="Sadece favorileri göster">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ToggleFavoritesFilterCommand}" />
+                </Border.GestureRecognizers>
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding ShowFavoritesOnly}" Value="True">
+                        <Setter Property="BackgroundColor" Value="#2010B981" />
+                        <Setter Property="Stroke" Value="#6010B981" />
+                    </DataTrigger>
+                </Border.Triggers>
+                <Label FontSize="12" FontFamily="OpenSansSemibold">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding ShowFavoritesOnly}" Value="False">
+                            <Setter Property="Text" Value="♡ Favoriler" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding ShowFavoritesOnly}" Value="True">
+                            <Setter Property="Text" Value="♥ Favoriler" />
+                            <Setter Property="TextColor" Value="{StaticResource AccentEmerald}" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+            </Border>
+        </Grid>
+
+        <!-- Duas List -->
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding Duas}"
                         SelectionMode="None">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="vm:DuaItem">
-                    <Border Margin="0,5" Padding="16,14"
-                            StrokeThickness="1" Stroke="{StaticResource GlassStroke}"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceDark}}"
-                            StrokeShape="RoundRectangle 16">
-                        <VerticalStackLayout Spacing="10">
-                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                    <Border Margin="0,5"
+                            Padding="16,14"
+                            Style="{StaticResource GlassCard}">
+                        <VerticalStackLayout Spacing="12">
+                            <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="6">
                                 <Label Text="{Binding Title}"
-                                       FontSize="14" FontFamily="OpenSansSemibold"
-                                       TextColor="{StaticResource AccentGold}"
-                                       LineHeight="1.3"
+                                       FontSize="15" FontFamily="OpenSansSemibold"
+                                       TextColor="{AppThemeBinding Light={StaticResource AccentGoldMuted}, Dark={StaticResource AccentGold}}"
                                        VerticalOptions="Center" />
-                                <Border Grid.Column="1" Style="{StaticResource IconButton}"
-                                        WidthRequest="36" HeightRequest="36"
-                                        SemanticProperties.Description="Duayı paylaş">
-                                    <Label Text="↗" FontSize="14" TextColor="{StaticResource AccentGold}"
-                                           HorizontalOptions="Center" VerticalOptions="Center" />
+
+                                <Border Grid.Column="1" Style="{StaticResource InfoChip}" Padding="9,5">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DuasViewModel}}, Path=CopyCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="Kopyala" FontSize="11" FontFamily="OpenSansSemibold" />
+                                </Border>
+
+                                <Border Grid.Column="2" Style="{StaticResource InfoChip}" Padding="9,5">
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DuasViewModel}}, Path=ShareCommand}"
                                             CommandParameter="{Binding .}" />
                                     </Border.GestureRecognizers>
+                                    <Label Text="Paylaş" FontSize="11" FontFamily="OpenSansSemibold" />
                                 </Border>
-                                <Border Grid.Column="2" Style="{StaticResource IconButton}"
-                                        WidthRequest="36" HeightRequest="36"
-                                        SemanticProperties.Description="Kur'an'da aç">
-                                    <Label Text="›" FontSize="18" TextColor="{StaticResource AccentGold}"
-                                           HorizontalOptions="Center" VerticalOptions="Center" />
+
+                                <Border Grid.Column="3" Style="{StaticResource InfoChip}" Padding="10,5">
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DuasViewModel}}, Path=OpenInQuranCommand}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DuasViewModel}}, Path=ToggleFavoriteCommand}"
                                             CommandParameter="{Binding .}" />
                                     </Border.GestureRecognizers>
+                                    <Label Text="♡" FontSize="14" FontFamily="OpenSansSemibold">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsFavorite}" Value="True">
+                                                <Setter Property="Text" Value="♥" />
+                                                <Setter Property="TextColor" Value="{StaticResource Error}" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
                                 </Border>
                             </Grid>
 
                             <Label Text="{Binding ArabicText}"
                                    FontFamily="AmiriQuran"
-                                   FontSize="20"
-                                   LineHeight="1.7"
+                                   FontSize="23"
+                                   LineHeight="1.75"
                                    FlowDirection="RightToLeft"
-                                   HorizontalTextAlignment="End"
-                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                   HorizontalTextAlignment="End" />
 
                             <Label Text="{Binding Translation}"
                                    FontSize="14"
-                                   LineHeight="1.4"
-                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                                   LineHeight="1.48" />
 
-                            <Label Text="{Binding Reference}"
-                                   Style="{StaticResource BodyMuted}"
-                                   FontSize="12" />
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="{Binding Reference}"
+                                       Style="{StaticResource BodyMuted}"
+                                       FontSize="12"
+                                       VerticalOptions="Center" />
+                                <Button Grid.Column="1"
+                                        Text="Kur'an'da Aç ›"
+                                        Style="{StaticResource GhostButton}"
+                                        TextColor="{StaticResource AccentEmerald}"
+                                        Padding="8,4"
+                                        MinimumHeightRequest="32"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DuasViewModel}}, Path=OpenInQuranCommand}"
+                                        CommandParameter="{Binding .}" />
+                            </Grid>
                         </VerticalStackLayout>
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
-                           Color="{StaticResource AccentEmerald}"
+        <Label Grid.Row="1"
+               Text="{Binding EmptyMessage}"
+               Style="{StaticResource BodyMuted}"
+               HorizontalTextAlignment="Center"
+               VerticalOptions="Center"
+               Margin="24"
+               IsVisible="{Binding EmptyMessage, Converter={StaticResource StringNotEmpty}}" />
+
+        <ActivityIndicator Grid.Row="1"
+                           IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
                            VerticalOptions="Center" HorizontalOptions="Center" />
+
+        <!-- Inline Toast -->
+        <Border Grid.Row="2"
+                Margin="0,0,0,10"
+                Padding="12,8"
+                StrokeShape="RoundRectangle 12"
+                Stroke="#5010B981"
+                BackgroundColor="#2010B981"
+                IsVisible="{Binding ActionMessage, Converter={StaticResource StringNotEmpty}}">
+            <Label Text="{Binding ActionMessage}"
+                   FontSize="12" FontFamily="OpenSansSemibold"
+                   TextColor="{StaticResource AccentEmerald}"
+                   HorizontalTextAlignment="Center" />
+        </Border>
     </Grid>
 </ContentPage>

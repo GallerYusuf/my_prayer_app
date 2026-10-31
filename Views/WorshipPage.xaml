@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PrayerApp.ViewModels"
+             xmlns:models="clr-namespace:PrayerApp.Models"
+             xmlns:services="clr-namespace:PrayerApp.Services.Interfaces"
+             xmlns:conv="clr-namespace:PrayerApp.Converters"
+             x:Class="PrayerApp.Views.WorshipPage"
+             x:DataType="vm:WorshipViewModel"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <conv:InverseBoolConverter x:Key="InverseBool" />
+        <conv:StringNotEmptyConverter x:Key="StringNotEmpty" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+        <!-- Top Header + Segmented Navigation -->
+        <VerticalStackLayout Padding="16,14,16,10" Spacing="12">
+            <Grid ColumnDefinitions="*,Auto">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="İbadet Merkezi" Style="{StaticResource DisplayTitle}" />
+                    <Label Text="Zikirmatik, günlük namaz, kaza ve hatim takibi" Style="{StaticResource BodyMuted}" />
+                </VerticalStackLayout>
+                <Border Grid.Column="1" Style="{StaticResource InfoChip}" Padding="10,6" VerticalOptions="Center">
+                    <Label Text="{Binding TrackProgressText}"
+                           FontSize="12" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource AccentEmerald}" />
+                </Border>
+            </Grid>
+
+            <!-- Shared native section tabs: readable and keyboard/screen-reader operable. -->
+            <Border Style="{StaticResource GlassCardCompact}" Padding="4" StrokeShape="RoundRectangle 14">
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="4">
+                    <Button Text="Zikirmatik" Style="{StaticResource SectionTabButton}"
+                            Command="{Binding SelectSectionCommand}" CommandParameter="0">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsDhikrSection}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}" />
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource AccentEmeraldDeep}, Dark={StaticResource AccentEmeraldSoft}}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <Button Grid.Column="1" Text="Namaz &amp; Kaza" Style="{StaticResource SectionTabButton}"
+                            Command="{Binding SelectSectionCommand}" CommandParameter="1">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsPrayerSection}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}" />
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource AccentEmeraldDeep}, Dark={StaticResource AccentEmeraldSoft}}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <Button Grid.Column="2" Text="Hatim Planı" Style="{StaticResource SectionTabButton}"
+                            Command="{Binding SelectSectionCommand}" CommandParameter="2">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsKhatmSection}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}" />
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource AccentEmeraldDeep}, Dark={StaticResource AccentEmeraldSoft}}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                </Grid>
+            </Border>
+        </VerticalStackLayout>
+
+        <!-- Content ScrollView -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16,4,16,28" Spacing="16">
+
+                <!-- ==================== 0: ZİKİRMATİK SECTION ==================== -->
+                <VerticalStackLayout Spacing="14" IsVisible="{Binding IsDhikrSection}">
+
+                    <!-- Preset chips -->
+                    <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                        <HorizontalStackLayout BindableLayout.ItemsSource="{Binding Presets}" Spacing="8">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:DhikrPreset">
+                                    <Border Style="{StaticResource InfoChip}" Padding="12,8">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WorshipViewModel}}, Path=SelectPresetCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                        <Label FontSize="13" FontFamily="OpenSansSemibold">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="{Binding Name}" />
+                                                    <Span Text=" · " TextColor="{StaticResource AccentGold}" />
+                                                    <Span Text="{Binding Target}" TextColor="{StaticResource AccentGold}" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </HorizontalStackLayout>
+                    </ScrollView>
+
+                    <!-- Guided Tesbihat Bar -->
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <Button Text="Namaz Tesbihatı Başlat (33 × 3)"
+                                Style="{StaticResource OutlineButton}"
+                                Command="{Binding StartTesbihatCommand}"
+                                IsVisible="{Binding IsTesbihatMode, Converter={StaticResource InverseBool}}" />
+                        <Border Style="{StaticResource InfoChip}" Padding="12,10"
+                                IsVisible="{Binding IsTesbihatMode}">
+                            <Label Text="{Binding TesbihatStepText}"
+                                   FontSize="13" FontFamily="OpenSansSemibold"
+                                   TextColor="{StaticResource AccentEmerald}" />
+                        </Border>
+                        <Button Grid.Column="1" Text="Bitir"
+                                Style="{StaticResource GhostButton}"
+                                Command="{Binding ExitTesbihatCommand}"
+                                IsVisible="{Binding IsTesbihatMode}" />
+                    </Grid>
+
+                    <!-- Undo Reset Banner -->
+                    <Border IsVisible="{Binding CanUndoReset}"
+                            Style="{StaticResource GlassCardCompact}"
+                            Stroke="{StaticResource AccentGold}"
+                            Padding="12,8">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <Label Text="{Binding UndoResetText}" FontSize="13" VerticalOptions="Center" />
+                            <Button Grid.Column="1" Text="Geri Al"
+                                    Style="{StaticResource OutlineButton}"
+                                    HeightRequest="36" Padding="12,0"
+                                    Command="{Binding UndoResetDhikrCommand}" />
+                        </Grid>
+                    </Border>
+
+                    <!-- One-Handed Ergonomic Big Counter Card -->
+                    <Border Style="{StaticResource GlassCard}"
+                            StrokeShape="RoundRectangle 24"
+                            Padding="20,26"
+                            MinimumHeightRequest="250"
+                            SemanticProperties.Description="Zikir saymak için dokunun">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding IncrementDhikrCommand}" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="12" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Label Text="{Binding DhikrName}"
+                                   FontFamily="OpenSansSemibold"
+                                   FontSize="19"
+                                   HorizontalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource AccentGoldMuted}, Dark={StaticResource AccentGold}}" />
+
+                            <Label Text="{Binding Count}"
+                                   FontFamily="OpenSansSemibold"
+                                   FontSize="68"
+                                   HeightRequest="84"
+                                   VerticalTextAlignment="Center"
+                                   HorizontalTextAlignment="Center" />
+
+                            <Label Text="{Binding ProgressText}"
+                                   Style="{StaticResource BodyMuted}"
+                                   FontSize="14"
+                                   HorizontalTextAlignment="Center" />
+
+                            <ProgressBar Progress="{Binding Progress}"
+                                         ProgressColor="{StaticResource AccentEmerald}"
+                                         WidthRequest="220" />
+
+                            <Label Text="Hedefe ulaşıldı"
+                                   TextColor="{StaticResource AccentEmerald}"
+                                   FontFamily="OpenSansSemibold"
+                                   FontSize="13"
+                                   HorizontalTextAlignment="Center"
+                                   IsVisible="{Binding TargetReached}" />
+
+                            <Label Text="Saymak için bu alana dokunun"
+                                   Style="{StaticResource BodyMuted}"
+                                   FontSize="12"
+                                   HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Mistake recovery (-1), Reset, and Vibration controls -->
+                    <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8">
+                        <Button Text="−1 Düzelt"
+                                Style="{StaticResource OutlineButton}"
+                                Command="{Binding DecrementDhikrCommand}"
+                                IsEnabled="{Binding CanDecrementDhikr}"
+                                SemanticProperties.Description="Sayacı bir azalt" />
+
+                        <Button Grid.Column="1"
+                                Text="Sıfırla"
+                                Style="{StaticResource GhostButton}"
+                                TextColor="{StaticResource Error}"
+                                Command="{Binding ResetDhikrCommand}"
+                                IsEnabled="{Binding CanDecrementDhikr}" />
+
+                        <Border Grid.Column="2" Style="{StaticResource SettingsGroup}" Padding="12,4">
+                            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                                <Label Text="Titreşim" FontSize="13" VerticalOptions="Center" />
+                                <Switch Grid.Column="1" IsToggled="{Binding VibrationEnabled}" Style="{StaticResource PremiumSwitch}" />
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <!-- Custom Dhikr Input -->
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <Border Style="{StaticResource PremiumInput}">
+                            <Entry Placeholder="Özel zikir metni yazın..." Text="{Binding CustomDhikr}" />
+                        </Border>
+                        <Button Grid.Column="1" Text="Seç"
+                                Style="{StaticResource OutlineButton}"
+                                Command="{Binding ApplyCustomDhikrCommand}" />
+                    </Grid>
+
+                    <!-- Recent Dhikr History -->
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="BUGÜN VE SON KAYITLAR" Style="{StaticResource SectionLabel}" VerticalOptions="Center" />
+                            <Button Grid.Column="1" Text="Tam Ekran Aç ›" Style="{StaticResource GhostButton}" Command="{Binding OpenFullDhikrCommand}" />
+                        </Grid>
+                        <Border Style="{StaticResource GlassCard}" Padding="8">
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding History}" Spacing="2">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:DhikrHistoryItem">
+                                        <Grid Padding="10,8" ColumnDefinitions="56,*,Auto" ColumnSpacing="10">
+                                            <Label Text="{Binding DateText}" Style="{StaticResource BodyMuted}" FontSize="12" VerticalOptions="Center" />
+                                            <Label Grid.Column="1" Text="{Binding Name}" FontSize="14" VerticalOptions="Center" />
+                                            <Label Grid.Column="2" Text="{Binding CountText}" FontFamily="OpenSansSemibold" FontSize="13"
+                                                   TextColor="{AppThemeBinding Light={StaticResource AccentGoldMuted}, Dark={StaticResource AccentGold}}" VerticalOptions="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                                <BindableLayout.EmptyView>
+                                    <Label Text="Henüz zikir kaydı bulunmuyor." Style="{StaticResource BodyMuted}" Padding="12,10" />
+                                </BindableLayout.EmptyView>
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- ==================== 1: NAMAZ & KAZA SECTION ==================== -->
+                <VerticalStackLayout Spacing="16" IsVisible="{Binding IsPrayerSection}">
+
+                    <!-- Today's 5 Obligatory Prayers -->
+                    <Border Style="{StaticResource GlassCard}" Padding="16">
+                        <VerticalStackLayout Spacing="12">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="BUGÜNKÜ FARZ NAMAZLAR" Style="{StaticResource SectionLabel}" />
+                                    <Label Text="{Binding TrackProgressText}" FontSize="16" FontFamily="OpenSansSemibold" />
+                                </VerticalStackLayout>
+                                <Border Grid.Column="1" Style="{StaticResource InfoChip}" Padding="10,6"
+                                        IsVisible="{Binding TrackStreak}">
+                                    <HorizontalStackLayout Spacing="4">
+                                        <Image Source="icon_flame.png" WidthRequest="13" HeightRequest="13" VerticalOptions="Center" />
+                                        <Label Text="{Binding TrackStreak, StringFormat='{}{0} gün düzenli'}"
+                                               FontSize="12" FontFamily="OpenSansSemibold"
+                                               TextColor="{AppThemeBinding Light={StaticResource AccentGoldMuted}, Dark={StaticResource AccentGold}}" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                            </Grid>
+
+                            <ProgressBar Progress="{Binding TrackProgressRatio}" ProgressColor="{StaticResource AccentEmerald}" />
+
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding TrackItems}" Spacing="8">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="models:PrayerTrackItem">
+                                        <Border Padding="12,10"
+                                                StrokeThickness="1"
+                                                Stroke="{AppThemeBinding Light={StaticResource HairLine}, Dark={StaticResource HairLineDark}}"
+                                                BackgroundColor="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}"
+                                                StrokeShape="RoundRectangle 12">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WorshipViewModel}}, Path=TogglePrayerCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                            </Border.GestureRecognizers>
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsCompleted}" Value="True">
+                                                    <Setter Property="Stroke" Value="#6010B981" />
+                                                    <Setter Property="BackgroundColor" Value="#1810B981" />
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                                <Image Source="{Binding Icon}" WidthRequest="20" HeightRequest="20" VerticalOptions="Center" />
+                                                <Label Grid.Column="1" Text="{Binding TurkishName}" FontSize="15" FontFamily="OpenSansSemibold" VerticalOptions="Center" />
+                                                <Label Grid.Column="2" FontSize="13" FontFamily="OpenSansSemibold" VerticalOptions="Center">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding IsCompleted}" Value="True">
+                                                            <Setter Property="Text" Value="✓ Kılındı" />
+                                                            <Setter Property="TextColor" Value="{StaticResource AccentEmerald}" />
+                                                        </DataTrigger>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding IsCompleted}" Value="False">
+                                                            <Setter Property="Text" Value="İşaretle" />
+                                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Calm 7-Day Rhythm Summary -->
+                    <Border Style="{StaticResource GlassCard}" Padding="16">
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="SON 7 GÜNÜN ÖZETİ" Style="{StaticResource SectionLabel}" />
+                            <Grid ColumnDefinitions="*,*,*,*,*,*,*" BindableLayout.ItemsSource="{Binding RecentDays}" ColumnSpacing="6">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="services:DailyPrayerSummary">
+                                        <Border Padding="4,8"
+                                                StrokeShape="RoundRectangle 10"
+                                                BackgroundColor="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}">
+                                            <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                                                <Label Text="{Binding DayLabel}" FontSize="11" Style="{StaticResource BodyMuted}" HorizontalOptions="Center" />
+                                                <Label Text="{Binding CountText}" FontSize="12" FontFamily="OpenSansSemibold"
+                                                       TextColor="{StaticResource AccentEmerald}" HorizontalOptions="Center" />
+                                            </VerticalStackLayout>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Kaza Tracker with Undo -->
+                    <Border Style="{StaticResource GlassCard}" Padding="16">
+                        <VerticalStackLayout Spacing="12">
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="KAZA NAMAZI VE ORUÇ ÇETELESİ" Style="{StaticResource SectionLabel}" />
+                                <Label Text="{Binding KazaTotalText}" Style="{StaticResource BodyMuted}" FontSize="13" />
+                            </VerticalStackLayout>
+
+                            <!-- Undo Kaza Action Banner -->
+                            <Border IsVisible="{Binding CanUndoKaza}"
+                                    Style="{StaticResource GlassCardCompact}"
+                                    Stroke="{StaticResource AccentGold}"
+                                    Padding="12,8">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                    <Label Text="{Binding UndoKazaText, StringFormat='Son işlem: {0}'}" FontSize="13" VerticalOptions="Center" />
+                                    <Button Grid.Column="1" Text="Geri Al"
+                                            Style="{StaticResource OutlineButton}"
+                                            HeightRequest="34" Padding="12,0"
+                                            Command="{Binding UndoKazaCommand}" />
+                                </Grid>
+                            </Border>
+
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding KazaItems}" Spacing="8">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:KazaItem">
+                                        <Border Padding="12,10"
+                                                StrokeShape="RoundRectangle 12"
+                                                BackgroundColor="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}">
+                                            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="6">
+                                                <Image Source="{Binding Icon}" WidthRequest="18" HeightRequest="18" VerticalOptions="Center" />
+                                                <Label Grid.Column="1" Text="{Binding Name}" FontSize="14" FontFamily="OpenSansSemibold" VerticalOptions="Center" />
+
+                                                <Border Grid.Column="2" Style="{StaticResource IconButton}" WidthRequest="34" HeightRequest="34">
+                                                    <Label Text="−10" FontSize="10" FontFamily="OpenSansSemibold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                                    <Border.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WorshipViewModel}}, Path=DecrementKazaTenCommand}"
+                                                            CommandParameter="{Binding .}" />
+                                                    </Border.GestureRecognizers>
+                                                </Border>
+                                                <Border Grid.Column="3" Style="{StaticResource IconButton}" WidthRequest="34" HeightRequest="34">
+                                                    <Label Text="−" FontSize="16" FontFamily="OpenSansSemibold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                                    <Border.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WorshipViewModel}}, Path=DecrementKazaCommand}"
+                                                            CommandParameter="{Binding .}" />
+                                                    </Border.GestureRecognizers>
+                                                </Border>
+
+                                                <Label Grid.Column="4" Text="{Binding Count}" FontSize="15" FontFamily="OpenSansSemibold"
+                                                       TextColor="{StaticResource AccentEmerald}" WidthRequest="44"
+                                                       HorizontalTextAlignment="Center" VerticalOptions="Center" />
+
+                                                <Border Grid.Column="5" Style="{StaticResource IconButton}" WidthRequest="34" HeightRequest="34">
+                                                    <Label Text="+" FontSize="16" FontFamily="OpenSansSemibold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                                    <Border.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WorshipViewModel}}, Path=IncrementKazaCommand}"
+                                                            CommandParameter="{Binding .}" />
+                                                    </Border.GestureRecognizers>
+                                                </Border>
+                                                <Border Grid.Column="6" Style="{StaticResource IconButton}" WidthRequest="34" HeightRequest="34">
+                                                    <Label Text="+10" FontSize="10" FontFamily="OpenSansSemibold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                                    <Border.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WorshipViewModel}}, Path=IncrementKazaTenCommand}"
+                                                            CommandParameter="{Binding .}" />
+                                                    </Border.GestureRecognizers>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- ==================== 2: HATİM PLANI SECTION ==================== -->
+                <VerticalStackLayout Spacing="16" IsVisible="{Binding IsKhatmSection}">
+
+                    <!-- Continue Reading Card -->
+                    <Border Style="{StaticResource GlassCard}" Padding="16">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <VerticalStackLayout Spacing="4" VerticalOptions="Center">
+                                <Label Text="KUR'AN OKUMA KONUMU" Style="{StaticResource SectionLabel}" />
+                                <Label Text="{Binding LastReadQuranText}" FontSize="15" FontFamily="OpenSansSemibold" />
+                            </VerticalStackLayout>
+                            <Button Grid.Column="1" Text="Devam Et"
+                                    Style="{StaticResource OutlineButton}"
+                                    VerticalOptions="Center"
+                                    Command="{Binding ContinueLastReadQuranCommand}" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Active Khatm Plan -->
+                    <Border Style="{StaticResource GlassCard}" Padding="16">
+                        <VerticalStackLayout Spacing="14">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="HATİM PLANI (604 SAYFA)" Style="{StaticResource SectionLabel}" />
+                                    <Label Text="Sayfa bazlı hatim takibi ve günlük okuma hedefi" Style="{StaticResource BodyMuted}" FontSize="12" />
+                                </VerticalStackLayout>
+                                <Button Grid.Column="1"
+                                        Text="Yeni Plan"
+                                        Style="{StaticResource GhostButton}"
+                                        Command="{Binding ToggleKhatmPanelCommand}" />
+                            </Grid>
+
+                            <VerticalStackLayout Spacing="10" IsVisible="{Binding HasActiveKhatm}">
+                                <ProgressBar Progress="{Binding KhatmProgress}" ProgressColor="{StaticResource AccentEmerald}" />
+                                <Label Text="{Binding KhatmProgressText}" FontSize="15" FontFamily="OpenSansSemibold" TextColor="{StaticResource AccentEmerald}" />
+                                <Label Text="{Binding KhatmDailyText}" Style="{StaticResource BodyMuted}" FontSize="13" />
+
+                                <Grid ColumnDefinitions="Auto,84,Auto,Auto,*" ColumnSpacing="8" Margin="0,4,0,0">
+                                    <Label Text="Sayfa:" Style="{StaticResource BodyMuted}" VerticalOptions="Center" />
+                                    <Border Grid.Column="1" Style="{StaticResource PremiumInput}" Padding="8,2">
+                                        <Entry Text="{Binding KhatmPageText}" Keyboard="Numeric" MaxLength="3" HorizontalTextAlignment="Center" />
+                                    </Border>
+                                    <Button Grid.Column="2" Text="+1 Sayfa" Style="{StaticResource OutlineButton}" Command="{Binding IncrementKhatmPageCommand}" />
+                                    <Button Grid.Column="3" Text="Kaydet" Style="{StaticResource GhostButton}" Command="{Binding SaveKhatmPageCommand}" />
+                                </Grid>
+
+                                <Button Text="Kaldığım Hatim Sayfasını Kur'an'da Aç"
+                                        Style="{StaticResource PremiumButton}"
+                                        Command="{Binding OpenKhatmPageInQuranCommand}"
+                                        Margin="0,4,0,0" />
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Spacing="10" IsVisible="{Binding HasActiveKhatm, Converter={StaticResource InverseBool}}">
+                                <Label Text="Henüz aktif bir hatim planınız yok. Aşağıdan hedef süre seçerek hemen başlayabilirsiniz."
+                                       Style="{StaticResource BodyMuted}" FontSize="13" />
+                            </VerticalStackLayout>
+
+                            <!-- Plan duration selector -->
+                            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsKhatmPanelOpen}">
+                                <BoxView Style="{StaticResource SettingsDivider}" />
+                                <Label Text="Hedef tamamlanma süresi seçin:" Style="{StaticResource BodyMuted}" FontSize="12" />
+                                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
+                                    <Button Text="30 Gün" Style="{StaticResource OutlineButton}" Command="{Binding StartKhatmCommand}" CommandParameter="30" Padding="6,10" />
+                                    <Button Grid.Column="1" Text="60 Gün" Style="{StaticResource OutlineButton}" Command="{Binding StartKhatmCommand}" CommandParameter="60" Padding="6,10" />
+                                    <Button Grid.Column="2" Text="90 Gün" Style="{StaticResource OutlineButton}" Command="{Binding StartKhatmCommand}" CommandParameter="90" Padding="6,10" />
+                                    <Button Grid.Column="3" Text="Serbest" Style="{StaticResource OutlineButton}" Command="{Binding StartKhatmCommand}" CommandParameter="0" Padding="6,10" />
+                                </Grid>
+                            </VerticalStackLayout>
+
+                            <Label Text="{Binding KhatmStatusMessage}"
+                                   FontSize="13" FontFamily="OpenSansSemibold"
+                                   TextColor="{StaticResource AccentEmerald}"
+                                   IsVisible="{Binding KhatmStatusMessage, Converter={StaticResource StringNotEmpty}}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

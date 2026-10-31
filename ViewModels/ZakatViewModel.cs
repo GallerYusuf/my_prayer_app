@@ -91,6 +91,18 @@ public partial class ZakatViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
+    private void Clear()
+    {
+        GoldGrams = string.Empty;
+        SilverGrams = string.Empty;
+        Cash = string.Empty;
+        Receivables = string.Empty;
+        Debts = string.Empty;
+        ValidationMessage = string.Empty;
+        HasResult = false;
+    }
+
     private static bool TryParse(string? text, out decimal value)
     {
         var trimmed = text?.Trim() ?? string.Empty;

@@ -16,8 +16,7 @@ public partial class KazaItem : ObservableObject
 }
 
 /// <summary>
-/// Missed (kaza) prayer counters. Users track their own debt per prayer and
-/// decrease it as they make up prayers; data stays on the device.
+/// Missed (kaza) prayer counters with single-action Undo recovery.
 /// </summary>
 public partial class KazaViewModel : ObservableObject
 {
@@ -35,8 +34,11 @@ public partial class KazaViewModel : ObservableObject
     ];
 
     private readonly IKeyValueStore _keyValueStore;
+    private (string Key, string Name, int OldValue)? _lastUndo;
 
     [ObservableProperty] private string _totalText = string.Empty;
+    [ObservableProperty] private bool _canUndo;
+    [ObservableProperty] private string _undoMessage = string.Empty;
 
     public ObservableCollection<KazaItem> Items { get; } = [];
 
@@ -63,9 +65,37 @@ public partial class KazaViewModel : ObservableObject
     [RelayCommand]
     private void DecrementTen(KazaItem item) => Adjust(item, -10);
 
+    [RelayCommand]
+    private void Undo()
+    {
+        if (!CanUndo || _lastUndo is not { } undo)
+            return;
+
+        var item = Items.FirstOrDefault(i => i.Key == undo.Key);
+        if (item is not null)
+        {
+            item.Count = undo.OldValue;
+            Save();
+            UpdateTotal();
+        }
+
+        CanUndo = false;
+        _lastUndo = null;
+    }
+
     private void Adjust(KazaItem item, int delta)
     {
-        item.Count = Math.Clamp(item.Count + delta, 0, 99_999);
+        var oldVal = item.Count;
+        var newVal = Math.Clamp(oldVal + delta, 0, 99_999);
+        if (newVal == oldVal)
+            return;
+
+        _lastUndo = (item.Key, item.Name, oldVal);
+        CanUndo = true;
+        var diff = newVal - oldVal;
+        UndoMessage = $"{item.Name}: {(diff > 0 ? $"+{diff}" : diff.ToString())} ({newVal})";
+
+        item.Count = newVal;
         Save();
         UpdateTotal();
     }
@@ -73,9 +103,13 @@ public partial class KazaViewModel : ObservableObject
     private void UpdateTotal()
     {
         var prayers = Items.Where(i => i.Key != "Fast").Sum(i => i.Count);
-        TotalText = prayers == 0
-            ? "Kaza borcunuz görünmüyor."
-            : $"Toplam {prayers} vakit kaza borcu kayıtlı.";
+        var fasts = Items.FirstOrDefault(i => i.Key == "Fast")?.Count ?? 0;
+        if (prayers == 0 && fasts == 0)
+            TotalText = "Kayıtlı kaza borcunuz görünmüyor.";
+        else if (fasts > 0)
+            TotalText = $"Toplam {prayers} vakit namaz · {fasts} gün oruç kazası kayıtlı.";
+        else
+            TotalText = $"Toplam {prayers} vakit kaza namazı kayıtlı.";
     }
 
     private Dictionary<string, int> Load()

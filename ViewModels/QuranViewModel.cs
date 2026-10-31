@@ -24,18 +24,31 @@ public partial class QuranViewModel : ObservableObject
 
     [ObservableProperty] private string _searchText = string.Empty;
     [ObservableProperty] private bool _isBusy;
-    [ObservableProperty] private bool _isSearchMode;
-    [ObservableProperty] private bool _showFavorites;
-    [ObservableProperty] private bool _showJuzList;
-    [ObservableProperty] private bool _showTopics;
-    [ObservableProperty] private bool _showTopicVerses;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSurahTabActive))]
+    private bool _isSearchMode;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSurahTabActive))]
+    private bool _showFavorites;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSurahTabActive))]
+    private bool _showJuzList;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSurahTabActive))]
+    private bool _showTopics;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSurahTabActive))]
+    private bool _showTopicVerses;
     [ObservableProperty] private string _selectedTopicName = string.Empty;
     [ObservableProperty] private bool _sortByNuzul;
     [ObservableProperty] private string _emptyMessage = string.Empty;
+    [ObservableProperty] private bool _canForceVerseSearch;
+
+    public bool IsSurahTabActive => !ShowJuzList && !ShowFavorites && !ShowTopics && !ShowTopicVerses && !IsSearchMode;
 
     // "Continue reading" card
     [ObservableProperty] private bool _hasLastRead;
-    [ObservableProperty] private string _lastReadText = string.Empty;
+    [ObservableProperty] private string _lastReadText = "Fatiha Suresi, 1. ayetten başla";
 
     // Khatm card
     [ObservableProperty] private bool _hasActiveKhatm;
@@ -79,12 +92,22 @@ public partial class QuranViewModel : ObservableObject
         await RefreshKhatmAsync();
     }
 
-    private void SortSurahs()
+    private void SortSurahs(string? surahFilter = null)
     {
-        var sorted = SortByNuzul 
-            ? _allSurahs.OrderBy(s => s.NuzulNumber).ToList() 
-            : _allSurahs.OrderBy(s => s.Number).ToList();
-            
+        IEnumerable<SurahInfo> source = _allSurahs;
+        if (!string.IsNullOrWhiteSpace(surahFilter))
+        {
+            var q = surahFilter.Trim();
+            source = source.Where(s =>
+                s.TranslatedName.Contains(q, StringComparison.CurrentCultureIgnoreCase) ||
+                s.Name.Contains(q, StringComparison.CurrentCultureIgnoreCase) ||
+                s.Number.ToString() == q);
+        }
+
+        var sorted = SortByNuzul
+            ? source.OrderBy(s => s.NuzulNumber).ToList()
+            : source.OrderBy(s => s.Number).ToList();
+
         Surahs.Clear();
         foreach (var surah in sorted)
             Surahs.Add(surah);
@@ -128,6 +151,7 @@ public partial class QuranViewModel : ObservableObject
             _allSurahs.FirstOrDefault(s => s.Number == position.Surah) is not { } surah)
         {
             HasLastRead = false;
+            LastReadText = "Fatiha Suresi, 1. ayet";
             return;
         }
 
@@ -148,13 +172,13 @@ public partial class QuranViewModel : ObservableObject
 
             HasActiveKhatm = true;
             KhatmProgress = _activePlan.Progress;
-            KhatmProgressText = $"%{_activePlan.Progress * 100:0} · {_activePlan.LastReadPage}/{KhatmPlan.TotalPages} sayfa";
+            KhatmProgressText = $"Sayfa {_activePlan.LastReadPage}/{KhatmPlan.TotalPages} (%{_activePlan.Progress * 100:0})";
             KhatmPageText = _activePlan.LastReadPage.ToString();
 
             var readToday = await _khatmRepository.GetPagesReadOnAsync(_activePlan.Id, _clock.Today);
             var target = _activePlan.PagesPerDayTarget(_clock.Today);
             KhatmDailyText = target > 0
-                ? $"Bugün {readToday} sayfa okundu · günlük hedef {target} sayfa"
+                ? $"Bugün {readToday} sayfa · Hedef {target} sayfa/gün"
                 : $"Bugün {readToday} sayfa okundu";
         }
         catch (Exception ex)
@@ -169,6 +193,8 @@ public partial class QuranViewModel : ObservableObject
     {
         if (SurahViewModel.GetLastRead(_keyValueStore) is { } position)
             await Shell.Current.GoToAsync($"SurahPage?surah={position.Surah}&verse={position.Verse}");
+        else
+            await Shell.Current.GoToAsync("SurahPage?surah=1&verse=1");
     }
 
     private void ResetViews()
@@ -178,7 +204,10 @@ public partial class QuranViewModel : ObservableObject
         ShowTopics = false;
         ShowTopicVerses = false;
         IsSearchMode = false;
+        CanForceVerseSearch = false;
+        EmptyMessage = string.Empty;
         SearchText = string.Empty;
+        SortSurahs();
     }
 
     [RelayCommand]
@@ -210,16 +239,14 @@ public partial class QuranViewModel : ObservableObject
             ResetViews();
             ShowTopicVerses = true;
             TopicVerses.Clear();
-            
+
             foreach (var refVal in topic.Verses)
             {
                 var verse = await _quranRepository.GetVerseAsync(refVal.Surah, refVal.Verse);
                 if (verse != null)
-                {
                     TopicVerses.Add(verse);
-                }
             }
-            
+
             EmptyMessage = TopicVerses.Count == 0 ? "Bu konuya ait ayet bulunamadı." : string.Empty;
         }
         catch (Exception ex)
@@ -237,7 +264,7 @@ public partial class QuranViewModel : ObservableObject
     private void ToggleSortOrder()
     {
         SortByNuzul = !SortByNuzul;
-        SortSurahs();
+        SortSurahs(SearchText);
     }
 
     [RelayCommand]
@@ -255,7 +282,7 @@ public partial class QuranViewModel : ObservableObject
             {
                 var confirmed = await Shell.Current.DisplayAlertAsync(
                     "Yeni Hatim",
-                    "Devam eden hatminiz silinip yeni bir hatim başlatılacak. Emin misiniz?",
+                    "Devam eden hatminiz sıfırlanıp yeni bir hatim başlatılacak. Emin misiniz?",
                     "Evet, yeni başlat", "Vazgeç");
                 if (!confirmed)
                     return;
@@ -294,6 +321,7 @@ public partial class QuranViewModel : ObservableObject
             if (updated.IsCompleted)
                 KhatmCompletedMessage = "Hatminiz tamamlandı, tebrikler! Yeni bir hatim başlatabilirsiniz.";
 
+            IsKhatmPanelOpen = false;
             await RefreshKhatmAsync();
         }
         catch (Exception ex)
@@ -321,9 +349,29 @@ public partial class QuranViewModel : ObservableObject
         _searchCts?.Cancel();
         var trimmed = value.Trim();
 
+        if (trimmed.Length == 0)
+        {
+            IsSearchMode = false;
+            CanForceVerseSearch = false;
+            EmptyMessage = string.Empty;
+            SearchResults.Clear();
+            SortSurahs();
+            return;
+        }
+
+        // First check if the query matches any surah name or number
+        SortSurahs(trimmed);
+        if (Surahs.Count > 0 && !IsSearchMode)
+        {
+            CanForceVerseSearch = trimmed.Length >= 2;
+            EmptyMessage = string.Empty;
+            return;
+        }
+
         if (trimmed.Length < 2)
         {
             IsSearchMode = false;
+            CanForceVerseSearch = false;
             SearchResults.Clear();
             return;
         }
@@ -332,15 +380,30 @@ public partial class QuranViewModel : ObservableObject
         _ = DebouncedSearchAsync(trimmed, cts.Token);
     }
 
-    private async Task DebouncedSearchAsync(string query, CancellationToken cancellationToken)
+    [RelayCommand]
+    private async Task SearchInVersesAsync()
+    {
+        var trimmed = SearchText.Trim();
+        if (trimmed.Length < 2)
+            return;
+
+        _searchCts?.Cancel();
+        var cts = _searchCts = new CancellationTokenSource();
+        await DebouncedSearchAsync(trimmed, cts.Token, immediate: true);
+    }
+
+    private async Task DebouncedSearchAsync(string query, CancellationToken cancellationToken, bool immediate = false)
     {
         try
         {
-            await Task.Delay(300, cancellationToken);
+            if (!immediate)
+                await Task.Delay(260, cancellationToken);
+
             var results = await _quranRepository.SearchAsync(query, 100, cancellationToken);
             if (cancellationToken.IsCancellationRequested)
                 return;
 
+            CanForceVerseSearch = false;
             IsSearchMode = true;
             ShowFavorites = false;
             ShowJuzList = false;
@@ -350,7 +413,7 @@ public partial class QuranViewModel : ObservableObject
             foreach (var verse in results)
                 SearchResults.Add(verse);
 
-            EmptyMessage = results.Count == 0 ? "Aramanızla eşleşen ayet bulunamadı." : string.Empty;
+            EmptyMessage = results.Count == 0 ? "Aramanızla eşleşen sure veya ayet bulunamadı." : string.Empty;
         }
         catch (OperationCanceledException)
         {
@@ -380,7 +443,7 @@ public partial class QuranViewModel : ObservableObject
         foreach (var verse in favorites)
             Favorites.Add(verse);
 
-        EmptyMessage = favorites.Count == 0 ? "Henüz favori ayetiniz yok. Ayetlere dokunarak favorilere ekleyin." : string.Empty;
+        EmptyMessage = favorites.Count == 0 ? "Henüz favori ayetiniz yok. Sure okurken kalp simgesine dokunarak favorilere ekleyebilirsiniz." : string.Empty;
     }
 
     [RelayCommand]

@@ -2,7 +2,6 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:PrayerApp.ViewModels"
-             xmlns:data="clr-namespace:PrayerApp.Data"
              xmlns:conv="clr-namespace:PrayerApp.Converters"
              x:Class="PrayerApp.Views.EsmaulHusnaPage"
              x:DataType="vm:EsmaulHusnaViewModel"
@@ -13,56 +12,136 @@
         <conv:StringNotEmptyConverter x:Key="StringNotEmpty" />
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="Auto,*" Padding="20,12,20,0" RowSpacing="12">
-        <Grid.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0" />
-                <GradientStop Color="{AppThemeBinding Light=#EEF2FF, Dark={StaticResource BackgroundMid}}" Offset="1" />
-            </LinearGradientBrush>
-        </Grid.Background>
+    <Grid RowDefinitions="Auto,*,Auto" Padding="16,10,16,0" RowSpacing="10">
 
-        <Border Style="{StaticResource PremiumInput}">
-            <Entry Placeholder="İsim veya anlam ara..."
-                   Text="{Binding SearchText}"
-                   ClearButtonVisibility="WhileEditing" />
-        </Border>
+        <!-- Search + Favorites Filter -->
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Border Style="{StaticResource PremiumInput}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                    <Image Source="icon_search.png" WidthRequest="15" HeightRequest="15" Opacity="0.65" VerticalOptions="Center" />
+                    <Entry Grid.Column="1"
+                           Placeholder="İsim, sıra numarası veya anlam ara..."
+                           Text="{Binding SearchText}"
+                           ClearButtonVisibility="WhileEditing" />
+                </Grid>
+            </Border>
 
+            <Border Grid.Column="1"
+                    Style="{StaticResource InfoChip}"
+                    Padding="12,8"
+                    VerticalOptions="Center"
+                    SemanticProperties.Description="Sadece favorileri göster">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ToggleFavoritesFilterCommand}" />
+                </Border.GestureRecognizers>
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding ShowFavoritesOnly}" Value="True">
+                        <Setter Property="BackgroundColor" Value="#2010B981" />
+                        <Setter Property="Stroke" Value="#6010B981" />
+                    </DataTrigger>
+                </Border.Triggers>
+                <Label FontSize="12" FontFamily="OpenSansSemibold">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding ShowFavoritesOnly}" Value="False">
+                            <Setter Property="Text" Value="♡ Favoriler" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding ShowFavoritesOnly}" Value="True">
+                            <Setter Property="Text" Value="♥ Favoriler" />
+                            <Setter Property="TextColor" Value="{StaticResource AccentEmerald}" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+            </Border>
+        </Grid>
+
+        <!-- Names List -->
         <CollectionView Grid.Row="1"
                         ItemsSource="{Binding Names}"
                         SelectionMode="None">
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="data:EsmaName">
-                    <Border Margin="0,4" Padding="14,12"
-                            StrokeThickness="1" Stroke="{StaticResource GlassStroke}"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceDark}}"
-                            StrokeShape="RoundRectangle 14">
-                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
-                            <Border WidthRequest="38" HeightRequest="38"
-                                    StrokeThickness="1" Stroke="#40D4AF37"
-                                    BackgroundColor="Transparent"
-                                    StrokeShape="RoundRectangle 10"
-                                    VerticalOptions="Center">
-                                <Label Text="{Binding Number}"
-                                       FontSize="12" FontFamily="OpenSansSemibold"
-                                       TextColor="{StaticResource AccentGold}"
-                                       HorizontalOptions="Center" VerticalOptions="Center" />
-                            </Border>
-                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                                <Label Text="{Binding Transliteration}"
-                                       FontSize="15" FontFamily="OpenSansSemibold"
-                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                                <Label Text="{Binding Meaning}"
-                                       Style="{StaticResource BodyMuted}"
-                                       FontSize="12"
-                                       LineHeight="1.3" />
-                            </VerticalStackLayout>
-                            <Label Grid.Column="2"
-                                   Text="{Binding Arabic}"
-                                   FontFamily="AmiriQuran"
-                                   FontSize="20"
-                                   TextColor="{StaticResource AccentGold}"
-                                   VerticalOptions="Center" />
-                        </Grid>
+                <DataTemplate x:DataType="vm:EsmaItem">
+                    <Border Margin="0,4"
+                            Padding="14,12"
+                            Style="{StaticResource GlassCardCompact}">
+                        <VerticalStackLayout Spacing="10">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                <Border WidthRequest="36" HeightRequest="36"
+                                        StrokeThickness="1" Stroke="#4010B981"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}"
+                                        StrokeShape="RoundRectangle 10"
+                                        VerticalOptions="Center">
+                                    <Label Text="{Binding Number}"
+                                           FontSize="12" FontFamily="OpenSansSemibold"
+                                           TextColor="{StaticResource AccentEmerald}"
+                                           HorizontalOptions="Center" VerticalOptions="Center" />
+                                </Border>
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                    <Label Text="{Binding Transliteration}"
+                                           FontSize="16" FontFamily="OpenSansSemibold" />
+                                    <Label Text="{Binding Meaning}"
+                                           Style="{StaticResource BodyMuted}"
+                                           FontSize="13"
+                                           LineHeight="1.35" />
+                                </VerticalStackLayout>
+
+                                <Label Grid.Column="2"
+                                       Text="{Binding Arabic}"
+                                       FontFamily="AmiriQuran"
+                                       FontSize="24"
+                                       TextColor="{AppThemeBinding Light={StaticResource AccentGoldMuted}, Dark={StaticResource AccentGold}}"
+                                       VerticalOptions="Center" />
+                            </Grid>
+
+                            <!-- Action Row: Zikrini Çek, Kopyala, Paylaş, Favori -->
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="6">
+                                <Border Style="{StaticResource InfoChip}" Padding="10,5">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:EsmaulHusnaViewModel}}, Path=StartDhikrCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="Zikrini Çek ›" FontSize="11" FontFamily="OpenSansSemibold"
+                                           TextColor="{StaticResource AccentEmerald}" />
+                                </Border>
+
+                                <BoxView Grid.Column="1" Color="Transparent" />
+
+                                <Border Grid.Column="2" Style="{StaticResource InfoChip}" Padding="9,5">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:EsmaulHusnaViewModel}}, Path=CopyCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="Kopyala" FontSize="11" FontFamily="OpenSansSemibold" />
+                                </Border>
+
+                                <Border Grid.Column="3" Style="{StaticResource InfoChip}" Padding="9,5">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:EsmaulHusnaViewModel}}, Path=ShareCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="Paylaş" FontSize="11" FontFamily="OpenSansSemibold" />
+                                </Border>
+
+                                <Border Grid.Column="4" Style="{StaticResource InfoChip}" Padding="10,5">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:EsmaulHusnaViewModel}}, Path=ToggleFavoriteCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="♡" FontSize="14" FontFamily="OpenSansSemibold">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsFavorite}" Value="True">
+                                                <Setter Property="Text" Value="♥" />
+                                                <Setter Property="TextColor" Value="{StaticResource Error}" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                </Border>
+                            </Grid>
+                        </VerticalStackLayout>
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
@@ -73,6 +152,21 @@
                Style="{StaticResource BodyMuted}"
                HorizontalTextAlignment="Center"
                VerticalOptions="Center"
+               Margin="24"
                IsVisible="{Binding EmptyMessage, Converter={StaticResource StringNotEmpty}}" />
+
+        <!-- Inline Toast -->
+        <Border Grid.Row="2"
+                Margin="0,0,0,10"
+                Padding="12,8"
+                StrokeShape="RoundRectangle 12"
+                Stroke="#5010B981"
+                BackgroundColor="#2010B981"
+                IsVisible="{Binding ActionMessage, Converter={StaticResource StringNotEmpty}}">
+            <Label Text="{Binding ActionMessage}"
+                   FontSize="12" FontFamily="OpenSansSemibold"
+                   TextColor="{StaticResource AccentEmerald}"
+                   HorizontalTextAlignment="Center" />
+        </Border>
     </Grid>
 </ContentPage>

@@ -12,13 +12,8 @@
         <conv:StringNotEmptyConverter x:Key="StringNotEmpty" />
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="Auto,*" Padding="20,12,20,0" RowSpacing="12">
-        <Grid.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0" />
-                <GradientStop Color="{AppThemeBinding Light=#EEF2FF, Dark={StaticResource BackgroundMid}}" Offset="1" />
-            </LinearGradientBrush>
-        </Grid.Background>
+    <Grid RowDefinitions="Auto,*" Padding="16,12,16,0" RowSpacing="12"
+          BackgroundColor="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}">
 
         <!-- Gregorian → Hijri converter -->
         <Border Style="{StaticResource GlassCard}" Padding="14,12">

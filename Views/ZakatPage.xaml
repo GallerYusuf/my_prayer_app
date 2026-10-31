@@ -18,13 +18,8 @@
         </Style>
     </ContentPage.Resources>
 
-    <Grid Padding="20,12,20,0">
-        <Grid.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0" />
-                <GradientStop Color="{AppThemeBinding Light=#EEF2FF, Dark={StaticResource BackgroundMid}}" Offset="1" />
-            </LinearGradientBrush>
-        </Grid.Background>
+    <Grid Padding="16,12,16,0"
+          BackgroundColor="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}">
 
         <ScrollView>
             <VerticalStackLayout Spacing="14" Padding="0,0,0,32">
@@ -87,9 +82,15 @@
                     </Border>
                 </VerticalStackLayout>
 
-                <Button Text="Hesapla"
-                        Style="{StaticResource PremiumButton}"
-                        Command="{Binding CalculateCommand}" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <Button Text="Hesapla"
+                            Style="{StaticResource PremiumButton}"
+                            Command="{Binding CalculateCommand}" />
+                    <Button Grid.Column="1"
+                            Text="Temizle"
+                            Style="{StaticResource SecondaryButton}"
+                            Command="{Binding ClearCommand}" />
+                </Grid>
 
                 <Border IsVisible="{Binding ValidationMessage, Converter={StaticResource StringNotEmpty}}"
                         StrokeThickness="1" Stroke="#40F87171" BackgroundColor="#1AF87171"

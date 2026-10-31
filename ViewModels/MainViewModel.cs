@@ -7,9 +7,11 @@ using PrayerApp.Core.Common;
 using PrayerApp.Core.Contracts;
 using PrayerApp.Core.Domain;
 using PrayerApp.Core.Services;
+using PrayerApp.Data;
 using PrayerApp.Models;
 using PrayerApp.Services;
 using PrayerApp.Services.Interfaces;
+using PrayerApp.Views;
 
 namespace PrayerApp.ViewModels;
 
@@ -19,7 +21,10 @@ public partial class MainViewModel : ObservableObject
 
     private readonly IPrayerScheduleService _scheduleService;
     private readonly IQuranRepository _quranRepository;
+    private readonly IKhatmRepository _khatmRepository;
+    private readonly IDhikrRepository _dhikrRepository;
     private readonly ISettingsStore _settingsStore;
+    private readonly IKeyValueStore _keyValueStore;
     private readonly INotificationCoordinator _notificationCoordinator;
     private readonly IPrayerTrackingService _trackingService;
     private readonly IClock _clock;
@@ -31,12 +36,12 @@ public partial class MainViewModel : ObservableObject
     private Verse? _currentVerse;
     private bool _initialized;
 
-    [ObservableProperty] private string _cityDisplay = "—";
+    [ObservableProperty] private string _cityDisplay = "Konum seçin";
     [ObservableProperty] private string _greeting = "Selâmün Aleyküm";
     [ObservableProperty] private string _todayDate = string.Empty;
     [ObservableProperty] private string _hijriDate = "—";
     [ObservableProperty] private string _dayPeriod = "day";
-    [ObservableProperty] private string _nextPrayerName = "-";
+    [ObservableProperty] private string _nextPrayerName = "—";
     [ObservableProperty] private string _nextPrayerTime = "--:--";
     [ObservableProperty] private string _remainingTime = "--:--:--";
     [ObservableProperty] private string _remainingHours = "--";
@@ -56,11 +61,18 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _ramadanCountdown = string.Empty;
     [ObservableProperty] private string _ramadanIftarTime = string.Empty;
     [ObservableProperty] private string _ramadanSahurTime = string.Empty;
-    [ObservableProperty] private string _trackProgressText = "0/5 kılındı";
+    [ObservableProperty] private string _trackProgressText = "0/5 vakit kılındı";
     [ObservableProperty] private int _trackStreak;
     [ObservableProperty] private bool _isOffline;
     [ObservableProperty] private string _dataStatusText = string.Empty;
     [ObservableProperty] private string _kerahatText = string.Empty;
+    [ObservableProperty] private bool _hasScheduleData;
+
+    // Quick resume & tools summaries
+    [ObservableProperty] private string _quranResumeTitle = "Kur'an Okumaya Başla";
+    [ObservableProperty] private string _quranResumeSubtitle = "114 sure · Arapça metin ve Türkçe meal";
+    [ObservableProperty] private string _qiblaSummaryText = "Kıble yönünü bul";
+    [ObservableProperty] private string _dhikrSummaryText = "Sübhanallah · 33";
 
     public ObservableCollection<PrayerTime> PrayerTimes { get; } = [];
     public ObservableCollection<PrayerTrackItem> TrackItems { get; } = [];
@@ -68,7 +80,10 @@ public partial class MainViewModel : ObservableObject
     public MainViewModel(
         IPrayerScheduleService scheduleService,
         IQuranRepository quranRepository,
+        IKhatmRepository khatmRepository,
+        IDhikrRepository dhikrRepository,
         ISettingsStore settingsStore,
+        IKeyValueStore keyValueStore,
         INotificationCoordinator notificationCoordinator,
         IPrayerTrackingService trackingService,
         IClock clock,
@@ -76,7 +91,10 @@ public partial class MainViewModel : ObservableObject
     {
         _scheduleService = scheduleService;
         _quranRepository = quranRepository;
+        _khatmRepository = khatmRepository;
+        _dhikrRepository = dhikrRepository;
         _settingsStore = settingsStore;
+        _keyValueStore = keyValueStore;
         _notificationCoordinator = notificationCoordinator;
         _trackingService = trackingService;
         _clock = clock;
@@ -100,9 +118,13 @@ public partial class MainViewModel : ObservableObject
         }
         else
         {
-            if (_loadedDate != _clock.Today)
+            var locationChanged = (settings.Location?.DisplayName ?? "Konum seçin") != CityDisplay;
+            if (_loadedDate != _clock.Today || locationChanged || !HasScheduleData)
                 await LoadAsync(forceRefresh: false, showBusy: false);
 
+            LoadTracking();
+            SyncPrayerCompletionStates();
+            await RefreshQuickCardsAsync();
             StartCountdown();
         }
     }
@@ -122,6 +144,7 @@ public partial class MainViewModel : ObservableObject
             LoadTracking();
             await LoadVerseOfDayAsync();
             await LoadAsync(forceRefresh: false, showBusy: true);
+            await RefreshQuickCardsAsync();
             StartCountdown();
         }
         finally
@@ -137,12 +160,61 @@ public partial class MainViewModel : ObservableObject
         {
             IsRefreshing = true;
             await LoadAsync(forceRefresh: true, showBusy: false);
+            await RefreshQuickCardsAsync();
             StartCountdown();
         }
         finally
         {
             IsRefreshing = false;
         }
+    }
+
+    [RelayCommand]
+    private async Task OpenCityPickerAsync()
+    {
+        var navigation = Shell.Current?.Navigation;
+        if (navigation is null)
+            return;
+
+        var current = _settingsStore.Get();
+        var pickerVm = new CityPickerViewModel(current.CityPlateCode, current.DistrictApiName);
+        pickerVm.SetNavigation(navigation);
+        var page = new CityPickerPage(pickerVm);
+        var modal = new NavigationPage(page)
+        {
+            BarBackgroundColor = Colors.Transparent,
+            BackgroundColor = Colors.Transparent
+        };
+        NavigationPage.SetHasNavigationBar(page, false);
+
+        await navigation.PushModalAsync(modal);
+
+        var selected = await pickerVm.WaitForSelectionAsync();
+        if (selected is null)
+            return;
+
+        if (CityCoordinates.FindByPlate(selected.City.PlateCode) is not { } coords)
+            return;
+
+        var updatedLocation = new GeoLocation
+        {
+            Latitude = coords.Lat,
+            Longitude = coords.Lon,
+            DisplayName = selected.Display,
+            IsFromDevice = false
+        };
+
+        var updatedSettings = current with
+        {
+            Location = updatedLocation,
+            LocationMode = LocationMode.Manual,
+            CityPlateCode = selected.City.PlateCode,
+            DistrictApiName = selected.District?.ApiName ?? string.Empty
+        };
+
+        _settingsStore.Save(updatedSettings);
+        await LoadAsync(forceRefresh: true, showBusy: true);
+        await RefreshQuickCardsAsync();
     }
 
     [RelayCommand]
@@ -165,16 +237,52 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private static async Task OpenSettingsAsync() => await Shell.Current.GoToAsync("//SettingsPage");
+    private async Task OpenVerseInQuranAsync()
+    {
+        if (_currentVerse is null)
+            return;
+
+        await Shell.Current.GoToAsync($"SurahPage?surah={_currentVerse.SurahNumber}&verse={_currentVerse.VerseNumber}");
+    }
 
     [RelayCommand]
-    private static async Task OpenQiblaAsync() => await Shell.Current.GoToAsync("//QiblaPage");
+    private async Task ContinueQuranAsync()
+    {
+        if (SurahViewModel.GetLastRead(_keyValueStore) is { } pos)
+        {
+            await Shell.Current.GoToAsync($"SurahPage?surah={pos.Surah}&verse={pos.Verse}");
+            return;
+        }
+
+        var plan = await _khatmRepository.GetActivePlanAsync();
+        if (plan is not null)
+        {
+            var nextPage = Math.Clamp(plan.LastReadPage + 1, 1, KhatmPlan.TotalPages);
+            var startVerse = await _quranRepository.GetPageStartAsync(nextPage);
+            if (startVerse is not null)
+            {
+                await Shell.Current.GoToAsync($"SurahPage?surah={startVerse.SurahNumber}&verse={startVerse.VerseNumber}");
+                return;
+            }
+        }
+
+        await Shell.Current.GoToAsync("//QuranPage");
+    }
+
+    [RelayCommand]
+    private static async Task OpenSettingsAsync() => await Shell.Current.GoToAsync("SettingsPage");
+
+    [RelayCommand]
+    private static async Task OpenQiblaAsync() => await Shell.Current.GoToAsync("QiblaPage");
 
     [RelayCommand]
     private static async Task OpenCalendarAsync() => await Shell.Current.GoToAsync("//CalendarPage");
 
     [RelayCommand]
     private static async Task OpenDhikrAsync() => await Shell.Current.GoToAsync("DhikrPage");
+
+    [RelayCommand]
+    private static async Task OpenWorshipAsync() => await Shell.Current.GoToAsync("//WorshipPage");
 
     [RelayCommand]
     private static async Task OpenEsmaulHusnaAsync() => await Shell.Current.GoToAsync("EsmaulHusnaPage");
@@ -196,6 +304,23 @@ public partial class MainViewModel : ObservableObject
     {
         _trackingService.Toggle(item.Name);
         item.IsCompleted = !item.IsCompleted;
+        SyncPrayerCompletionStates();
+        RefreshTrackingSummary();
+    }
+
+    [RelayCommand]
+    private void TogglePrayerTime(PrayerTime item)
+    {
+        if (!item.IsTrackable)
+            return;
+
+        _trackingService.Toggle(item.Name);
+        item.IsCompleted = _trackingService.IsCompletedToday(item.Name);
+
+        var trackItem = TrackItems.FirstOrDefault(t => t.Name == item.Name);
+        if (trackItem is not null)
+            trackItem.IsCompleted = item.IsCompleted;
+
         RefreshTrackingSummary();
     }
 
@@ -220,6 +345,52 @@ public partial class MainViewModel : ObservableObject
         _ = ClearVerseActionMessageAsync();
     }
 
+    private async Task RefreshQuickCardsAsync()
+    {
+        try
+        {
+            var settings = _settingsStore.Get();
+            if (settings.Location is { IsValid: true } loc)
+            {
+                var bearing = QiblaCalculator.CalculateBearing(loc.Latitude, loc.Longitude);
+                QiblaSummaryText = $"Kıble · {bearing:F0}°";
+            }
+            else
+            {
+                QiblaSummaryText = "Kıble Pusulası";
+            }
+
+            // Quran resume card
+            var lastRead = SurahViewModel.GetLastRead(_keyValueStore);
+            var activeKhatm = await _khatmRepository.GetActivePlanAsync();
+            if (lastRead is { } pos)
+            {
+                var surahs = await _quranRepository.GetSurahsAsync();
+                var surah = surahs.FirstOrDefault(s => s.Number == pos.Surah);
+                QuranResumeTitle = surah is not null
+                    ? $"{surah.TranslatedName} Suresi, {pos.Verse}. ayet"
+                    : $"{pos.Surah}. Sure, {pos.Verse}. ayet";
+            }
+            else
+            {
+                QuranResumeTitle = "Kur'an okumaya başla";
+            }
+
+            QuranResumeSubtitle = activeKhatm is not null
+                ? $"Hatim: {activeKhatm.LastReadPage}/{KhatmPlan.TotalPages}. sayfa (%{activeKhatm.Progress * 100:0})"
+                : "Kaldığın yerden devam et veya sure seç";
+
+            // Dhikr summary
+            var history = await _dhikrRepository.GetHistoryAsync(10);
+            var todayTotal = history.Where(h => h.Date == _clock.Today).Sum(h => h.Count);
+            DhikrSummaryText = todayTotal > 0 ? $"Bugün {todayTotal} zikir" : "Tesbihat & Sayaç";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Quick cards refresh failed");
+        }
+    }
+
     private async Task LoadAsync(bool forceRefresh, bool showBusy)
     {
         ErrorMessage = string.Empty;
@@ -230,15 +401,23 @@ public partial class MainViewModel : ObservableObject
         {
             ErrorMessage = result.Error.Message;
             IsOffline = result.Error.Kind is ErrorKind.Network or ErrorKind.Timeout;
+            if (_days.Count == 0)
+            {
+                HasScheduleData = false;
+                NextPrayerName = "Veri yok";
+                NextPrayerTime = "--:--";
+                RemainingTime = "--:--:--";
+            }
             return;
         }
 
         _days = result.Value.Days;
         _loadedDate = _clock.Today;
-        IsOffline = result.Value.IsFromCache && forceRefresh;
-        DataStatusText = BuildDataStatusText(result.Value);
-
         var today = _days.FirstOrDefault(d => d.Date == _clock.Today);
+        HasScheduleData = today is not null;
+        IsOffline = result.Value.IsFromCache;
+        DataStatusText = BuildDataStatusText(result.Value, today?.Date);
+
         HijriDate = string.IsNullOrWhiteSpace(today?.HijriDateText) ? "—" : today!.HijriDateText;
 
         UpdatePrayerList(today);
@@ -259,14 +438,19 @@ public partial class MainViewModel : ObservableObject
         });
     }
 
-    private string BuildDataStatusText(PrayerScheduleResult result)
+    private static string BuildDataStatusText(PrayerScheduleResult result, DateOnly? shownDate)
     {
+        var dateLabel = shownDate is { } d
+            ? d.ToDateTime(TimeOnly.MinValue).ToString("d MMMM", TurkishCulture)
+            : "Bugün";
+
         if (result.LastFetchedAtUtc is not { } fetchedAt)
-            return string.Empty;
+            return result.IsFromCache ? $"Çevrimdışı · {dateLabel} verisi" : string.Empty;
 
         var local = fetchedAt.ToLocalTime();
-        var prefix = result.IsFromCache ? "Kayıtlı veri" : "Güncellendi";
-        return $"{prefix}: {local.ToString("d MMM HH:mm", TurkishCulture)}";
+        return result.IsFromCache
+            ? $"Kayıtlı veri ({dateLabel}) · Son güncelleme {local.ToString("d MMM HH:mm", TurkishCulture)}"
+            : $"Güncel ({dateLabel})";
     }
 
     private void UpdateHeader()
@@ -283,7 +467,7 @@ public partial class MainViewModel : ObservableObject
         UpdateDayPeriod();
 
         var settings = _settingsStore.Get();
-        CityDisplay = settings.Location?.DisplayName is { Length: > 0 } name ? name : "Konum seçilmedi";
+        CityDisplay = settings.Location?.DisplayName is { Length: > 0 } name ? name : "Şehir Seçin";
     }
 
     private void UpdateDayPeriod()
@@ -337,13 +521,27 @@ public partial class MainViewModel : ObservableObject
             if (!today.Times.TryGetValue(kind, out var time))
                 continue;
 
+            var name = kind.ToString();
+            var isTrackable = kind != PrayerKind.Sunrise;
+
             PrayerTimes.Add(new PrayerTime
             {
-                Name = kind.ToString(),
+                Name = name,
                 TurkishName = kind.ToTurkishName(),
                 Icon = PrayerIcons.For(kind),
-                Time = time.ToTimeSpan()
+                Time = time.ToTimeSpan(),
+                IsTrackable = isTrackable,
+                IsCompleted = isTrackable && _trackingService.IsCompletedToday(name)
             });
+        }
+    }
+
+    private void SyncPrayerCompletionStates()
+    {
+        foreach (var pt in PrayerTimes)
+        {
+            if (pt.IsTrackable)
+                pt.IsCompleted = _trackingService.IsCompletedToday(pt.Name);
         }
     }
 
@@ -354,7 +552,7 @@ public partial class MainViewModel : ObservableObject
         if (!IsRamadanVisible || today is null)
             return;
 
-        RamadanDayText = $"{today.HijriDay}. gün";
+        RamadanDayText = $"Ramazan · {today.HijriDay}. Gün";
         RamadanIftarTime = today[PrayerKind.Maghrib].ToString("HH\\:mm");
         RamadanSahurTime = today[PrayerKind.Fajr].ToString("HH\\:mm");
     }
@@ -377,7 +575,7 @@ public partial class MainViewModel : ObservableObject
 
     private void UpdateCountdown()
     {
-        if (_days.Count == 0)
+        if (_days.Count == 0 || !HasScheduleData)
             return;
 
         // Day rollover while the page is open: reload today's data.
@@ -397,7 +595,7 @@ public partial class MainViewModel : ObservableObject
         var next = NextPrayerCalculator.FindNext(_days, now);
         if (next is null)
         {
-            NextPrayerName = "-";
+            NextPrayerName = "—";
             RemainingTime = "--:--:--";
             return;
         }
@@ -475,7 +673,7 @@ public partial class MainViewModel : ObservableObject
         var maghribAt = new DateTimeOffset(_clock.Today.ToDateTime(today[PrayerKind.Maghrib]), now.Offset);
         if (now < maghribAt)
         {
-            RamadanCountdownLabel = "İftara kalan";
+            RamadanCountdownLabel = "İftara kalan süre";
             var remaining = maghribAt - now;
             RamadanCountdown = $"{(int)remaining.TotalHours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}";
         }
@@ -483,7 +681,7 @@ public partial class MainViewModel : ObservableObject
         {
             var tomorrow = _days.FirstOrDefault(d => d.Date == _clock.Today.AddDays(1)) ?? today;
             var fajrAt = new DateTimeOffset(_clock.Today.AddDays(1).ToDateTime(tomorrow[PrayerKind.Fajr]), now.Offset);
-            RamadanCountdownLabel = "Sahura kalan";
+            RamadanCountdownLabel = "Sahura kalan süre";
             var remaining = fajrAt - now;
             RamadanCountdown = $"{(int)remaining.TotalHours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}";
         }

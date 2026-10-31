@@ -14,149 +14,265 @@
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*,Auto">
-        <Grid.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="{AppThemeBinding Light={StaticResource AppBackground}, Dark={StaticResource BackgroundDeep}}" Offset="0" />
-                <GradientStop Color="{AppThemeBinding Light=#EEF2FF, Dark={StaticResource BackgroundMid}}" Offset="1" />
-            </LinearGradientBrush>
-        </Grid.Background>
 
-        <!-- Reading toolbar -->
-        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="8" Padding="20,10,20,4">
-            <Border Style="{StaticResource InfoChip}" Padding="12,7">
-                <Label FontSize="12" FontFamily="OpenSansSemibold"
-                       TextColor="{StaticResource AccentGold}">
-                    <Label.Triggers>
-                        <DataTrigger TargetType="Label" Binding="{Binding ShowArabic}" Value="True">
-                            <Setter Property="Text" Value="Arapça: Açık" />
-                        </DataTrigger>
-                        <DataTrigger TargetType="Label" Binding="{Binding ShowArabic}" Value="False">
-                            <Setter Property="Text" Value="Arapça: Kapalı" />
-                        </DataTrigger>
-                    </Label.Triggers>
-                </Label>
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding ToggleArabicCommand}" />
-                </Border.GestureRecognizers>
-            </Border>
+        <!-- 0. Top Reading Control Bar & Expandable Typography Drawer -->
+        <VerticalStackLayout Padding="16,8,16,6" Spacing="8">
+            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="8" ColumnSpacing="8">
+                <!-- Page / Verse Position Indicator -->
+                <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                    <Label Text="{Binding SurahSubtitle}"
+                           FontSize="12"
+                           FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource AccentEmerald}" />
+                    <Label Text="{Binding HatimSummaryText}"
+                           Style="{StaticResource BodyMuted}"
+                           FontSize="11"
+                           IsVisible="{Binding HasActiveKhatm}" />
+                </VerticalStackLayout>
 
-            <BoxView Grid.Column="1" HeightRequest="1" Color="Transparent" />
-
-            <!-- Audio controls in Column 2 -->
-            <Grid Grid.Column="2" WidthRequest="38" HeightRequest="38">
-                <!-- Play Button -->
-                <Border Style="{StaticResource IconButton}" WidthRequest="38" HeightRequest="38"
-                        SemanticProperties.Description="Sureyi başlat">
+                <!-- Audio Play / Pause Trigger -->
+                <Border Grid.Column="1"
+                        Style="{StaticResource ReaderToolChip}"
+                        VerticalOptions="Center"
+                        SemanticProperties.Description="Sesli tilaveti başlat veya duraklat">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding PlayAudioCommand}" />
                     </Border.GestureRecognizers>
                     <Border.Triggers>
-                        <DataTrigger TargetType="Border" Binding="{Binding IsAudioLoading}" Value="True">
-                            <Setter Property="IsVisible" Value="False" />
-                        </DataTrigger>
                         <DataTrigger TargetType="Border" Binding="{Binding IsPlaying}" Value="True">
-                            <Setter Property="IsVisible" Value="False" />
+                            <Setter Property="BackgroundColor" Value="#2010B981" />
+                            <Setter Property="Stroke" Value="#6010B981" />
                         </DataTrigger>
                     </Border.Triggers>
-                    <Label Text="▶" FontSize="13" TextColor="{StaticResource AccentGold}"
-                           HorizontalOptions="Center" VerticalOptions="Center" />
+                    <Label FontSize="12" FontFamily="OpenSansSemibold"
+                           TextColor="{AppThemeBinding Light={StaticResource AccentEmeraldDeep}, Dark={StaticResource AccentGold}}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsPlaying}" Value="False">
+                                <Setter Property="Text" Value="▶ Dinle" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsPlaying}" Value="True">
+                                <Setter Property="Text" Value="Çalıyor" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsAudioLoading}" Value="True">
+                                <Setter Property="Text" Value="Yükleniyor..." />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
                 </Border>
 
-                <!-- Pause Button -->
-                <Border Style="{StaticResource IconButton}" WidthRequest="38" HeightRequest="38"
-                        SemanticProperties.Description="Sureyi duraklat" IsVisible="False">
+                <!-- Distraction-Free Focus Mode Button -->
+                <Border Grid.Row="1" Grid.Column="0"
+                        Style="{StaticResource ReaderToolChip}"
+                        HorizontalOptions="Start"
+                        VerticalOptions="Center"
+                        SemanticProperties.Description="Odak okuma modunu aç veya kapat">
                     <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding PauseAudioCommand}" />
+                        <TapGestureRecognizer Command="{Binding ToggleFocusModeCommand}" />
                     </Border.GestureRecognizers>
                     <Border.Triggers>
-                        <MultiTrigger TargetType="Border">
-                            <MultiTrigger.Conditions>
-                                <Condition Binding="{Binding IsAudioLoading}" Value="False" />
-                                <Condition Binding="{Binding IsPlaying}" Value="True" />
-                            </MultiTrigger.Conditions>
-                            <Setter Property="IsVisible" Value="True" />
-                        </MultiTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsFocusMode}" Value="True">
+                            <Setter Property="BackgroundColor" Value="#2010B981" />
+                            <Setter Property="Stroke" Value="#6010B981" />
+                        </DataTrigger>
                     </Border.Triggers>
-                    <Label Text="⏸" FontSize="13" TextColor="{StaticResource AccentGold}"
-                           HorizontalOptions="Center" VerticalOptions="Center" />
+                    <Label FontSize="12" FontFamily="OpenSansSemibold">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsFocusMode}" Value="False">
+                                <Setter Property="Text" Value="Odak Modu" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsFocusMode}" Value="True">
+                                <Setter Property="Text" Value="✓ Odak Açık" />
+                                <Setter Property="TextColor" Value="{StaticResource AccentEmerald}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
                 </Border>
 
-                <!-- Loading Spinner -->
-                <ActivityIndicator IsRunning="{Binding IsAudioLoading}" IsVisible="{Binding IsAudioLoading}"
-                                   Color="{StaticResource AccentGold}" WidthRequest="22" HeightRequest="22"
-                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                <!-- Readability Settings Drawer Toggle -->
+                <Border Grid.Row="1" Grid.Column="1"
+                        Style="{StaticResource ReaderToolChip}"
+                        VerticalOptions="Center"
+                        SemanticProperties.Description="Görünüm ve yazı boyutu ayarları">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleSettingsPanelCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label Text="Aa Görünüm"
+                           FontSize="12"
+                           FontFamily="OpenSansSemibold"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                </Border>
             </Grid>
 
-            <!-- Shifted Font controls to Columns 3 & 4 -->
-            <Border Grid.Column="3" Style="{StaticResource IconButton}"
-                    WidthRequest="38" HeightRequest="38"
-                    SemanticProperties.Description="Yazıyı küçült">
-                <Label Text="A−" FontSize="13" FontFamily="OpenSansSemibold"
-                       TextColor="{StaticResource AccentGold}"
-                       HorizontalOptions="Center" VerticalOptions="Center" />
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding DecreaseFontCommand}" />
-                </Border.GestureRecognizers>
-            </Border>
-            <Border Grid.Column="4" Style="{StaticResource IconButton}"
-                    WidthRequest="38" HeightRequest="38"
-                    SemanticProperties.Description="Yazıyı büyüt">
-                <Label Text="A+" FontSize="15" FontFamily="OpenSansSemibold"
-                       TextColor="{StaticResource AccentGold}"
-                       HorizontalOptions="Center" VerticalOptions="Center" />
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding IncreaseFontCommand}" />
-                </Border.GestureRecognizers>
-            </Border>
-        </Grid>
+            <!-- Collapsible Independent Readability Panel (Arabic & Meal separate font sizes + visibility) -->
+            <Border Style="{StaticResource GlassCardCompact}"
+                    IsVisible="{Binding IsSettingsPanelOpen}">
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                        <Button Style="{StaticResource OutlineButton}"
+                                Padding="10,6"
+                                MinimumHeightRequest="38"
+                                Command="{Binding ToggleArabicCommand}">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding ShowArabic}" Value="True">
+                                    <Setter Property="Text" Value="✓ Arapça Metin Açık" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button" Binding="{Binding ShowArabic}" Value="False">
+                                    <Setter Property="Text" Value="Arapça Metin Gizli" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
 
+                        <Button Grid.Column="1"
+                                Style="{StaticResource OutlineButton}"
+                                Padding="10,6"
+                                MinimumHeightRequest="38"
+                                Command="{Binding ToggleTranslationCommand}">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding ShowTranslation}" Value="True">
+                                    <Setter Property="Text" Value="✓ Türkçe Meal Açık" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Button" Binding="{Binding ShowTranslation}" Value="False">
+                                    <Setter Property="Text" Value="Türkçe Meal Gizli" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                    </Grid>
+
+                    <!-- Independent Arabic Font Size -->
+                    <Grid ColumnDefinitions="*,Auto,50,Auto" ColumnSpacing="8">
+                        <Label Text="Arapça yazı boyutu" FontSize="13" VerticalOptions="Center" />
+                        <Border Grid.Column="1" Style="{StaticResource IconButton}" WidthRequest="36" HeightRequest="36">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding DecreaseArabicFontCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="A−" FontSize="13" FontFamily="OpenSansSemibold" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <Label Grid.Column="2" Text="{Binding ArabicFontSize, StringFormat='{0:0} pt'}"
+                               FontSize="12" FontFamily="OpenSansSemibold" HorizontalTextAlignment="Center" VerticalOptions="Center" />
+                        <Border Grid.Column="3" Style="{StaticResource IconButton}" WidthRequest="36" HeightRequest="36">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding IncreaseArabicFontCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="A+" FontSize="14" FontFamily="OpenSansSemibold" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                    </Grid>
+
+                    <!-- Independent Meal Font Size -->
+                    <Grid ColumnDefinitions="*,Auto,50,Auto" ColumnSpacing="8">
+                        <Label Text="Türkçe meal yazı boyutu" FontSize="13" VerticalOptions="Center" />
+                        <Border Grid.Column="1" Style="{StaticResource IconButton}" WidthRequest="36" HeightRequest="36">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding DecreaseTranslationFontCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="A−" FontSize="13" FontFamily="OpenSansSemibold" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <Label Grid.Column="2" Text="{Binding TranslationFontSize, StringFormat='{0:0} pt'}"
+                               FontSize="12" FontFamily="OpenSansSemibold" HorizontalTextAlignment="Center" VerticalOptions="Center" />
+                        <Border Grid.Column="3" Style="{StaticResource IconButton}" WidthRequest="36" HeightRequest="36">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding IncreaseTranslationFontCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="A+" FontSize="14" FontFamily="OpenSansSemibold" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                    </Grid>
+
+                    <Label Text="Not: Arapça metin ve Türkçe meal tamamen çevrimdışı çalışır. Sesli tilavet internet bağlantısı gerektirir."
+                           Style="{StaticResource BodyMuted}"
+                           FontSize="11" />
+                </VerticalStackLayout>
+            </Border>
+        </VerticalStackLayout>
+
+        <!-- 1. Verses List -->
         <CollectionView x:Name="VersesView"
                         Grid.Row="1"
                         ItemsSource="{Binding Verses}"
                         SelectionMode="None"
                         Scrolled="OnVersesScrolled"
-                        Margin="20,4,20,0">
+                        Margin="16,0,16,0">
+            <CollectionView.Footer>
+                <!-- Previous / Next Surah Navigation at end of surah -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Padding="0,12,0,24">
+                    <Button Text="← Önceki Sure"
+                            Style="{StaticResource OutlineButton}"
+                            Command="{Binding GoPreviousSurahCommand}"
+                            IsEnabled="{Binding CanGoPreviousSurah}" />
+                    <Button Grid.Column="1"
+                            Text="Sonraki Sure →"
+                            Style="{StaticResource OutlineButton}"
+                            Command="{Binding GoNextSurahCommand}"
+                            IsEnabled="{Binding CanGoNextSurah}" />
+                </Grid>
+            </CollectionView.Footer>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="vm:VerseItem">
-                    <Border Margin="0,5" Padding="16,14"
-                            StrokeThickness="1" Stroke="{StaticResource GlassStroke}"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceDark}}"
-                            StrokeShape="RoundRectangle 16">
-                        <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
-                            <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto" ColumnSpacing="10">
-                                <Border WidthRequest="30" HeightRequest="30"
-                                        StrokeThickness="1" Stroke="#40D4AF37"
+                    <Border Margin="0,5"
+                            Padding="16,14"
+                            Style="{StaticResource GlassCard}">
+                        <VerticalStackLayout Spacing="12">
+                            <!-- Verse Header: Number + Page/Juz + Compact Actions (Hidden in Focus Mode) -->
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="8">
+                                <Border Padding="9,4"
+                                        StrokeThickness="1"
+                                        Stroke="#4010B981"
                                         StrokeShape="RoundRectangle 8"
-                                        BackgroundColor="Transparent"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}"
                                         VerticalOptions="Center">
                                     <Label Text="{Binding VerseNumber}"
-                                           FontSize="11" FontFamily="OpenSansSemibold"
-                                           TextColor="{StaticResource AccentGold}"
-                                           HorizontalOptions="Center" VerticalOptions="Center" />
+                                           FontSize="12"
+                                           FontFamily="OpenSansSemibold"
+                                           TextColor="{StaticResource AccentEmerald}"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center" />
                                 </Border>
+
                                 <Label Grid.Column="1"
                                        Text="{Binding PageInfo}"
                                        Style="{StaticResource BodyMuted}"
-                                       FontSize="10"
-                                       VerticalOptions="Center"
-                                       IsVisible="{Binding PageInfo, Converter={StaticResource StringNotEmpty}}" />
-                                <BoxView Grid.Column="2" HeightRequest="1" Color="Transparent" />
-                                <Border Grid.Column="3" Style="{StaticResource IconButton}"
-                                        WidthRequest="38" HeightRequest="38"
+                                       FontSize="11"
+                                       VerticalOptions="Center" />
+
+                                <!-- Copy button -->
+                                <Border Grid.Column="2"
+                                        Style="{StaticResource InfoChip}"
+                                        Padding="9,5"
+                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:SurahViewModel}}, Path=IsFocusMode, Converter={StaticResource InverseBool}}"
+                                        SemanticProperties.Description="Ayeti kopyala">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SurahViewModel}}, Path=CopyVerseCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="Kopyala" FontSize="11" FontFamily="OpenSansSemibold" />
+                                </Border>
+
+                                <!-- Share button -->
+                                <Border Grid.Column="3"
+                                        Style="{StaticResource InfoChip}"
+                                        Padding="9,5"
+                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:SurahViewModel}}, Path=IsFocusMode, Converter={StaticResource InverseBool}}"
                                         SemanticProperties.Description="Ayeti paylaş">
-                                    <Label Text="↗" FontSize="15" TextColor="{StaticResource AccentGold}"
-                                           HorizontalOptions="Center" VerticalOptions="Center" />
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SurahViewModel}}, Path=ShareVerseCommand}"
                                             CommandParameter="{Binding .}" />
                                     </Border.GestureRecognizers>
+                                    <Label Text="Paylaş" FontSize="11" FontFamily="OpenSansSemibold" />
                                 </Border>
-                                <Border Grid.Column="4" Style="{StaticResource IconButton}"
-                                        WidthRequest="38" HeightRequest="38"
+
+                                <!-- Favorite button -->
+                                <Border Grid.Column="4"
+                                        Style="{StaticResource InfoChip}"
+                                        Padding="10,5"
+                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:SurahViewModel}}, Path=IsFocusMode, Converter={StaticResource InverseBool}}"
                                         SemanticProperties.Description="Favorilere ekle veya çıkar">
-                                    <Label Text="♡" FontSize="16" TextColor="{StaticResource AccentGold}"
-                                           HorizontalOptions="Center" VerticalOptions="Center">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SurahViewModel}}, Path=ToggleFavoriteCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="♡" FontSize="14" FontFamily="OpenSansSemibold"
+                                           TextColor="{AppThemeBinding Light={StaticResource AccentGoldMuted}, Dark={StaticResource AccentGold}}">
                                         <Label.Triggers>
                                             <DataTrigger TargetType="Label" Binding="{Binding IsFavorite}" Value="True">
                                                 <Setter Property="Text" Value="♥" />
@@ -164,22 +280,16 @@
                                             </DataTrigger>
                                         </Label.Triggers>
                                     </Label>
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SurahViewModel}}, Path=ToggleFavoriteCommand}"
-                                            CommandParameter="{Binding .}" />
-                                    </Border.GestureRecognizers>
                                 </Border>
                             </Grid>
 
-                            <Label Grid.Row="1"
-                                   Text="{Binding ArabicText}"
+                            <!-- Arabic Verse Text -->
+                            <Label Text="{Binding ArabicText}"
                                    FontFamily="AmiriQuran"
                                    FontSize="{Binding Source={RelativeSource AncestorType={x:Type vm:SurahViewModel}}, Path=ArabicFontSize}"
-                                   LineHeight="1.7"
+                                   LineHeight="1.78"
                                    FlowDirection="RightToLeft"
                                    HorizontalTextAlignment="End"
-                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
                                    IsVisible="{Binding HasArabic}">
                                 <Label.Triggers>
                                     <DataTrigger TargetType="Label"
@@ -190,12 +300,12 @@
                                 </Label.Triggers>
                             </Label>
 
-                            <Label Grid.Row="2"
-                                   Text="{Binding Text}"
+                            <!-- Turkish Meal Text -->
+                            <Label Text="{Binding Text}"
                                    FontSize="{Binding Source={RelativeSource AncestorType={x:Type vm:SurahViewModel}}, Path=TranslationFontSize}"
-                                   LineHeight="1.45"
-                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                        </Grid>
+                                   LineHeight="1.52"
+                                   IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:SurahViewModel}}, Path=ShowTranslation}" />
+                        </VerticalStackLayout>
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
@@ -203,14 +313,29 @@
 
         <ActivityIndicator Grid.Row="1"
                            IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
-                           Color="{StaticResource AccentEmerald}"
                            VerticalOptions="Center" HorizontalOptions="Center" />
 
-        <!-- Bottom Controls Bar (Row 2) -->
-        <VerticalStackLayout Grid.Row="2" Spacing="8" Padding="20,10" BackgroundColor="{AppThemeBinding Light=#FFFDF6, Dark={StaticResource BackgroundDeep}}">
-            <!-- Hatim Update Card -->
-            <Border StrokeThickness="1" Stroke="{StaticResource GlassStroke}"
-                    BackgroundColor="{AppThemeBinding Light=#E0F2FE, Dark=#1E3A8A}"
+        <!-- 2. Bottom Controls Bar (Feedback, Hatim Save, and Audio Player) -->
+        <VerticalStackLayout Grid.Row="2" Spacing="8" Padding="16,8">
+
+            <!-- Inline Action Feedback Toast -->
+            <Border IsVisible="{Binding ActionFeedbackMessage, Converter={StaticResource StringNotEmpty}}"
+                    StrokeThickness="1"
+                    Stroke="#5010B981"
+                    BackgroundColor="#2010B981"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="12,8">
+                <Label Text="{Binding ActionFeedbackMessage}"
+                       FontSize="12"
+                       FontFamily="OpenSansSemibold"
+                       TextColor="{StaticResource AccentEmerald}"
+                       HorizontalTextAlignment="Center" />
+            </Border>
+
+            <!-- Hatim One-Tap Save Bar -->
+            <Border StrokeThickness="1"
+                    Stroke="#5010B981"
+                    BackgroundColor="{AppThemeBinding Light=#ECFDF5, Dark=#122B23}"
                     StrokeShape="RoundRectangle 12"
                     Padding="12,10"
                     IsVisible="{Binding ShowHatimUpdateChip}">
@@ -218,30 +343,73 @@
                     <TapGestureRecognizer Command="{Binding UpdateHatimPageCommand}" />
                 </Border.GestureRecognizers>
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                    <VerticalStackLayout Spacing="2">
-                        <Label Text="Hatim Takibini Güncelle" FontSize="11" FontFamily="OpenSansSemibold" TextColor="{StaticResource AccentGold}" />
-                        <Label Text="{Binding CurrentVisiblePage, StringFormat='Okuduğunuz sayfayı hatim planınıza kaydedin (Sayfa {0})'}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                    <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                        <Label Text="HATİM TAKİBİNİ GÜNCELLE" Style="{StaticResource SectionLabel}" FontSize="10" />
+                        <Label Text="{Binding CurrentVisiblePage, StringFormat='Okuduğunuz sayfayı hatime kaydet (Sayfa {0})'}"
+                               FontSize="13" FontFamily="OpenSansSemibold" />
                     </VerticalStackLayout>
-                    <Label Grid.Column="1" Text="✓" FontSize="20" TextColor="{StaticResource AccentEmerald}" VerticalOptions="Center" />
+                    <Button Grid.Column="1"
+                            Text="Kaydet ✓"
+                            Style="{StaticResource OutlineButton}"
+                            Padding="12,4"
+                            MinimumHeightRequest="34"
+                            Command="{Binding UpdateHatimPageCommand}" />
                 </Grid>
             </Border>
 
-            <!-- Audio Player Control Bar -->
-            <Border StrokeThickness="1" Stroke="{StaticResource GlassStroke}"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource CardSurface}, Dark={StaticResource CardSurfaceDark}}"
-                    StrokeShape="RoundRectangle 12"
-                    Padding="14,10"
-                    IsVisible="{Binding IsPlaying}">
-                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
-                    <VerticalStackLayout Spacing="2" VerticalOptions="Center">
-                        <Label Text="Sesli Okunuş" FontSize="11" FontFamily="OpenSansSemibold" TextColor="{StaticResource AccentGold}" />
-                        <Label Text="Mishary Rashid Al-Afasy" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
-                    </VerticalStackLayout>
-                    <!-- Pause Button (inline) -->
-                    <Button Grid.Column="1" Text="Duraklat" Style="{StaticResource OutlineButton}" Command="{Binding PauseAudioCommand}" HeightRequest="36" Padding="12,0" />
-                    <!-- Stop Button (inline) -->
-                    <Button Grid.Column="2" Text="Kapat" Style="{StaticResource GhostButton}" Command="{Binding StopAudioCommand}" HeightRequest="36" Padding="12,0" />
-                </Grid>
+            <!-- Audio Player Bar (Loading, Playing, Paused, Error states) -->
+            <Border Style="{StaticResource GlassCardCompact}"
+                    Padding="12,10"
+                    IsVisible="{Binding IsAudioBarVisible}">
+                <VerticalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                        <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                            <Label Text="SESLİ TİLAVET (ÇEVRİMİÇİ)" Style="{StaticResource SectionLabel}" FontSize="10" />
+                            <Label Text="{Binding AudioStatusText}" FontSize="13" FontFamily="OpenSansSemibold" />
+                        </VerticalStackLayout>
+
+                        <ActivityIndicator Grid.Column="1"
+                                           IsRunning="{Binding IsAudioLoading}"
+                                           IsVisible="{Binding IsAudioLoading}"
+                                           WidthRequest="24" HeightRequest="24"
+                                           VerticalOptions="Center" />
+
+                        <Button Grid.Column="1"
+                                Text="Duraklat"
+                                Style="{StaticResource OutlineButton}"
+                                HeightRequest="34" Padding="12,0"
+                                IsVisible="{Binding IsPlaying}"
+                                Command="{Binding PauseAudioCommand}" />
+
+                        <Button Grid.Column="1"
+                                Text="Devam Et"
+                                Style="{StaticResource OutlineButton}"
+                                HeightRequest="34" Padding="12,0"
+                                IsVisible="{Binding IsAudioPaused}"
+                                Command="{Binding PlayAudioCommand}" />
+
+                        <Button Grid.Column="2"
+                                Text="Kapat"
+                                Style="{StaticResource GhostButton}"
+                                HeightRequest="34" Padding="10,0"
+                                Command="{Binding StopAudioCommand}" />
+                    </Grid>
+
+                    <!-- Audio Error Explanation (Offline / Network issue) -->
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"
+                          IsVisible="{Binding AudioErrorMessage, Converter={StaticResource StringNotEmpty}}">
+                        <Label Text="{Binding AudioErrorMessage}"
+                               TextColor="{StaticResource Error}"
+                               FontSize="12"
+                               VerticalOptions="Center" />
+                        <Button Grid.Column="1"
+                                Text="Tekrar Dene"
+                                Style="{StaticResource GhostButton}"
+                                TextColor="{StaticResource Error}"
+                                HeightRequest="32" Padding="8,0"
+                                Command="{Binding PlayAudioCommand}" />
+                    </Grid>
+                </VerticalStackLayout>
             </Border>
         </VerticalStackLayout>
     </Grid>

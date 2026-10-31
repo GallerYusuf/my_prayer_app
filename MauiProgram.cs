@@ -136,6 +136,8 @@ public static class MauiProgram
 		services.AddTransient<ReligiousDaysViewModel>();
 		services.AddTransient<KazaViewModel>();
 		services.AddTransient<ZakatViewModel>();
+		services.AddTransient<WorshipViewModel>();
+		services.AddTransient<ExploreViewModel>();
 
 		services.AddTransient<MainPage>();
 		services.AddTransient<CalendarPage>();
@@ -150,5 +152,7 @@ public static class MauiProgram
 		services.AddTransient<ReligiousDaysPage>();
 		services.AddTransient<KazaPage>();
 		services.AddTransient<ZakatPage>();
+		services.AddTransient<WorshipPage>();
+		services.AddTransient<ExplorePage>();
 	}
 }

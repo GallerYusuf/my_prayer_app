@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PrayerApp.ViewModels"
+             x:Class="PrayerApp.Views.ExplorePage"
+             x:DataType="vm:ExploreViewModel"
+             Shell.NavBarIsVisible="False">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16,14,16,28" Spacing="16">
+
+            <!-- Header -->
+            <Grid ColumnDefinitions="*,Auto">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="Keşfet &amp; Araçlar" Style="{StaticResource DisplayTitle}" />
+                    <Label Text="Kıble, dualar, Esmaül Hüsna, hesaplama araçları ve ayarlar" Style="{StaticResource BodyMuted}" />
+                </VerticalStackLayout>
+                <Border Grid.Column="1" Style="{StaticResource IconButton}" VerticalOptions="Center"
+                        SemanticProperties.Description="Ayarları aç">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenSettingsCommand}" />
+                    </Border.GestureRecognizers>
+                    <Image Source="settings.png" WidthRequest="20" HeightRequest="20" HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+            </Grid>
+
+            <!-- Featured Card: Günün Esması -->
+            <Border Style="{StaticResource GlassCard}" Padding="16">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenEsmaulHusnaCommand}" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="14">
+                    <VerticalStackLayout Spacing="6" VerticalOptions="Center">
+                        <Label Text="GÜNÜN ESMASI · ESMAÜL HÜSNA" Style="{StaticResource SectionLabel}" />
+                        <Label Text="{Binding EsmaOfTheDayName}"
+                               FontSize="18" FontFamily="OpenSansSemibold" />
+                        <Label Text="{Binding EsmaOfTheDayMeaning}"
+                               Style="{StaticResource BodyMuted}"
+                               LineHeight="1.35" />
+                        <Label Text="99 ismin tamamını incele ›"
+                               FontSize="12" FontFamily="OpenSansSemibold"
+                               TextColor="{StaticResource AccentEmerald}"
+                               Margin="0,4,0,0" />
+                    </VerticalStackLayout>
+                    <Border Grid.Column="1"
+                            Padding="14,10"
+                            StrokeShape="RoundRectangle 14"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}"
+                            VerticalOptions="Center">
+                        <Label Text="{Binding EsmaOfTheDayArabic}"
+                               FontFamily="AmiriQuran"
+                               FontSize="26"
+                               TextColor="{AppThemeBinding Light={StaticResource AccentGoldMuted}, Dark={StaticResource AccentGold}}"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Center" />
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Primary Tools Section -->
+            <Label Text="İBADET VE YÖN ARAÇLARI" Style="{StaticResource SectionLabel}" Margin="2,4,0,0" />
+
+            <!-- Kıble Pusulası -->
+            <Border Style="{StaticResource GlassCard}" Padding="16">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenQiblaCommand}" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                    <Border WidthRequest="44" HeightRequest="44"
+                            StrokeShape="RoundRectangle 12"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}"
+                            VerticalOptions="Center">
+                        <Image Source="tab_qibla.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                        <Label Text="Kıble Pusulası" FontSize="16" FontFamily="OpenSansSemibold" />
+                        <Label Text="{Binding QiblaSummary}" Style="{StaticResource BodyMuted}" FontSize="12" />
+                    </VerticalStackLayout>
+                    <Label Grid.Column="2" Text="›" FontSize="24"
+                           TextColor="{AppThemeBinding Light={StaticResource AccentGoldMuted}, Dark={StaticResource AccentGold}}"
+                           VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
+            <!-- Kur'an'dan Dualar -->
+            <Border Style="{StaticResource GlassCard}" Padding="16">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenDuasCommand}" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                    <Border WidthRequest="44" HeightRequest="44"
+                            StrokeShape="RoundRectangle 12"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}"
+                            VerticalOptions="Center">
+                        <Image Source="icon_dua.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                        <Label Text="Kur'an'dan Dualar" FontSize="16" FontFamily="OpenSansSemibold" />
+                        <Label Text="{Binding DuasSummary}" Style="{StaticResource BodyMuted}" FontSize="12" />
+                    </VerticalStackLayout>
+                    <Label Grid.Column="2" Text="›" FontSize="24"
+                           TextColor="{AppThemeBinding Light={StaticResource AccentGoldMuted}, Dark={StaticResource AccentGold}}"
+                           VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
+            <!-- Dini Günler ve Hicri Takvim -->
+            <Border Style="{StaticResource GlassCard}" Padding="16">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenReligiousDaysCommand}" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                    <Border WidthRequest="44" HeightRequest="44"
+                            StrokeShape="RoundRectangle 12"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}"
+                            VerticalOptions="Center">
+                        <Image Source="icon_crescent.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                        <Label Text="Dini Günler &amp; Hicri Çevirici" FontSize="16" FontFamily="OpenSansSemibold" />
+                        <Label Text="{Binding NextReligiousDaySummary}" Style="{StaticResource BodyMuted}" FontSize="12" />
+                    </VerticalStackLayout>
+                    <Label Grid.Column="2" Text="›" FontSize="24"
+                           TextColor="{AppThemeBinding Light={StaticResource AccentGoldMuted}, Dark={StaticResource AccentGold}}"
+                           VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
+            <!-- Zekât Hesaplayıcı -->
+            <Border Style="{StaticResource GlassCard}" Padding="16">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenZakatCommand}" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                    <Border WidthRequest="44" HeightRequest="44"
+                            StrokeShape="RoundRectangle 12"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}"
+                            VerticalOptions="Center">
+                        <Image Source="icon_coin.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                        <Label Text="Zekât Hesaplayıcı" FontSize="16" FontFamily="OpenSansSemibold" />
+                        <Label Text="Diyanet nisap ölçüsüne (80,18 g altın) göre çevrimdışı hesaplama" Style="{StaticResource BodyMuted}" FontSize="12" />
+                    </VerticalStackLayout>
+                    <Label Grid.Column="2" Text="›" FontSize="24"
+                           TextColor="{AppThemeBinding Light={StaticResource AccentGoldMuted}, Dark={StaticResource AccentGold}}"
+                           VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
+            <!-- Quick 2-Column Shortcuts: Tam Ekran Zikirmatik & Kaza Takibi -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Border Style="{StaticResource GlassCardCompact}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenDhikrCommand}" />
+                    </Border.GestureRecognizers>
+                    <HorizontalStackLayout Spacing="10">
+                        <Image Source="tab_worship.png" WidthRequest="20" HeightRequest="20" VerticalOptions="Center" />
+                        <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                            <Label Text="Zikirmatik" FontSize="14" FontFamily="OpenSansSemibold" />
+                            <Label Text="Tam ekran sayaç" Style="{StaticResource BodyMuted}" FontSize="11" />
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                </Border>
+
+                <Border Grid.Column="1" Style="{StaticResource GlassCardCompact}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenKazaCommand}" />
+                    </Border.GestureRecognizers>
+                    <HorizontalStackLayout Spacing="10">
+                        <Image Source="icon_counter.png" WidthRequest="20" HeightRequest="20" VerticalOptions="Center" />
+                        <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                            <Label Text="Kaza Takibi" FontSize="14" FontFamily="OpenSansSemibold" />
+                            <Label Text="Namaz &amp; oruç çetelesi" Style="{StaticResource BodyMuted}" FontSize="11" />
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                </Border>
+            </Grid>
+
+            <!-- Settings & Backup Entry -->
+            <Label Text="UYGULAMA VE VERİ" Style="{StaticResource SectionLabel}" Margin="2,4,0,0" />
+
+            <Border Style="{StaticResource GlassCard}" Padding="16">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenSettingsCommand}" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                    <Border WidthRequest="44" HeightRequest="44"
+                            StrokeShape="RoundRectangle 12"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource CardSurfaceAlt}, Dark={StaticResource CardSurfaceAltDark}}"
+                            VerticalOptions="Center">
+                        <Image Source="settings.png" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                        <Label Text="Ayarlar ve Yedekleme" FontSize="16" FontFamily="OpenSansSemibold" />
+                        <Label Text="{Binding SettingsSummary}" Style="{StaticResource BodyMuted}" FontSize="12" />
+                    </VerticalStackLayout>
+                    <Label Grid.Column="2" Text="›" FontSize="24"
+                           TextColor="{AppThemeBinding Light={StaticResource AccentGoldMuted}, Dark={StaticResource AccentGold}}"
+                           VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -19,7 +19,7 @@ public sealed class AudioPlayer : IAudioPlayer, IDisposable
     {
         try
         {
-            if (_currentUrl == url && _mediaPlayer != null)
+            if (_currentUrl == url && _mediaPlayer != null && _isPrepared)
             {
                 if (!_mediaPlayer.IsPlaying)
                 {
@@ -36,9 +36,9 @@ public sealed class AudioPlayer : IAudioPlayer, IDisposable
             
             // Set audio attributes for media playback
             var audioAttributes = new AudioAttributes.Builder()
-                .SetUsage(AudioUsageKind.Media)
-                .SetContentType(AudioContentType.Music)
-                .Build();
+                .SetUsage(AudioUsageKind.Media)!
+                .SetContentType(AudioContentType.Music)!
+                .Build()!;
             _mediaPlayer.SetAudioAttributes(audioAttributes);
 
             _mediaPlayer.SetDataSource(url);
@@ -54,10 +54,10 @@ public sealed class AudioPlayer : IAudioPlayer, IDisposable
 
             _mediaPlayer.Error += (s, e) =>
             {
+                e.Handled = true;
                 var errorMsg = $"MediaPlayer error: {e.What}, Extra: {e.Extra}";
                 PlaybackFailed?.Invoke(this, errorMsg);
                 tcs.TrySetException(new Exception(errorMsg));
-                return true; // handled
             };
 
             _mediaPlayer.Completion += (s, e) =>

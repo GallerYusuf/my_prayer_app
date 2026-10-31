@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using PrayerApp.Core.Contracts;
 using PrayerApp.Core.Domain;
 using PrayerApp.Data;
-using PrayerApp.Models;
 using PrayerApp.Services;
 using PrayerApp.Views;
 
@@ -15,16 +14,31 @@ public sealed record CalculationMethodOption(CalculationMethod Method, string Di
 
 public partial class AdjustmentItem : ObservableObject
 {
+    private readonly Action? _onChanged;
+
     public required PrayerKind Kind { get; init; }
     public string Name => Kind.ToTurkishName();
 
     [ObservableProperty] private int _minutes;
 
-    [RelayCommand]
-    private void Increment() => Minutes = Math.Min(Minutes + 1, PrayerAdjustments.MaxMinutes);
+    public AdjustmentItem(Action? onChanged = null)
+    {
+        _onChanged = onChanged;
+    }
 
     [RelayCommand]
-    private void Decrement() => Minutes = Math.Max(Minutes - 1, PrayerAdjustments.MinMinutes);
+    private void Increment()
+    {
+        Minutes = Math.Min(Minutes + 1, PrayerAdjustments.MaxMinutes);
+        _onChanged?.Invoke();
+    }
+
+    [RelayCommand]
+    private void Decrement()
+    {
+        Minutes = Math.Max(Minutes - 1, PrayerAdjustments.MinMinutes);
+        _onChanged?.Invoke();
+    }
 }
 
 public partial class SettingsViewModel : ObservableObject
@@ -39,6 +53,7 @@ public partial class SettingsViewModel : ObservableObject
     private GeoLocation? _pendingLocation;
     private int _pendingPlateCode;
     private string _pendingDistrictApiName = string.Empty;
+    private bool _isLoading;
 
     [ObservableProperty] private string _locationSummary = "—";
     [ObservableProperty] private bool _isLocating;
@@ -47,7 +62,21 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _prayerNotificationsEnabled = true;
     [ObservableProperty] private bool _sunriseNotificationEnabled;
     [ObservableProperty] private bool _persistentNotificationEnabled = true;
-    [ObservableProperty] private int _minutesBeforePrayer;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsMin0))]
+    [NotifyPropertyChangedFor(nameof(IsMin5))]
+    [NotifyPropertyChangedFor(nameof(IsMin10))]
+    [NotifyPropertyChangedFor(nameof(IsMin15))]
+    [NotifyPropertyChangedFor(nameof(IsMin30))]
+    private int _minutesBeforePrayer;
+
+    public bool IsMin0 => MinutesBeforePrayer == 0;
+    public bool IsMin5 => MinutesBeforePrayer == 5;
+    public bool IsMin10 => MinutesBeforePrayer == 10;
+    public bool IsMin15 => MinutesBeforePrayer == 15;
+    public bool IsMin30 => MinutesBeforePrayer == 30;
+
     [ObservableProperty] private bool _soundEnabled = true;
     [ObservableProperty] private bool _vibrationEnabled = true;
     [ObservableProperty] private bool _verseNotificationsEnabled = true;
@@ -57,11 +86,13 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _ramadanModeEnabled = true;
     [ObservableProperty] private string _statusMessage = string.Empty;
     [ObservableProperty] private string _diagnosticsText = string.Empty;
+    [ObservableProperty] private bool _isDiagnosticsOpen;
+    [ObservableProperty] private bool _isAdjustmentsOpen;
     [ObservableProperty] private bool _isSaving;
 
     public ObservableCollection<AdjustmentItem> Adjustments { get; } = [];
     public IReadOnlyList<CalculationMethodOption> MethodOptions { get; }
-    public IReadOnlyList<string> ThemeOptions { get; } = ["Sistem", "Açık", "Koyu"];
+    public IReadOnlyList<string> ThemeOptions { get; } = ["Sistem teması", "Açık tema", "Koyu tema"];
     public int[] MinutesBeforeOptions { get; } = [0, 5, 10, 15, 30];
 
     public string AppVersion => $"Ezan Vakti {AppInfo.Current.VersionString}";
@@ -89,34 +120,131 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     public void LoadSettings()
     {
-        var settings = _settingsStore.Get();
+        _isLoading = true;
+        try
+        {
+            var settings = _settingsStore.Get();
 
-        _pendingLocation = settings.Location;
-        _pendingPlateCode = settings.CityPlateCode;
-        _pendingDistrictApiName = settings.DistrictApiName;
-        LocationSummary = settings.Location?.DisplayName ?? "Konum seçilmedi";
+            _pendingLocation = settings.Location;
+            _pendingPlateCode = settings.CityPlateCode;
+            _pendingDistrictApiName = settings.DistrictApiName;
+            LocationSummary = settings.Location?.DisplayName ?? "Konum seçilmedi";
 
-        SelectedMethodIndex = Math.Max(0, MethodOptions.ToList().FindIndex(o => o.Method == settings.CalculationMethod));
-        ThemeIndex = (int)settings.Theme;
+            SelectedMethodIndex = Math.Max(0, MethodOptions.ToList().FindIndex(o => o.Method == settings.CalculationMethod));
+            ThemeIndex = (int)settings.Theme;
 
-        PrayerNotificationsEnabled = settings.PrayerNotificationsEnabled;
-        SunriseNotificationEnabled = !settings.PrayerNotificationToggles.TryGetValue(PrayerKind.Sunrise, out var sunrise) || sunrise;
-        PersistentNotificationEnabled = settings.PersistentNotificationEnabled;
-        MinutesBeforePrayer = settings.MinutesBeforePrayer;
-        SoundEnabled = settings.NotificationSoundEnabled;
-        VibrationEnabled = settings.NotificationVibrationEnabled;
-        VerseNotificationsEnabled = settings.VerseNotificationsEnabled;
-        VerseTime = (settings.VerseNotificationTimes.FirstOrDefault(new TimeOnly(9, 0))).ToTimeSpan();
-        FridayNotificationsEnabled = settings.FridayNotificationsEnabled;
-        FridayTime = settings.FridayNotificationTime.ToTimeSpan();
-        RamadanModeEnabled = settings.RamadanModeEnabled;
+            PrayerNotificationsEnabled = settings.PrayerNotificationsEnabled;
+            SunriseNotificationEnabled = !settings.PrayerNotificationToggles.TryGetValue(PrayerKind.Sunrise, out var sunrise) || sunrise;
+            PersistentNotificationEnabled = settings.PersistentNotificationEnabled;
+            MinutesBeforePrayer = settings.MinutesBeforePrayer;
+            SoundEnabled = settings.NotificationSoundEnabled;
+            VibrationEnabled = settings.NotificationVibrationEnabled;
+            VerseNotificationsEnabled = settings.VerseNotificationsEnabled;
+            VerseTime = settings.VerseNotificationTimes.FirstOrDefault(new TimeOnly(9, 0)).ToTimeSpan();
+            FridayNotificationsEnabled = settings.FridayNotificationsEnabled;
+            FridayTime = settings.FridayNotificationTime.ToTimeSpan();
+            RamadanModeEnabled = settings.RamadanModeEnabled;
 
-        Adjustments.Clear();
-        foreach (var kind in PrayerKindExtensions.All)
-            Adjustments.Add(new AdjustmentItem { Kind = kind, Minutes = settings.Adjustments.GetMinutes(kind) });
+            Adjustments.Clear();
+            foreach (var kind in PrayerKindExtensions.All)
+            {
+                Adjustments.Add(new AdjustmentItem(OnAnySettingChanged)
+                {
+                    Kind = kind,
+                    Minutes = settings.Adjustments.GetMinutes(kind)
+                });
+            }
 
-        _ = RefreshDiagnosticsAsync();
+            _ = RefreshDiagnosticsAsync();
+        }
+        finally
+        {
+            _isLoading = false;
+        }
     }
+
+    partial void OnThemeIndexChanged(int value)
+    {
+        if (_isLoading) return;
+        var theme = (ThemePreference)Math.Clamp(value, 0, 2);
+        ThemeManager.Apply(theme);
+        OnAnySettingChanged();
+    }
+
+    partial void OnSelectedMethodIndexChanged(int value) => OnAnySettingChanged();
+    partial void OnPrayerNotificationsEnabledChanged(bool value) => OnAnySettingChanged();
+    partial void OnSunriseNotificationEnabledChanged(bool value) => OnAnySettingChanged();
+    partial void OnPersistentNotificationEnabledChanged(bool value) => OnAnySettingChanged();
+    partial void OnMinutesBeforePrayerChanged(int value) => OnAnySettingChanged();
+    partial void OnSoundEnabledChanged(bool value) => OnAnySettingChanged();
+    partial void OnVibrationEnabledChanged(bool value) => OnAnySettingChanged();
+    partial void OnVerseNotificationsEnabledChanged(bool value) => OnAnySettingChanged();
+    partial void OnVerseTimeChanged(TimeSpan value) => OnAnySettingChanged();
+    partial void OnFridayNotificationsEnabledChanged(bool value) => OnAnySettingChanged();
+    partial void OnFridayTimeChanged(TimeSpan value) => OnAnySettingChanged();
+    partial void OnRamadanModeEnabledChanged(bool value) => OnAnySettingChanged();
+
+    private void OnAnySettingChanged()
+    {
+        if (_isLoading)
+            return;
+
+        PersistCurrentSettings(showToast: true);
+    }
+
+    private void PersistCurrentSettings(bool showToast)
+    {
+        if (_pendingLocation is null || !_pendingLocation.IsValid)
+            return;
+
+        var current = _settingsStore.Get();
+        var updated = current with
+        {
+            HasCompletedOnboarding = true,
+            Location = _pendingLocation,
+            LocationMode = _pendingLocation.IsFromDevice ? LocationMode.Automatic : LocationMode.Manual,
+            CityPlateCode = _pendingPlateCode,
+            DistrictApiName = _pendingDistrictApiName,
+            CalculationMethod = MethodOptions[Math.Clamp(SelectedMethodIndex, 0, MethodOptions.Count - 1)].Method,
+            Theme = (ThemePreference)Math.Clamp(ThemeIndex, 0, 2),
+            Adjustments = BuildAdjustments(),
+            PrayerNotificationsEnabled = PrayerNotificationsEnabled,
+            PrayerNotificationToggles = new Dictionary<PrayerKind, bool> { [PrayerKind.Sunrise] = SunriseNotificationEnabled },
+            PersistentNotificationEnabled = PersistentNotificationEnabled,
+            MinutesBeforePrayer = MinutesBeforePrayer,
+            NotificationSoundEnabled = SoundEnabled,
+            NotificationVibrationEnabled = VibrationEnabled,
+            VerseNotificationsEnabled = VerseNotificationsEnabled,
+            VerseNotificationTimes = [TimeOnly.FromTimeSpan(VerseTime)],
+            FridayNotificationsEnabled = FridayNotificationsEnabled,
+            FridayNotificationTime = TimeOnly.FromTimeSpan(FridayTime),
+            RamadanModeEnabled = RamadanModeEnabled
+        };
+
+        _settingsStore.Save(updated);
+        ThemeManager.Apply(updated.Theme);
+
+        if (showToast)
+            StatusMessage = "✓ Değişiklikler kaydedildi";
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await _notificationCoordinator.RescheduleAsync(force: true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Background settings reschedule failed");
+            }
+        });
+    }
+
+    [RelayCommand]
+    private void ToggleDiagnostics() => IsDiagnosticsOpen = !IsDiagnosticsOpen;
+
+    [RelayCommand]
+    private void ToggleAdjustments() => IsAdjustmentsOpen = !IsAdjustmentsOpen;
 
     [RelayCommand]
     private async Task UseDeviceLocationAsync()
@@ -140,6 +268,7 @@ public partial class SettingsViewModel : ObservableObject
             _pendingPlateCode = 0;
             _pendingDistrictApiName = string.Empty;
             LocationSummary = result.Value.DisplayName;
+            PersistCurrentSettings(showToast: true);
         }
         finally
         {
@@ -183,6 +312,7 @@ public partial class SettingsViewModel : ObservableObject
         _pendingPlateCode = selected.City.PlateCode;
         _pendingDistrictApiName = selected.District?.ApiName ?? string.Empty;
         LocationSummary = selected.Display;
+        PersistCurrentSettings(showToast: true);
     }
 
     [RelayCommand]
@@ -200,51 +330,22 @@ public partial class SettingsViewModel : ObservableObject
         try
         {
             IsSaving = true;
-            StatusMessage = string.Empty;
-
-            var current = _settingsStore.Get();
-            var updated = current with
-            {
-                HasCompletedOnboarding = true,
-                Location = _pendingLocation,
-                LocationMode = _pendingLocation.IsFromDevice ? LocationMode.Automatic : LocationMode.Manual,
-                CityPlateCode = _pendingPlateCode,
-                DistrictApiName = _pendingDistrictApiName,
-                CalculationMethod = MethodOptions[Math.Clamp(SelectedMethodIndex, 0, MethodOptions.Count - 1)].Method,
-                Theme = (ThemePreference)Math.Clamp(ThemeIndex, 0, 2),
-                Adjustments = BuildAdjustments(),
-                PrayerNotificationsEnabled = PrayerNotificationsEnabled,
-                PrayerNotificationToggles = new Dictionary<PrayerKind, bool> { [PrayerKind.Sunrise] = SunriseNotificationEnabled },
-                PersistentNotificationEnabled = PersistentNotificationEnabled,
-                MinutesBeforePrayer = MinutesBeforePrayer,
-                NotificationSoundEnabled = SoundEnabled,
-                NotificationVibrationEnabled = VibrationEnabled,
-                VerseNotificationsEnabled = VerseNotificationsEnabled,
-                VerseNotificationTimes = [TimeOnly.FromTimeSpan(VerseTime)],
-                FridayNotificationsEnabled = FridayNotificationsEnabled,
-                FridayNotificationTime = TimeOnly.FromTimeSpan(FridayTime),
-                RamadanModeEnabled = RamadanModeEnabled
-            };
-
-            _settingsStore.Save(updated);
-            ThemeManager.Apply(updated.Theme);
+            PersistCurrentSettings(showToast: false);
 
             if (PrayerNotificationsEnabled || VerseNotificationsEnabled || FridayNotificationsEnabled || PersistentNotificationEnabled)
                 await _notificationScheduler.RequestPermissionAsync();
 
-            // Atomic replan: the coordinator fetches/validates data first and only
-            // then swaps the old notification plan for the new one.
             var replan = await _notificationCoordinator.RescheduleAsync(force: true);
             StatusMessage = replan.IsSuccess
-                ? $"Ayarlar kaydedildi. {replan.Value} bildirim planlandı."
-                : $"Ayarlar kaydedildi. {replan.Error.Message}";
+                ? $"✓ Ayarlar kaydedildi ve {replan.Value} bildirim güncellendi."
+                : $"✓ Ayarlar kaydedildi. ({replan.Error.Message})";
 
             await RefreshDiagnosticsAsync();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Settings save failed");
-            StatusMessage = "Ayarlar kaydedilirken bir sorun oluştu. Lütfen tekrar deneyin.";
+            StatusMessage = "Ayarlar kaydedilirken bir sorun oluştu.";
         }
         finally
         {
@@ -278,9 +379,9 @@ public partial class SettingsViewModel : ObservableObject
 
             var lines = new List<string>
             {
-                permitted ? "Bildirim izni: Açık" : "Bildirim izni: Kapalı",
-                exact ? "Tam zamanlı alarm: Açık" : "Tam zamanlı alarm: Kapalı (bildirimler gecikebilir)",
-                $"Planlanmış bildirim: {pending}"
+                permitted ? "• Bildirim izni: Açık" : "• Bildirim izni: Kapalı (sistem ayarlarından açın)",
+                exact ? "• Tam zamanlı alarm izni: Açık" : "• Tam zamanlı alarm izni: Kapalı (bildirimler gecikebilir)",
+                $"• Planlanmış aktif bildirim: {pending} adet"
             };
 
             DiagnosticsText = string.Join("\n", lines);
@@ -320,7 +421,7 @@ public partial class SettingsViewModel : ObservableObject
                 {
                     NotificationId = 999_999_001,
                     Title = "Test Bildirimi",
-                    Description = "Bildirimler çalışıyor.",
+                    Description = "Ezan Vakti bildirimleri sorunsuz çalışıyor.",
                     Android = new Plugin.LocalNotification.Core.Models.AndroidOption.AndroidOptions
                     {
                         ChannelId = LocalNotificationScheduler.ChannelOther,
@@ -328,7 +429,7 @@ public partial class SettingsViewModel : ObservableObject
                     }
                 });
 
-            StatusMessage = "Test bildirimi gönderildi.";
+            StatusMessage = "✓ Test bildirimi gönderildi.";
             await RefreshDiagnosticsAsync();
         }
         catch (Exception ex)
@@ -370,17 +471,17 @@ public partial class SettingsViewModel : ObservableObject
         {
             StatusMessage = "Yedek hazırlanıyor...";
             var backupJson = await _backupService.ExportBackupAsync();
-            
+
             var backupPath = Path.Combine(FileSystem.CacheDirectory, "prayer_app_backup.json");
             await File.WriteAllTextAsync(backupPath, backupJson);
 
             await Share.Default.RequestAsync(new ShareFileRequest
             {
-                Title = "Namaz Vakti Yedek Dosyası",
+                Title = "Ezan Vakti Yedek Dosyası",
                 File = new ShareFile(backupPath)
             });
 
-            StatusMessage = "Yedek dosyası başarıyla dışa aktarıldı.";
+            StatusMessage = "✓ Yedek dosyası başarıyla dışa aktarıldı.";
         }
         catch (Exception ex)
         {
@@ -408,7 +509,7 @@ public partial class SettingsViewModel : ObservableObject
 
             if (result == null)
             {
-                StatusMessage = "Yedek yükleme iptal edildi.";
+                StatusMessage = string.Empty;
                 return;
             }
 
@@ -418,14 +519,12 @@ public partial class SettingsViewModel : ObservableObject
 
             if (success)
             {
-                // Refresh ViewModel values
                 LoadSettings();
 
-                // Re-plan notifications
                 var replan = await _notificationCoordinator.RescheduleAsync(force: true);
                 StatusMessage = replan.IsSuccess
-                    ? $"Yedek başarıyla geri yüklendi. {replan.Value} bildirim planlandı."
-                    : $"Yedek geri yüklendi. Bildirim planlanırken sorun oluştu: {replan.Error.Message}";
+                    ? $"✓ Yedek geri yüklendi ve {replan.Value} bildirim planlandı."
+                    : $"✓ Yedek geri yüklendi.";
             }
             else
             {
