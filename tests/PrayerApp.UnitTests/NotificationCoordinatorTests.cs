@@ -100,6 +100,7 @@ public class NotificationCoordinatorTests
         Assert.Empty(_scheduler.Cancelled);        // old plan must not be cancelled blindly
         Assert.Empty(_scheduler.Scheduled);
         Assert.Equal("11,22", _keyValueStore.GetString("notification_scheduled_ids"));
+        Assert.Equal(1, _persistent.RefreshCount); // alarm chain must re-arm to retry later
     }
 
     [Fact]

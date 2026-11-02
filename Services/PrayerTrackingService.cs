@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using PrayerApp.Core.Common;
 using PrayerApp.Models;
 using PrayerApp.Services.Interfaces;
 
@@ -7,8 +8,10 @@ namespace PrayerApp.Services;
 
 public class PrayerTrackingService : IPrayerTrackingService
 {
-    private const string StreakKey = "prayer_track_streak";
-    private const string LastFullDateKey = "prayer_track_last_full";
+    private const string StreakKey = StorageKeys.PrayerTrackStreak;
+
+    /// <summary>Upper bound for the backwards streak walk (protects against pathological data).</summary>
+    private const int MaxStreakDays = 3660;
     private static readonly CultureInfo TurkishCulture = new("tr-TR");
     private static readonly string[] TrackablePrayers = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
 
@@ -56,12 +59,33 @@ public class PrayerTrackingService : IPrayerTrackingService
             completed.Add(prayerName);
 
         SaveCompletedForDate(today, completed);
-        UpdateStreakIfNeeded(completed);
+
+        // Cached copy for backups / older readers; the source of truth is the daily records.
+        Preferences.Default.Set(StreakKey, GetStreak());
     }
 
     public int GetCompletedCountToday() => LoadCompletedForDate(DateOnly.FromDateTime(DateTime.Today)).Count;
 
-    public int GetStreak() => Preferences.Default.Get(StreakKey, 0);
+    /// <summary>
+    /// Consecutive fully-completed days, derived from the daily records so it is always
+    /// consistent: today counts once all five are marked; an unfinished today does not
+    /// break a streak that ran through yesterday, but a missed day resets it to 0, and
+    /// un-marking a prayer immediately lowers it again.
+    /// </summary>
+    public int GetStreak()
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var date = IsFullDay(today) ? today : today.AddDays(-1);
+
+        var streak = 0;
+        while (streak < MaxStreakDays && IsFullDay(date))
+        {
+            streak++;
+            date = date.AddDays(-1);
+        }
+
+        return streak;
+    }
 
     public string GetProgressText()
     {
@@ -86,8 +110,10 @@ public class PrayerTrackingService : IPrayerTrackingService
         return result;
     }
 
-    private static string DateKey(DateOnly date) =>
-        $"prayer_track_{date:yyyy-MM-dd}";
+    private static string DateKey(DateOnly date) => StorageKeys.PrayerTrackDay(date);
+
+    private static bool IsFullDay(DateOnly date) =>
+        LoadCompletedForDate(date).Count(TrackablePrayers.Contains) >= TrackablePrayers.Length;
 
     private static HashSet<string> LoadCompletedForDate(DateOnly date)
     {
@@ -105,32 +131,23 @@ public class PrayerTrackingService : IPrayerTrackingService
         }
     }
 
-    private static void SaveCompletedForDate(DateOnly date, HashSet<string> completed) =>
-        Preferences.Default.Set(DateKey(date), JsonSerializer.Serialize(completed));
-
-    private static void UpdateStreakIfNeeded(HashSet<string> completed)
+    private static void SaveCompletedForDate(DateOnly date, HashSet<string> completed)
     {
-        if (completed.Count < TrackablePrayers.Length)
-            return;
+        Preferences.Default.Set(DateKey(date), JsonSerializer.Serialize(completed));
+        RememberFirstTrackedDate(date);
+    }
 
-        var today = DateTime.Today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-        var lastFull = Preferences.Default.Get(LastFullDateKey, string.Empty);
-        if (lastFull == today)
+    /// <summary>Lets the backup service know how far back daily records go.</summary>
+    private static void RememberFirstTrackedDate(DateOnly date)
+    {
+        var raw = Preferences.Default.Get(StorageKeys.PrayerTrackFirstDate, string.Empty);
+        if (DateOnly.TryParseExact(raw, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var first)
+            && first <= date)
+        {
             return;
-
-        var streak = Preferences.Default.Get(StreakKey, 0);
-        if (!string.IsNullOrEmpty(lastFull) &&
-            DateTime.TryParseExact(lastFull, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var lastDate) &&
-            lastDate == DateTime.Today.AddDays(-1))
-        {
-            streak++;
-        }
-        else
-        {
-            streak = 1;
         }
 
-        Preferences.Default.Set(StreakKey, streak);
-        Preferences.Default.Set(LastFullDateKey, today);
+        Preferences.Default.Set(StorageKeys.PrayerTrackFirstDate,
+            date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
     }
 }

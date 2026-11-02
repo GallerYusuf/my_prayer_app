@@ -1,5 +1,22 @@
 # Changelog
 
+## [Unreleased] — 2026-11-02
+
+### Düzeltildi
+- Bildirimler: manuel vakit düzeltmeleri bildirim planında iki kez uygulanıyordu
+  (+3 dk ayar bildirimde +6 dk oluyordu). `NotificationPlanner` artık düzeltilmiş vakitleri olduğu gibi kullanır.
+- Bildirimler: uygulama 3 gün açılmazsa hatırlatmalar duruyordu. Sürekli bildirim/widget alarm zinciri artık
+  `RescheduleIfStaleAsync` çağırır; yüzeyler kapalıyken de günlük bakım alarmı kurulur, veri alınamadığında zincir kopmaz.
+- Yedekleme (format v2): tüm namaz takibi geçmişi, kaza sayaçları, Esma favorileri, sure içi okuma konumları ve
+  okuma tercihleri yedeğe dahil. Geri yüklemede dosya önce doğrulanır (SQLite başlığı, bütünlük, şema sürümü),
+  canlı veritabanı yedeklenerek değiştirilir, hata olursa geri alınır; yalnızca izinli anahtarlar yazılır. v1 yedekler hâlâ okunur.
+- Yedek geri yüklendikten sonra eski ayarlar bellekte kalıyordu; `ISettingsStore.Reload()` eklendi.
+- Seri (streak) artık günlük kayıtlardan hesaplanır: gün kaçırılınca sıfırlanır, işaret kaldırılınca düşer.
+- `SurahViewModel` içindeki sessiz `catch` blokları loglanıyor.
+
+### Değişti
+- Kullanıcı verisi tutan Preferences anahtarları `PrayerApp.Core.Common.StorageKeys` altında toplandı.
+
 ## [1.1.0-dev] — 2026-07-06 (fable5/autonomous-evolution)
 
 ### Eklendi

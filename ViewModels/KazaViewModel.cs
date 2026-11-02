@@ -20,7 +20,7 @@ public partial class KazaItem : ObservableObject
 /// </summary>
 public partial class KazaViewModel : ObservableObject
 {
-    private const string StorageKey = "kaza_counters";
+    private const string StorageKey = PrayerApp.Core.Common.StorageKeys.KazaCounters;
 
     private static readonly (string Key, string Name, string Icon)[] Definitions =
     [

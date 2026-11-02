@@ -13,7 +13,7 @@ namespace PrayerApp.ViewModels;
 
 public partial class WorshipViewModel : ObservableObject
 {
-    private const string KazaStorageKey = "kaza_counters";
+    private const string KazaStorageKey = PrayerApp.Core.Common.StorageKeys.KazaCounters;
     private static readonly CultureInfo TurkishCulture = new("tr-TR");
 
     private static readonly (string Name, int Target)[] TesbihatSteps =

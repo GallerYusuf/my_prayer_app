@@ -13,7 +13,7 @@ namespace PrayerApp.Services;
 /// </summary>
 public sealed class SettingsStore(ILogger<SettingsStore> logger) : ISettingsStore
 {
-    private const string SettingsKey = "user_settings_v2";
+    private const string SettingsKey = PrayerApp.Core.Common.StorageKeys.UserSettings;
     private const string LegacySettingsKey = "app_settings";
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -52,6 +52,9 @@ public sealed class SettingsStore(ILogger<SettingsStore> logger) : ISettingsStor
 
         return _cached = new UserSettings();
     }
+
+    /// <inheritdoc />
+    public void Reload() => _cached = null;
 
     public void Save(UserSettings settings)
     {

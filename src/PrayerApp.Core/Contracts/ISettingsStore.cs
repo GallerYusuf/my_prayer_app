@@ -8,4 +8,10 @@ public interface ISettingsStore
 {
     UserSettings Get();
     void Save(UserSettings settings);
+
+    /// <summary>
+    /// Drops any in-memory copy so the next <see cref="Get"/> reads persisted data again
+    /// (needed after a backup restore rewrites the underlying storage).
+    /// </summary>
+    void Reload() { }
 }

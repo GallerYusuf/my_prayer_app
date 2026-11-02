@@ -72,7 +72,13 @@ public sealed class NotificationCoordinator(
                 clock.Today, NotificationPlanner.RollingDays + 1, force, cancellationToken);
 
             if (!schedule.IsSuccess)
-                return schedule.Error; // keep the existing plan; do not cancel blindly
+            {
+                // Keep the existing plan; do not cancel blindly. Still refresh the persistent
+                // surfaces so their alarm chain re-arms and retries later (keeps background
+                // re-planning alive even while the cache is empty or the device is offline).
+                await persistentNotification.RefreshAsync(cancellationToken);
+                return schedule.Error;
+            }
 
             var verseContent = settings.VerseNotificationsEnabled
                 ? await BuildVerseContentAsync(settings, cancellationToken)

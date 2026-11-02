@@ -12,8 +12,8 @@ namespace PrayerApp.ViewModels;
 /// </summary>
 public partial class ZakatViewModel : ObservableObject
 {
-    private const string GoldPriceKey = "zakat_gold_price";
-    private const string SilverPriceKey = "zakat_silver_price";
+    private const string GoldPriceKey = PrayerApp.Core.Common.StorageKeys.ZakatGoldPrice;
+    private const string SilverPriceKey = PrayerApp.Core.Common.StorageKeys.ZakatSilverPrice;
 
     private static readonly CultureInfo TurkishCulture = new("tr-TR");
 

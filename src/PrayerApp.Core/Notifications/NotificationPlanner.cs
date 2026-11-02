@@ -12,6 +12,10 @@ public static class NotificationPlanner
     /// <summary>How many days ahead the rolling schedule covers.</summary>
     public const int RollingDays = 3;
 
+    /// <param name="days">
+    /// Prayer days with the user's manual adjustments <b>already applied</b>, exactly as
+    /// returned by <c>IPrayerScheduleService</c>. The planner never adjusts times itself.
+    /// </param>
     public static IReadOnlyList<PlannedNotification> BuildPlan(
         IReadOnlyList<PrayerDay> days,
         UserSettings settings,
@@ -26,8 +30,9 @@ public static class NotificationPlanner
             if (day.Date > horizon)
                 break;
 
-            var adjusted = day.WithAdjustments(settings.Adjustments);
-            AddPrayerNotifications(plan, adjusted, settings, localNow);
+            // Days arrive already adjusted (IPrayerScheduleService applies the user's
+            // per-prayer minute offsets). Re-applying them here would double the offset.
+            AddPrayerNotifications(plan, day, settings, localNow);
         }
 
         if (settings.FridayNotificationsEnabled)

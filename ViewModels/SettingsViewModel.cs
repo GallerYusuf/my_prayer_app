@@ -519,6 +519,9 @@ public partial class SettingsViewModel : ObservableObject
 
             if (success)
             {
+                // The restore rewrote persisted settings underneath the cached copy;
+                // without this the old settings would stay active (and be saved back).
+                _settingsStore.Reload();
                 LoadSettings();
 
                 var replan = await _notificationCoordinator.RescheduleAsync(force: true);

@@ -22,7 +22,7 @@ public partial class EsmaItem : ObservableObject
 /// <summary>The 99 names of Allah with search, favorites, copy/share, and direct dhikr launch.</summary>
 public partial class EsmaulHusnaViewModel : ObservableObject
 {
-    private const string FavoritesKey = "esma_favorites";
+    private const string FavoritesKey = PrayerApp.Core.Common.StorageKeys.EsmaFavorites;
 
     private readonly IKeyValueStore _keyValueStore;
     private readonly List<EsmaItem> _allItems = [];

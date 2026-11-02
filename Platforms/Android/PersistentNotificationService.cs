@@ -35,10 +35,19 @@ public sealed class PersistentNotificationService(
             var settings = settingsStore.Get();
             var hasWidgets = WidgetRenderer.HasWidgets(context);
 
-            if (!settings.HasCompletedOnboarding ||
-                (!settings.PersistentNotificationEnabled && !hasWidgets))
+            if (!settings.HasCompletedOnboarding)
             {
                 Remove();
+                return;
+            }
+
+            if (!settings.PersistentNotificationEnabled && !hasWidgets)
+            {
+                // No visible surface, but keep a once-a-day maintenance alarm: the receiver
+                // uses it to extend the rolling notification plan even if the app is never
+                // opened (otherwise reminders would stop after NotificationPlanner.RollingDays).
+                NotificationManagerCompat.From(context)?.Cancel(NotificationId);
+                ScheduleNextUpdate(null, clock.LocalNow);
                 return;
             }
 
@@ -49,12 +58,16 @@ public sealed class PersistentNotificationService(
             if (!schedule.IsSuccess)
             {
                 logger.LogWarning("Persistent surfaces skipped: {Error}", schedule.Error.Message);
+                ScheduleNextUpdate(null, clock.LocalNow); // retry at midnight; keep the chain alive
                 return;
             }
 
             var today = schedule.Value.Days.FirstOrDefault(d => d.Date == clock.Today);
             if (today is null)
+            {
+                ScheduleNextUpdate(null, clock.LocalNow);
                 return;
+            }
 
             var now = clock.LocalNow;
             var next = NextPrayerCalculator.FindNext(schedule.Value.Days, now);
@@ -122,14 +135,26 @@ public sealed class PersistentNotificationService(
     private void ScheduleNextUpdate(UpcomingPrayer? next, DateTimeOffset now)
     {
         var context = global::Android.App.Application.Context;
-        if (context.GetSystemService(Context.AlarmService) is not AlarmManager alarmManager)
-            return;
-
         var midnight = new DateTimeOffset(
             clock.Today.AddDays(1).ToDateTime(TimeOnly.MinValue), now.Offset);
 
         var changeAt = next is not null && next.OccursAt < midnight ? next.OccursAt : midnight;
-        var triggerAtMillis = changeAt.AddSeconds(5).ToUnixTimeMilliseconds();
+        SetAlarm(context, changeAt.AddSeconds(5).ToUnixTimeMilliseconds());
+    }
+
+    /// <summary>
+    /// Arms a short safety alarm before a refresh that may hit the network. If the process is
+    /// killed mid-refresh (the receiver only gets a few seconds), the chain still continues;
+    /// a successful refresh replaces it with the real next-change alarm.
+    /// </summary>
+    internal static void ScheduleFallback(TimeSpan delay) =>
+        SetAlarm(global::Android.App.Application.Context,
+            DateTimeOffset.UtcNow.Add(delay).ToUnixTimeMilliseconds());
+
+    private static void SetAlarm(Context context, long triggerAtMillis)
+    {
+        if (context.GetSystemService(Context.AlarmService) is not AlarmManager alarmManager)
+            return;
 
         var pending = BuildAlarmPendingIntent(context, PendingIntentFlags.UpdateCurrent);
         if (pending is null)

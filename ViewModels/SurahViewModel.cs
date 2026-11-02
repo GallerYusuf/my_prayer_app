@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using PrayerApp.Core.Contracts;
 using PrayerApp.Core.Common;
 
@@ -24,12 +25,12 @@ public partial class VerseItem : ObservableObject
 [QueryProperty(nameof(ScrollToVerse), "verse")]
 public partial class SurahViewModel : ObservableObject
 {
-    private const string LastReadKey = "quran_last_read";
-    private const string ShowArabicKey = "quran_show_arabic";
-    private const string ShowTranslationKey = "quran_show_translation";
-    private const string FontScaleKey = "quran_font_scale";
-    private const string ArabicFontSizeKey = "quran_arabic_font_size";
-    private const string TranslationFontSizeKey = "quran_translation_font_size";
+    private const string LastReadKey = PrayerApp.Core.Common.StorageKeys.QuranLastRead;
+    private const string ShowArabicKey = PrayerApp.Core.Common.StorageKeys.QuranShowArabic;
+    private const string ShowTranslationKey = PrayerApp.Core.Common.StorageKeys.QuranShowTranslation;
+    private const string FontScaleKey = PrayerApp.Core.Common.StorageKeys.QuranFontScale;
+    private const string ArabicFontSizeKey = PrayerApp.Core.Common.StorageKeys.QuranArabicFontSize;
+    private const string TranslationFontSizeKey = PrayerApp.Core.Common.StorageKeys.QuranTranslationFontSize;
 
     private readonly IQuranRepository _quranRepository;
     private readonly IKeyValueStore _keyValueStore;
@@ -94,13 +95,17 @@ public partial class SurahViewModel : ObservableObject
 
     public event EventHandler? SurahNavigated;
 
+    private readonly ILogger<SurahViewModel> _logger;
+
     public SurahViewModel(
         IQuranRepository quranRepository,
         IKeyValueStore keyValueStore,
         IAudioPlayer audioPlayer,
         IKhatmRepository khatmRepository,
-        IClock clock)
+        IClock clock,
+        ILogger<SurahViewModel> logger)
     {
+        _logger = logger;
         _quranRepository = quranRepository;
         _keyValueStore = keyValueStore;
         _audioPlayer = audioPlayer;
@@ -208,13 +213,13 @@ public partial class SurahViewModel : ObservableObject
         if (SurahNumber > 0)
         {
             _keyValueStore.SetString(LastReadKey, $"{SurahNumber}:{verseNumber}");
-            _keyValueStore.SetString($"quran_surah_pos_{SurahNumber}", verseNumber.ToString());
+            _keyValueStore.SetString(PrayerApp.Core.Common.StorageKeys.QuranSurahPosition(SurahNumber), verseNumber.ToString());
         }
     }
 
     private int GetSurahSavedVerse(int surahNumber)
     {
-        var raw = _keyValueStore.GetString($"quran_surah_pos_{surahNumber}");
+        var raw = _keyValueStore.GetString(PrayerApp.Core.Common.StorageKeys.QuranSurahPosition(surahNumber));
         return int.TryParse(raw, out var v) ? v : 1;
     }
 
@@ -394,8 +399,9 @@ public partial class SurahViewModel : ObservableObject
             IsAudioPaused = false;
             AudioStatusText = $"{SurahTitle} · Mishary Rashid Al-Afasy";
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogWarning(ex, "Surah audio playback failed for surah {Surah}", SurahNumber);
             IsPlaying = false;
             IsAudioPaused = false;
             AudioErrorMessage = "Ses yüklenemedi. Sesli okuma için internet bağlantısı gerekir; Arapça metin ve meal çevrimdışı okunabilir.";
@@ -476,8 +482,9 @@ public partial class SurahViewModel : ObservableObject
                 ShowHatimUpdateChip = false;
             }
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogWarning(ex, "Khatm status could not be loaded");
             HasActiveKhatm = false;
             ShowHatimUpdateChip = false;
         }
@@ -505,8 +512,9 @@ public partial class SurahViewModel : ObservableObject
                 ShowFeedback($"Hatim ilerlemeniz Sayfa {CurrentVisiblePage} olarak kaydedildi ✓");
             }
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Khatm page update failed");
             ShowFeedback("Hatim ilerlemesi kaydedilemedi.");
         }
     }

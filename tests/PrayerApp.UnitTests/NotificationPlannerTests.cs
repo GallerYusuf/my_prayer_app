@@ -92,15 +92,18 @@ public class NotificationPlannerTests
     }
 
     [Fact]
-    public void BuildPlan_AppliesManualAdjustments()
+    public void BuildPlan_UsesAlreadyAdjustedTimes_WithoutReapplyingAdjustments()
     {
+        // Regression: the schedule service already applies manual offsets; the planner
+        // used to apply them a second time (+7 dk ayar bildirimde +14 dk oluyordu).
         var now = TestData.At(Today, "01:00");
         var settings = DefaultSettings with
         {
             Adjustments = new PrayerAdjustments { Fajr = 7 }
         };
+        var adjustedDay = TestData.Day(Today, fajr: "04:30").WithAdjustments(settings.Adjustments);
 
-        var plan = NotificationPlanner.BuildPlan([TestData.Day(Today, fajr: "04:30")], settings, now);
+        var plan = NotificationPlanner.BuildPlan([adjustedDay], settings, now);
         var fajr = plan.Single(n => n.Id == NotificationIds.ForPrayer(Today, PrayerKind.Fajr));
 
         Assert.Equal(new TimeOnly(4, 37), TimeOnly.FromDateTime(fajr.NotifyAt.DateTime));
